@@ -1,0 +1,11 @@
+.pin-label { font-size: 20px; font-weight: 700; }
+.pin-dots { font-size: 26px; letter-spacing: 4px; color: var(--green); min-height: 34px; }
+.pin-dots.shake { animation: shake 400ms; color: var(--coral); }
+@keyframes shake { 0%,100%{transform:none} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+.keypad { display: grid; grid-template-columns: repeat(3, 72px); gap: 12px; }
+.key {
+  font-family: inherit; font-size: 26px; font-weight: 700; color: var(--ink);
+  background: #fff; border: 2px solid #e5efdd; border-radius: 18px; padding: 16px 0; cursor: pointer;
+}
+.key:active { background: #eef8e9; }
+.pin-hint { font-size: 13px; color: #a2ada4; }

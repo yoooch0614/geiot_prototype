@@ -1,0 +1,34 @@
+.reader { justify-content: center; }
+.scene { border-radius: 20px; overflow: hidden; background: #eef4e7; aspect-ratio: 4/3; display: flex; }
+.scene img { width: 100%; height: 100%; object-fit: cover; }
+.scene.photo img { object-fit: contain; background: #333; }
+.prompt {
+  font-size: clamp(19px, 5vw, 24px); font-weight: 700; color: var(--green);
+  background: #eef8e9; border-radius: 18px; padding: 14px 16px; margin: 0; text-align: center;
+}
+.big-next {
+  align-self: center; font-family: inherit; font-weight: 900; font-size: 22px; color: #fff;
+  background: var(--green); border: none; border-radius: 999px; padding: 16px 40px;
+  box-shadow: 0 6px 0 #4f9a45; cursor: pointer; transition: transform 120ms, box-shadow 120ms;
+}
+.big-next:active { transform: translateY(4px); box-shadow: 0 2px 0 #4f9a45; }
+.mission-shoot {
+  align-self: center; font-family: inherit; font-weight: 900; font-size: 22px; color: #fff;
+  background: var(--coral); border: none; border-radius: 999px; padding: 16px 34px;
+  box-shadow: 0 6px 0 #e0563c; cursor: pointer; transition: transform 120ms, box-shadow 120ms;
+}
+.mission-shoot:active { transform: translateY(4px); box-shadow: 0 2px 0 #e0563c; }
+.tapdone {
+  align-self: center; font-family: inherit; font-weight: 700; font-size: 15px; color: #7a877e;
+  background: none; border: none; text-decoration: underline; cursor: pointer;
+}
+.preview-actions { display: flex; gap: 12px; justify-content: center; }
+.retry {
+  font-family: inherit; font-weight: 700; font-size: 18px; color: var(--ink);
+  background: var(--yellow); border: none; border-radius: 999px; padding: 16px 24px;
+  box-shadow: 0 6px 0 #e0b62f; cursor: pointer;
+}
+.achieve { gap: 10px; }
+.sparkle { font-size: 48px; animation: pop 700ms ease; }
+.sticker { width: 140px; height: 140px; animation: pop 700ms ease; }
+@keyframes pop { 0%{transform: scale(.4); opacity: 0} 60%{transform: scale(1.12)} 100%{transform: scale(1); opacity: 1} }
