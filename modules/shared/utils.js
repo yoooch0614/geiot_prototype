@@ -17,3 +17,65 @@ export const stage = (html) => `
 // 背景写真（.scene の1枚目）の上に、gifキャラクターを重ねて表示する<img>を作る。
 export const characterLayer = (url) =>
   url ? `<img class="character" src="${url}" alt="" onerror="this.remove()">` : "";
+
+// ミッションの背景イラストと、こどもが撮った写真を1枚の画像にまとめる。
+// DOM上で重ねるだけではなくcanvasからData URLを作るため、プレビューだけでなく
+// 日記・おもいでにも同じ合成済み画像を残せる。
+export async function composeMissionPhoto(backgroundUrl, photoUrl) {
+  const roundedRect = (context, x, y, width, height, radius) => {
+    const r = Math.min(radius, width / 2, height / 2);
+    context.moveTo(x + r, y);
+    context.arcTo(x + width, y, x + width, y + height, r);
+    context.arcTo(x + width, y + height, x, y + height, r);
+    context.arcTo(x, y + height, x, y, r);
+    context.arcTo(x, y, x + width, y, r);
+    context.closePath();
+  };
+  const loadImage = (src) => new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = reject;
+    image.src = src;
+  });
+
+  try {
+    const [background, photo] = await Promise.all([
+      loadImage(backgroundUrl),
+      loadImage(photoUrl),
+    ]);
+    const canvas = document.createElement("canvas");
+    canvas.width = 800;
+    canvas.height = 600;
+    const context = canvas.getContext("2d");
+
+    // 背景はページに表示されているイラストを全面に敷く。
+    context.drawImage(background, 0, 0, canvas.width, canvas.height);
+
+    // 写真は背景が見える大きさの白いフォトフレームとして中央に配置する。
+    const frame = { x: 92, y: 72, width: 616, height: 420, radius: 24 };
+    context.save();
+    context.shadowColor = "rgba(30, 45, 35, .28)";
+    context.shadowBlur = 22;
+    context.shadowOffsetY = 10;
+    context.fillStyle = "#fff";
+    context.beginPath();
+    roundedRect(context, frame.x - 10, frame.y - 10, frame.width + 20, frame.height + 20, frame.radius + 8);
+    context.fill();
+    context.restore();
+
+    context.save();
+    context.beginPath();
+    roundedRect(context, frame.x, frame.y, frame.width, frame.height, frame.radius);
+    context.clip();
+    const scale = Math.max(frame.width / photo.naturalWidth, frame.height / photo.naturalHeight);
+    const width = photo.naturalWidth * scale;
+    const height = photo.naturalHeight * scale;
+    context.drawImage(photo, frame.x + (frame.width - width) / 2, frame.y + (frame.height - height) / 2, width, height);
+    context.restore();
+
+    return canvas.toDataURL("image/jpeg", 0.9);
+  } catch (error) {
+    console.warn("写真を合成できなかったため、元の写真を使います。", error);
+    return photoUrl;
+  }
+}

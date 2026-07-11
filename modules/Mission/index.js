@@ -1,4 +1,4 @@
-import { playAudio, esc, stage, characterLayer } from "../shared/utils.js";
+import { playAudio, esc, stage, characterLayer, composeMissionPhoto } from "../shared/utils.js";
 
 export const MissionScreen = {
   render(ctx, { page }) {
@@ -14,6 +14,7 @@ export const MissionScreen = {
         <p class="lead">${esc(page.text)}</p>
         <p class="prompt">${esc(page.prompt)}</p>
         <button class="mission-shoot" data-shoot> ${esc(page.doneLabel || "とってみよう！")}</button>
+        <button class="tapdone" data-tap>できた！（しゃしんなし）</button>
       </div>`);
   },
   mount(ctx, { page }, root) {
@@ -27,18 +28,27 @@ export const MissionScreen = {
         const file = input.files && input.files[0];
         if (!file) return;
         const reader = new FileReader();
-        reader.onload = () => ctx.go("PREVIEW", { page, dataUrl: reader.result });
+        reader.onload = async () => {
+          const originalDataUrl = reader.result;
+          const dataUrl = await composeMissionPhoto(ctx.repo.assetUrl(page.image), originalDataUrl);
+          ctx.go("PREVIEW", { page, dataUrl });
+        };
         reader.readAsDataURL(file);
       };
       input.click();
     };
     root.querySelector("[data-shoot]").onclick = openCamera;
-    root.querySelector("[data-tap]").onclick = () => {
-      ctx.session.completeMission({
-        missionId: page.id, missionText: page.prompt,
-        caption: page.diaryCaption || page.prompt, photoUrl: null,
-      });
-      ctx.go("ACHIEVE", { page });
-    };
+    // 「しゃしんなし」ボタンは撤去済み。要素が無いのに onclick を触るとエラーになるためガード
+    const tap = root.querySelector("[data-tap]");
+    if (tap) {
+      tap.onclick = () => {
+        ctx.session.completeMission({
+          missionId: page.id, missionText: page.prompt,
+          caption: page.diaryCaption || page.prompt, photoUrl: null,
+          missionImage: page.image, missionCharacter: page.character,
+        });
+        ctx.go("ACHIEVE", { page });
+      };
+    }
   },
 };

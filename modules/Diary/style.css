@@ -1,4 +1,21 @@
 .diary { padding-top: 24px; }
+/* 絵本の表紙をぼかして敷く背景。内容はその上に浮かせる */
+.diary-bg {
+  position: absolute; inset: 0; z-index: 0;
+  background-size: cover; background-position: center;
+  filter: blur(14px) saturate(1.05);
+  opacity: .35;
+  pointer-events: none;
+}
+.diary > :not(.diary-bg) { position: relative; z-index: 1; }
+/* 「しゃしんなし」の枠にも表紙を敷き、ラベルは白帯で読めるようにする */
+.diary .no-photo { background-size: cover; background-position: center; border-radius: 14px; }
+.no-photo-label {
+  font-size: 15px; font-weight: 700; color: var(--ink);
+  background: rgba(255, 255, 255, .88);
+  padding: 8px 16px; border-radius: 999px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .15);
+}
 .diary-cover { background: var(--green); color: #fff; border-radius: 22px; padding: 22px; text-align: center; }
 .diary-cover h2 { margin: 6px 0 0; font-size: 22px; }
 .diary-date { font-size: 14px; opacity: .9; }

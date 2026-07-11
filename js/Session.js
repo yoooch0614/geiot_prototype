@@ -50,8 +50,10 @@ export class Session {
 
   // ── ミッション達成 ─────────────────────
   // photoUrl が null なら「タップ達成」（写真なし）
-  completeMission({ missionId, missionText, caption, photoUrl }) {
-    this.runMissions.push({ missionId, missionText, caption, photoUrl });
+  // missionImage はそのミッションの挿絵（写真がないとき日記の代わり絵に使う）
+  // missionCharacter は写真の上に重ねるキャラクター（おはなしページと同じ演出）
+  completeMission({ missionId, missionText, caption, photoUrl, missionImage, missionCharacter }) {
+    this.runMissions.push({ missionId, missionText, caption, photoUrl, missionImage, missionCharacter });
     this.activityDays.add(today()); // 外で活動した日として記録
     this._save();
   }
@@ -60,24 +62,39 @@ export class Session {
   }
 
   // ── 絵本完了 → 絵本日記を生成 ──────────────
+  // 日記には「おはなしの挿絵」と「ミッションのしゃしん」を絵本の順番どおりに収める。
+  // 例）はっぱのぼうけん = 挿絵3枚 + しゃしん2枚 の5枚アルバム
   buildMemory(book) {
+    const done = new Map(this.runMissions.map((m) => [m.missionId, m]));
+    const entries = [];
+    for (const page of book.pages ?? []) {
+      if (page.type === "story" && page.image) {
+        entries.push({ kind: "story", image: page.image });
+      } else if (page.type === "mission" && done.has(page.id)) {
+        const m = done.get(page.id);
+        entries.push({
+          kind: "mission",
+          photoUrl: m.photoUrl,
+          caption: m.caption,
+          missionText: m.missionText,
+          missionImage: m.missionImage,
+          missionCharacter: m.missionCharacter,
+        });
+      }
+    }
     const memory = {
       id: `mem-${Date.now()}`,
       bookId: book.id,
       bookTitle: book.title,
       date: today(),
-      entries: this.runMissions.map((m) => ({
-        photoUrl: m.photoUrl,
-        caption: m.caption,
-        missionText: m.missionText,
-      })),
+      entries,
     };
     this.memories.unshift(memory);               // ギャラリー（写真つき・メモリ）
     this.memoryLog.unshift({                      // 親レポート（メタのみ・保存）
       id: memory.id,
       bookTitle: book.title,
       date: memory.date,
-      count: memory.entries.length,
+      count: this.runMissions.length,             // 親レポートは達成ミッション数のまま
     });
     this._save();
     return memory;

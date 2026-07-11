@@ -1,0 +1,15 @@
+/* おもいで画面 ── 1回のきろくを1枚のカードに、しゃしんは全部ならべる */
+.memory-list { display: flex; flex-direction: column; gap: 16px; }
+.memory-list .memory-card { width: 100%; }
+.memory-photos {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+  padding: 8px 8px 0;
+}
+.memory-photo { position: relative; display: block; overflow: hidden; border-radius: 12px; }
+.memory-photo > img:first-child {
+  width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block;
+}
+/* 1枚だけのときは大きく1枚で見せる */
+.memory-photos > :only-child { grid-column: 1 / -1; }
+/* 奇数枚のときは最初の1枚を横いっぱいに */
+.memory-photos > :first-child:nth-last-child(odd) { grid-column: 1 / -1; }

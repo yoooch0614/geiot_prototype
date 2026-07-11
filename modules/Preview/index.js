@@ -1,4 +1,4 @@
-import { stage } from "../shared/utils.js";
+import { stage, composeMissionPhoto } from "../shared/utils.js";
 
 export const PreviewScreen = {
   render(_ctx, { dataUrl }) {
@@ -17,6 +17,7 @@ export const PreviewScreen = {
       ctx.session.completeMission({
         missionId: page.id, missionText: page.prompt,
         caption: page.diaryCaption || page.prompt, photoUrl: dataUrl,
+        missionImage: page.image,
       });
       ctx.go("ACHIEVE", { page });
     };
@@ -27,7 +28,11 @@ export const PreviewScreen = {
         const file = input.files && input.files[0];
         if (!file) return;
         const reader = new FileReader();
-        reader.onload = () => ctx.go("PREVIEW", { page, dataUrl: reader.result });
+        reader.onload = async () => {
+          const originalDataUrl = reader.result;
+          const nextDataUrl = await composeMissionPhoto(ctx.repo.assetUrl(page.image), originalDataUrl);
+          ctx.go("PREVIEW", { page, dataUrl: nextDataUrl });
+        };
         reader.readAsDataURL(file);
       };
       input.click();
