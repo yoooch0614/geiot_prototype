@@ -8,8 +8,7 @@
       "id": "u1",
       "type": "story",
       "text": "あさに なると、たいようが にっこり わらうよ。おはよう！のあいさつを しにいこう。",
-      "image": "assets/scene-sky.svg",
-      "audio": "assets/u1.mp3"
+      "image": "assets/scene-sky.svg"
     },
     {
       "id": "um1",
@@ -22,15 +21,13 @@
         "感覚",
         "自然"
       ],
-      "image": "assets/scene-meadow.svg",
-      "audio": "assets/um1.mp3"
+      "image": "assets/scene-meadow.svg"
     },
     {
       "id": "uend",
       "type": "end",
       "text": "きょうも いちにち げんきに いこう！",
-      "image": "assets/scene-cheer.svg",
-      "audio": "assets/uend.mp3"
+      "image": "assets/scene-cheer.svg"
     }
   ]
 }

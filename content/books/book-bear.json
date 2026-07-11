@@ -8,8 +8,7 @@
       "id": "b1",
       "type": "story",
       "text": "よるに なると、そらに つきが でるよ。ねむる まえに ちょっと おそらを みてみよう。",
-      "image": "assets/scene-sunset.svg",
-      "audio": "assets/b1.mp3"
+      "image": "assets/scene-sunset.svg"
     },
     {
       "id": "bm1",
@@ -22,15 +21,13 @@
         "観察",
         "自然"
       ],
-      "image": "assets/scene-cheer.svg",
-      "audio": "assets/bm1.mp3"
+      "image": "assets/scene-cheer.svg"
     },
     {
       "id": "bend",
       "type": "end",
       "text": "おやすみ。すてきな ゆめを みてね。",
-      "image": "assets/scene-sunset.svg",
-      "audio": "assets/bend.mp3"
+      "image": "assets/scene-sunset.svg"
     }
   ]
 }

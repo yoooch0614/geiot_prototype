@@ -34,9 +34,20 @@ def lan_ip() -> str:
     return ip
 
 
+# 中身が滅多に変わらない素材。これらまで no-store にすると、音を鳴らすたびに
+# mp3 を取り直すことになり、取得が間に合わず鳴らないことがある。
+MEDIA_SUFFIXES = (".mp3", ".wav", ".m4a", ".ogg", ".png", ".jpg", ".jpeg", ".gif", ".svg")
+
+
 class Handler(http.server.SimpleHTTPRequestHandler):
     def end_headers(self):
-        self.send_header("Cache-Control", "no-store")
+        # 編集しながら確認するので、JS/CSS/JSON は毎回取り直させる。
+        # 素材（音声・画像）はキャッシュさせて、鳴らしたい瞬間に手元にある状態にする。
+        path = self.path.split("?", 1)[0].lower()
+        if path.endswith(MEDIA_SUFFIXES):
+            self.send_header("Cache-Control", "public, max-age=3600")
+        else:
+            self.send_header("Cache-Control", "no-store")
         super().end_headers()
 
     def log_message(self, *args):

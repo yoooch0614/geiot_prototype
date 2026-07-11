@@ -111,7 +111,13 @@ export class Session {
     const entries = [];
     for (const page of book.pages ?? []) {
       if (page.type === "story" && page.image) {
-        entries.push({ kind: "story", image: page.image });
+        // 挿絵の透明部分（くるま・おうち・おはな）に敷く写真も一緒に残しておく。
+        // これが無いと、日記では透明のまま＝色のない絵に見えてしまう（おはなし画面と食い違う）。
+        entries.push({
+          kind: "story",
+          image: page.image,
+          fillPhoto: page.fillFrom ? (done.get(page.fillFrom)?.photoUrl ?? null) : null,
+        });
       } else if (page.type === "mission" && done.has(page.id)) {
         const m = done.get(page.id);
         entries.push({
