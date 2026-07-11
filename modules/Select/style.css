@@ -1,4 +1,17 @@
 /* 絵本選択画面 ── 本棚のみため */
+.shelf-pager { overflow: hidden; touch-action: pan-y; user-select: none; }
+.shelf-pager img { -webkit-user-drag: none; user-drag: none; }
+.shelf-track {
+  display: flex;
+  transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.shelf-page { flex: 0 0 100%; min-width: 0; }
+.shelf-dots { display: flex; justify-content: center; gap: 8px; }
+.shelf-dot {
+  width: 9px; height: 9px; padding: 0; border: none; border-radius: 50%;
+  background: var(--wood-dark); opacity: .35; cursor: pointer;
+}
+.shelf-dot.is-active { opacity: 1; background: var(--green); }
 .shelf {
   position: relative;
   padding: 0 12px 12px;

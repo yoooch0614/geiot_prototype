@@ -1,0 +1,36 @@
+{
+  "id": "book-sun",
+  "title": "おはよう、たいよう！",
+  "ageRange": "3-5",
+  "cover": "assets/cover-sun.svg",
+  "pages": [
+    {
+      "id": "u1",
+      "type": "story",
+      "text": "あさに なると、たいようが にっこり わらうよ。おはよう！のあいさつを しにいこう。",
+      "image": "assets/scene-sky.svg",
+      "audio": "assets/u1.mp3"
+    },
+    {
+      "id": "um1",
+      "type": "mission",
+      "text": "あさの おさんぽタイム！",
+      "prompt": "そとに でて、おひさまの ひかりを かんじてみよう。",
+      "doneLabel": "できた！",
+      "diaryCaption": "あさの ひかり、あびたよ！",
+      "developmentDomains": [
+        "感覚",
+        "自然"
+      ],
+      "image": "assets/scene-meadow.svg",
+      "audio": "assets/um1.mp3"
+    },
+    {
+      "id": "uend",
+      "type": "end",
+      "text": "きょうも いちにち げんきに いこう！",
+      "image": "assets/scene-cheer.svg",
+      "audio": "assets/uend.mp3"
+    }
+  ]
+}
