@@ -28,6 +28,7 @@ function go(name, params = {}) {
   root.innerHTML = screen.render(ctx, params);
   screen.mount?.(ctx, params, root);
   root.scrollTop = 0;
+  root.querySelector(".screen")?.scrollTo(0, 0);
 }
 
 // いまのページを種類に応じた画面へ振り分け（物語/ミッション/おわり）

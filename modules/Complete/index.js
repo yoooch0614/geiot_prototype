@@ -1,4 +1,4 @@
-import { esc } from "../shared/utils.js";
+import { esc, stage } from "../shared/utils.js";
 
 export const CompleteScreen = {
   render(_ctx, { page }) {

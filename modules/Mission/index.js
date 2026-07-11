@@ -1,12 +1,16 @@
-import { playAudio, esc } from "../shared/utils.js";
+import { playAudio, esc, stage, characterLayer } from "../shared/utils.js";
 
 export const MissionScreen = {
   render(ctx, { page }) {
     const img = ctx.repo.assetUrl(page.image);
-    return `
+    const character = ctx.repo.assetUrl(page.character);
+    return stage(`
       <div class="screen reader page--in">
         <button class="back" data-back>‹</button>
-        <div class="scene"><img src="${img}" alt="" onerror="this.style.opacity=0"></div>
+        <div class="scene">
+          <img src="${img}" alt="" onerror="this.style.opacity=0">
+          ${characterLayer(character)}
+        </div>
         <p class="lead">${esc(page.text)}</p>
         <p class="prompt">${esc(page.prompt)}</p>
         <button class="mission-shoot" data-shoot> ${esc(page.doneLabel || "とってみよう！")}</button>

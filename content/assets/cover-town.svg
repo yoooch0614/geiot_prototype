@@ -1,5 +1,19 @@
 <svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="まちのたからさがし">
-  <rect width="800" height="600" fill="#cfe3f5"/>
-  <rect x="230" y="250" width="90" height="180" fill="#f2a65a"/><rect x="340" y="200" width="90" height="230" fill="#e56b6f"/><rect x="450" y="280" width="90" height="150" fill="#6d9dc5"/><circle cx="600" cy="130" r="50" fill="#ffd23f"/>
+  <defs>
+    <linearGradient id="townSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e4f2fc"/><stop offset="1" stop-color="#cfe3f5"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#townSky)"/>
+  <ellipse cx="180" cy="140" rx="70" ry="32" fill="#ffffff" opacity="0.9"/>
+  <ellipse cx="235" cy="150" rx="55" ry="26" fill="#ffffff" opacity="0.9"/>
+  <circle cx="600" cy="130" r="50" fill="#ffd23f"/>
+  <rect x="230" y="250" width="90" height="180" rx="16" fill="#f2a65a"/>
+  <rect x="340" y="200" width="90" height="230" rx="16" fill="#e56b6f"/>
+  <rect x="450" y="280" width="90" height="150" rx="16" fill="#6d9dc5"/>
+  <circle cx="260" cy="290" r="12" fill="#fff4e2"/><circle cx="290" cy="330" r="12" fill="#fff4e2"/>
+  <circle cx="370" cy="240" r="12" fill="#ffe2e2"/><circle cx="400" cy="280" r="12" fill="#ffe2e2"/><circle cx="370" cy="320" r="12" fill="#ffe2e2"/>
+  <circle cx="480" cy="315" r="12" fill="#e5f1fb"/><circle cx="510" cy="355" r="12" fill="#e5f1fb"/>
+  <path d="M340 430 L430 430 L430 400 L385 375 L340 400 Z" fill="#c94f56"/>
   <text x="400" y="560" text-anchor="middle" font-family="sans-serif" font-size="34" fill="#ffffff" opacity="0.85" font-weight="bold">まちのたからさがし</text>
 </svg>

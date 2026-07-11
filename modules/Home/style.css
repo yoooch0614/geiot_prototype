@@ -2,7 +2,7 @@
   font-size: clamp(30px, 9vw, 44px); font-weight: 900; line-height: 1.4;
   color: var(--green); margin: 0 0 8px;
 }
-.section-title { font-size: 24px; font-weight: 900; margin: 4px 0; }
+.section-title { font-size: 24px; font-weight: 900; margin: 46px 0 4px; text-align: center; }
 .lead {
   font-size: clamp(22px, 6vw, 30px); font-weight: 700; line-height: 1.7;
   letter-spacing: .02em; margin: 0; text-align: center;
@@ -15,7 +15,7 @@
   box-shadow: 0 2px 8px rgba(58,74,63,.12); cursor: pointer; z-index: 2;
 }
 .progress {
-  position: absolute; top: 16px; right: 16px;
+  position: absolute; top: 16px; right: 16px; z-index: 2;
   font-weight: 700; font-size: 15px; color: var(--green);
   background: #fff; padding: 4px 14px; border-radius: 999px;
   box-shadow: 0 2px 8px rgba(58,74,63,.1);

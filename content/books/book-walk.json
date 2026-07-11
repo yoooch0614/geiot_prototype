@@ -1,0 +1,36 @@
+{
+  "id": "book-walk",
+  "title": "いっしょに おさんぽ",
+  "ageRange": "3-6",
+  "cover": "assets/cover-walk.svg",
+  "pages": [
+    {
+      "id": "w1",
+      "type": "story",
+      "text": "わんちゃんと いっしょに おさんぽに いこう！みちには なにが あるかな？",
+      "image": "assets/scene-town.svg",
+      "audio": "assets/w1.mp3"
+    },
+    {
+      "id": "wm1",
+      "type": "mission",
+      "text": "おさんぽ スタート！",
+      "prompt": "そとに でて、すきな いろの はなを さがしてみよう。",
+      "doneLabel": "みつけた！",
+      "diaryCaption": "きれいな はな、みつけたよ！",
+      "developmentDomains": [
+        "観察",
+        "自然"
+      ],
+      "image": "assets/scene-red.svg",
+      "audio": "assets/wm1.mp3"
+    },
+    {
+      "id": "wend",
+      "type": "end",
+      "text": "たのしい おさんぽ だったね！",
+      "image": "assets/scene-town.svg",
+      "audio": "assets/wend.mp3"
+    }
+  ]
+}

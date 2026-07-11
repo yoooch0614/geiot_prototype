@@ -1,0 +1,6 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="きらきら ほしのよる">
+  <rect width="800" height="600" fill="#1f2a52"/>
+  <circle cx="150" cy="140" r="5" fill="#ffffff"/><circle cx="260" cy="90" r="4" fill="#ffffff"/><circle cx="640" cy="130" r="5" fill="#ffffff"/><circle cx="560" cy="80" r="4" fill="#ffffff"/><circle cx="120" cy="300" r="4" fill="#ffffff"/><circle cx="690" cy="260" r="4" fill="#ffffff"/>
+  <path d="M400 260 L424 330 L498 330 L438 372 L462 442 L400 400 L338 442 L362 372 L302 330 L376 330 Z" fill="#ffd23f"/>
+  <text x="400" y="560" text-anchor="middle" font-family="sans-serif" font-size="34" fill="#ffffff" opacity="0.85" font-weight="bold">きらきら ほしのよる</text>
+</svg>

@@ -1,7 +1,34 @@
 .reader { justify-content: center; }
-.scene { border-radius: 20px; overflow: hidden; background: #eef4e7; aspect-ratio: 4/3; display: flex; }
+
+/* 読み聞かせ系の画面を横向きタブレット基準（4:3）のステージに収める。
+   はみ出す分は stage-outer の背景（帯）として上下または左右に見える。 */
+.stage-outer {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--paper);
+}
+.stage {
+  position: relative;
+  width: min(100vw, calc(100dvh * 4 / 3));
+  height: min(100dvh, calc(100vw * 3 / 4));
+  overflow: hidden;
+}
+.stage .screen {
+  height: 100%; min-height: 100%; max-width: 640px; margin: 0 auto;
+  overflow-y: auto; overflow-anchor: none;
+}
+
+.scene { position: relative; border-radius: 20px; overflow: hidden; background: #eef4e7; aspect-ratio: 4/3; display: flex; flex-shrink: 0; }
 .scene img { width: 100%; height: 100%; object-fit: cover; }
 .scene.photo img { object-fit: contain; background: #333; }
+/* gifキャラクターは背景写真の上に重ねる。文字（.lead など）は .scene の外、下に続く。
+   mix-blend-mode: multiply で、白背景のgifでも白い部分が背景となじんで透明に見える
+   （黒い線画やはっきりした色は残る）。本当に透明なgifを用意できるなら、これは不要。 */
+.scene .character {
+  position: absolute; left: 50%; bottom: 0; transform: translateX(-50%);
+  width: auto; height: 82%; max-width: 72%; object-fit: contain; pointer-events: none;
+  mix-blend-mode: multiply;
+}
 .prompt {
   font-size: clamp(19px, 5vw, 24px); font-weight: 700; color: var(--green);
   background: #eef8e9; border-radius: 18px; padding: 14px 16px; margin: 0; text-align: center;

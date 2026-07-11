@@ -1,0 +1,36 @@
+{
+  "id": "book-bear",
+  "title": "おやすみ、くまさん",
+  "ageRange": "3-5",
+  "cover": "assets/cover-bear.svg",
+  "pages": [
+    {
+      "id": "b1",
+      "type": "story",
+      "text": "よるに なると、そらに つきが でるよ。ねむる まえに ちょっと おそらを みてみよう。",
+      "image": "assets/scene-sunset.svg",
+      "audio": "assets/b1.mp3"
+    },
+    {
+      "id": "bm1",
+      "type": "mission",
+      "text": "おやすみまえの おそとタイム！",
+      "prompt": "そとに でて、つきや ほしを さがしてみよう。",
+      "doneLabel": "みつけた！",
+      "diaryCaption": "よるの そら、みたよ！",
+      "developmentDomains": [
+        "観察",
+        "自然"
+      ],
+      "image": "assets/scene-cheer.svg",
+      "audio": "assets/bm1.mp3"
+    },
+    {
+      "id": "bend",
+      "type": "end",
+      "text": "おやすみ。すてきな ゆめを みてね。",
+      "image": "assets/scene-sunset.svg",
+      "audio": "assets/bend.mp3"
+    }
+  ]
+}
