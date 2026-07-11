@@ -19,7 +19,7 @@ function bookCard(ctx, b, { labelType = "age" } = {}) {
   if (!b) {
     return `
       <div class="book-card book-card--ghost" aria-hidden="true">
-        <div class="book-cover book-cover--ghost"><span>✨</span></div>
+        <div class="book-cover book-cover--ghost"></div>
         <span class="book-title book-title--ghost">おたのしみに</span>
       </div>`;
   }
@@ -53,9 +53,9 @@ function shelfPage(ctx, books, labelType) {
   return `
     <div class="shelf-page">
       <div class="shelf">
-        <div class="shelf-awning"><span class="shelf-emblem">📖</span></div>
-        <span class="shelf-deco shelf-deco--plant" aria-hidden="true">🌱</span>
-        <span class="shelf-deco shelf-deco--books" aria-hidden="true">📚</span>
+        <div class="shelf-awning"><span class="shelf-emblem" aria-hidden="true"></span></div>
+        <span class="shelf-deco shelf-deco--plant" aria-hidden="true"></span>
+        <span class="shelf-deco shelf-deco--books" aria-hidden="true"></span>
         <div class="shelf-body">${shelfRows(ctx, books, labelType)}</div>
         <div class="shelf-base"></div>
       </div>
@@ -97,12 +97,12 @@ export const SelectScreen = {
     return `
       <div class="screen screen--select${isParent ? " screen--select--memory" : ""}">
         <div class="select-sky" aria-hidden="true">
-          <span style="top:5%;left:7%">✨</span>
-          <span style="top:11%;right:9%;animation-delay:.9s">⭐</span>
-          <span style="top:34%;left:3%;animation-delay:1.6s">🌟</span>
-          <span style="top:28%;right:4%;animation-delay:2.2s">🦋</span>
-          <span style="bottom:16%;left:9%;animation-delay:1.2s">✨</span>
-          <span style="bottom:12%;right:11%;animation-delay:.5s">⭐</span>
+          <span class="sky-shape sky-shape--sparkle" style="top:5%;left:7%"></span>
+          <span class="sky-shape sky-shape--star" style="top:11%;right:9%;animation-delay:.9s"></span>
+          <span class="sky-shape sky-shape--burst" style="top:34%;left:3%;animation-delay:1.6s"></span>
+          <span class="sky-shape sky-shape--butterfly" style="top:28%;right:4%;animation-delay:2.2s"></span>
+          <span class="sky-shape sky-shape--sparkle" style="bottom:16%;left:9%;animation-delay:1.2s"></span>
+          <span class="sky-shape sky-shape--star" style="bottom:12%;right:11%;animation-delay:.5s"></span>
         </div>
         <button class="back" data-back>‹ もどる</button>
         <h2 class="section-title select-title">${isParent ? "おもいで" : "どの えほんを よむ？"}</h2>

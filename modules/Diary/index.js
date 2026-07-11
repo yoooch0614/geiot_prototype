@@ -21,7 +21,7 @@ export const DiaryScreen = {
                <img src="${e.photoUrl}" alt="">
              </div>`
           : `<div class="no-photo"${fallback ? ` style="background-image:url('${fallback}')"` : ""}>
-               <span class="no-photo-label">📷 しゃしんなし</span>
+               <span class="no-photo-label"><span class="camera-icon" aria-hidden="true"></span> しゃしんなし</span>
              </div>`}
         <p class="diary-caption">${esc(e.caption)}</p>
       </div>`;

@@ -5,19 +5,44 @@
   background: linear-gradient(180deg, rgba(214, 238, 252, .55) 0%, rgba(214, 238, 252, 0) 42%);
 }
 .select-sky { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
-.select-sky span {
-  position: absolute; font-size: 20px; opacity: .85;
+.select-sky .sky-shape {
+  position: absolute;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  opacity: .85;
   animation: sky-float 3.6s ease-in-out infinite alternate;
 }
+.sky-shape--star { width: 14px; height: 14px; background: radial-gradient(circle, #fff 35%, rgba(255,255,255,0) 70%); box-shadow: 0 0 0 2px rgba(255,255,255,.6); }
+.sky-shape--sparkle { width: 10px; height: 10px; background: radial-gradient(circle, #fff 40%, rgba(255,255,255,0) 70%); }
+.sky-shape--burst { width: 18px; height: 18px; background: radial-gradient(circle, rgba(255,255,255,.9) 35%, rgba(255,255,255,0) 60%); }
+.sky-shape--butterfly {
+  width: 18px; height: 16px;
+  background: radial-gradient(circle at 30% 50%, #fff 20%, rgba(255,255,255,0) 21%),
+              radial-gradient(circle at 70% 50%, #fff 20%, rgba(255,255,255,0) 21%);
+  border-radius: 50% 50% 40% 40%;
+}
 @keyframes sky-float {
-  from { transform: translateY(0) rotate(-4deg); }
-  to   { transform: translateY(-12px) rotate(5deg); }
+  from { transform: translateY(0) rotate(0deg); }
+  to   { transform: translateY(-12px) rotate(0deg); }
 }
 /* .back は position:absolute のままにしたいので除外する */
 .screen--select > :not(.select-sky):not(.back) { position: relative; z-index: 1; }
 
-.select-title::before { content: "✨ "; font-size: .8em; }
-.select-title::after  { content: " ✨"; font-size: .8em; }
+.select-title {
+  position: relative;
+}
+.select-title::before,
+.select-title::after {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .8);
+  box-shadow: 0 0 0 2px rgba(107, 191, 89, .25);
+}
+.select-title::before { left: -12px; top: 50%; transform: translateY(-50%); }
+.select-title::after  { right: -12px; top: 50%; transform: translateY(-50%); }
 
 .select-toolbar {
   display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
@@ -41,8 +66,8 @@
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-x;
-  padding: 20px 26px 6px; /* 上は屋根かざり（🌱📚）のはみ出しぶん */
-  margin: 0 -18px; /* 画面の左右パディング分を打ち消し、めくり先が画面端ぎりぎりまで覗ける */
+  padding: 20px 26px 6px;
+  margin: 0 -18px;
   scrollbar-width: none;
   user-select: none;
 }
@@ -94,16 +119,38 @@
   background-repeat: repeat-x;
 }
 .shelf-emblem {
-  font-size: 15px; background: rgba(255, 255, 255, .88);
-  padding: 3px 12px; border-radius: 999px;
+  position: relative;
+  width: 32px; height: 20px;
+  background: rgba(255, 255, 255, .92);
+  border-radius: 10px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, .15);
 }
+.shelf-emblem::before,
+.shelf-emblem::after {
+  content: "";
+  position: absolute;
+  left: 7px; right: 7px;
+  height: 3px;
+  background: rgba(0, 0, 0, .12);
+  border-radius: 999px;
+}
+.shelf-emblem::before { top: 7px; }
+.shelf-emblem::after { top: 12px; }
 
-/* 屋根の上のかざり（鉢植えと本のやま） */
-/* 右端に置くと隣ページの覗きに隠れるので、少し内側に寄せる */
-.shelf-deco { position: absolute; top: -17px; font-size: 22px; z-index: 2; }
-.shelf-deco--plant { left: 16px; }
-.shelf-deco--books { right: 42px; }
+.shelf-deco { position: absolute; top: -16px; z-index: 2; }
+.shelf-deco--plant {
+  left: 16px;
+  width: 18px; height: 18px;
+  background: radial-gradient(circle at 30% 30%, #fff 18%, #8dc57a 18%),
+              radial-gradient(circle at 70% 30%, #fff 16%, #a8db94 16%);
+  border-radius: 50%;
+}
+.shelf-deco--books {
+  right: 42px;
+  width: 18px; height: 18px;
+  background: linear-gradient(90deg, #fff 34%, #f6df95 34%, #f6df95 66%, #fff 66%);
+  border-radius: 4px;
+}
 
 .shelf-body { padding-top: 22px; }
 .shelf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding-bottom: 14px; }
@@ -141,15 +188,22 @@
   width: 100%; aspect-ratio: 4/3; border-radius: 16px;
   border: 3px dashed rgba(150, 105, 58, .5);
   display: flex; align-items: center; justify-content: center;
-  font-size: 26px; opacity: .7;
+  background: linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,255,255,.6));
+  position: relative;
 }
-.book-cover--ghost span { animation: ghost-twinkle 2.4s ease-in-out infinite; }
-@keyframes ghost-twinkle {
-  0%, 100% { opacity: .45; transform: scale(.9); }
-  50%      { opacity: 1;   transform: scale(1.15) rotate(8deg); }
+.book-cover--ghost::before,
+.book-cover--ghost::after {
+  content: "";
+  position: absolute;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .95);
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, .5);
 }
+.book-cover--ghost::before { top: 32%; left: 32%; }
+.book-cover--ghost::after { top: 42%; left: 60%; }
 .book-title--ghost { text-align: center; color: var(--wood-deep); opacity: .85; }
 
 @media (prefers-reduced-motion: reduce) {
-  .select-sky span, .book-cover--ghost span { animation: none; }
+  .select-sky .sky-shape { animation: none; }
 }
