@@ -29,8 +29,10 @@ export const PinScreen = {
         else if (buf.length < 4) buf += k;
         draw();
         if (buf.length === 4) {
-          if (ctx.session.checkPin(buf)) ctx.go("PARENT");
-          else {
+          if (ctx.session.checkPin(buf)) {
+            ctx.session.setMode("parent");
+            ctx.go("SELECT");
+          } else {
             dots.classList.add("shake");
             setTimeout(() => { buf = ""; draw(); dots.classList.remove("shake"); }, 500);
           }

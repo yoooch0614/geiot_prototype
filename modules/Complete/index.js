@@ -1,4 +1,4 @@
-import { esc, stage } from "../shared/utils.js";
+import { esc } from "../shared/utils.js";
 
 export const CompleteScreen = {
   render(_ctx, { page }) {
@@ -19,7 +19,8 @@ export const CompleteScreen = {
         <button class="next-btn" data-next>つぎへ ›</button>
       </div>`;
   },
-  mount(ctx, { page }, root) {
+  mount(ctx, params = {}, root) {
+    const { page, view } = params;
     const book = ctx.repo.book(ctx.session.bookId);
     const memory = ctx.session.buildMemory(book);
 
@@ -35,7 +36,7 @@ export const CompleteScreen = {
 
     // 自動遷移はしない。ボタンを押したときだけ次の画面へ。
     root.querySelector("[data-next]").onclick = () => {
-      ctx.go("DIARY", { memory, fromPlay: true });
+      ctx.go("DIARY", { memory, fromPlay: true, view });
     };
   },
 };

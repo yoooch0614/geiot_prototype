@@ -1,0 +1,51 @@
+.analysis-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 4px 14px rgba(58,74,63,.08);
+}
+.analysis-lead {
+  margin: 6px 0 10px;
+  font-weight: 700;
+  color: var(--green);
+  line-height: 1.6;
+}
+.analysis-list {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #5c6d63;
+}
+.analysis-chart {
+  display: block;
+  width: 100%;
+  max-width: 260px;
+  margin: 12px auto 0;
+}
+.analysis-ring {
+  fill: none;
+  stroke: #d9e6cf;
+  stroke-width: 1;
+}
+.analysis-axis {
+  stroke: #d9e6cf;
+  stroke-width: 1;
+}
+.analysis-label {
+  fill: #5c6d63;
+  font-size: 11px;
+  text-anchor: middle;
+}
+.analysis-polygon {
+  fill: rgba(107, 191, 89, 0.24);
+  stroke: rgba(107, 191, 89, 0.8);
+  stroke-width: 2;
+}
+.analysis-point {
+  fill: var(--green);
+}
+.analysis-center {
+  fill: var(--green);
+}

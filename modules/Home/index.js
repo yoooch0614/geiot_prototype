@@ -8,7 +8,7 @@ export const HomeScreen = {
           <button class="mode-card mode-card--child" data-go="SELECT">
             <span class="mode-emoji">📖</span><span>えほん</span>
           </button>
-          <button class="mode-card mode-card--memory" data-go="GALLERY">
+          <button class="mode-card mode-card--memory" data-go="SELECT" data-view="memories">
             <span class="mode-emoji">🌟</span><span>おもいで</span>
           </button>
         </div>
@@ -16,6 +16,8 @@ export const HomeScreen = {
   },
   mount(ctx, _p, root) {
     root.querySelector("[data-back]").onclick = () => ctx.go("MODE");
-    root.querySelectorAll("[data-go]").forEach((b) => b.onclick = () => ctx.go(b.dataset.go));
+    root.querySelectorAll("[data-go]").forEach((b) => {
+      b.onclick = () => ctx.go(b.dataset.go, b.dataset.view ? { view: b.dataset.view } : {});
+    });
   },
 };
