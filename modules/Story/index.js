@@ -1,4 +1,4 @@
-import { playAudio, esc, stage, characterLayer, layersMarkup, openCamera } from "../shared/utils.js";
+import { playAudio, esc, stage, characterLayer, layersMarkup, fillLayer, openCamera, createRepeatableSound } from "../shared/utils.js";
 
 // 物語ページとミッションページを、いまのページを含む「1冊にできる範囲」で取り出す。
 // ・ end ページの手前で必ず区切る（達成の演出は別画面 COMPLETE が受け持つため）。
@@ -23,7 +23,8 @@ function pageMarkup(ctx, page, { index, showFinish }) {
   const character = ctx.repo.assetUrl(page.character);
   const scene = `
     <div class="scene">
-      <img src="${img}" alt="" onerror="this.style.opacity=0">
+      ${fillLayer(ctx, page)}
+      <img class="art" src="${img}" alt="" onerror="this.style.opacity=0">
       ${characterLayer(character)}
       ${layersMarkup(ctx, page.layers)}
     </div>`;
@@ -76,7 +77,9 @@ export const StoryScreen = {
     const bookEl = root.querySelector("[data-flipbook]");
     const progressEl = root.querySelector("[data-progress]");
     const playPageAudio = (localIdx) => playAudio(ctx.repo.assetUrl(pages[localIdx].audio));
-    const playPageTurnSound = () => playAudio(ctx.repo.assetUrl("assets/page_sound.mp3"));
+    // 本を開いた時点で先読みしておき、めくるたびに巻き戻して再生するだけにする
+    // （毎回 new Audio() だと取得が間に合わず鳴らないことがあったため）。
+    const playPageTurnSound = createRepeatableSound(ctx.repo.assetUrl("assets/page_sound.mp3"));
 
     root.querySelector("[data-back]").onclick = () => ctx.go("HOME");
 

@@ -60,6 +60,11 @@ export class Session {
   isMissionDone(missionId) {
     return this.runMissions.some((m) => m.missionId === missionId);
   }
+  // そのミッションでこどもが撮った写真。ページの透明部分（くるま・おうち・おはな）に
+  // 敷いて見せるために使う（page.fillFrom）。
+  missionPhoto(missionId) {
+    return this.runMissions.find((m) => m.missionId === missionId)?.photoUrl ?? null;
+  }
 
   // ── 絵本完了 → 絵本日記を生成 ──────────────
   // 日記には「おはなしの挿絵」と「ミッションのしゃしん」を絵本の順番どおりに収める。

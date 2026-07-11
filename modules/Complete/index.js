@@ -1,4 +1,4 @@
-import { esc } from "../shared/utils.js";
+import { esc, playCelebrationSound } from "../shared/utils.js";
 
 export const CompleteScreen = {
   render(_ctx, { page }) {
@@ -23,6 +23,9 @@ export const CompleteScreen = {
     const { page, view } = params;
     const book = ctx.repo.book(ctx.session.bookId);
     const memory = ctx.session.buildMemory(book);
+
+    // 1さつ読み終えたお祝いの音。メダルの登場演出と合わせて鳴らす。
+    playCelebrationSound(ctx);
 
     // 初期状態はCSS側で「すでに見えている」のがデフォルト。
     // ここでは登場演出用のクラスを1フレーム後に付与するだけ。

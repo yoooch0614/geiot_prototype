@@ -1,0 +1,27 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="にじいろピクニックへ、しゅっぱつ！">
+  <defs>
+    <linearGradient id="nijiSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#dff0fb"/><stop offset="1" stop-color="#bfe0f5"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#nijiSky)"/>
+  <g fill="none" stroke-width="22">
+    <path d="M120 430 A 280 280 0 0 1 680 430" stroke="#ef476f"/>
+    <path d="M142 430 A 258 258 0 0 1 658 430" stroke="#f78c3c"/>
+    <path d="M164 430 A 236 236 0 0 1 636 430" stroke="#ffd23f"/>
+    <path d="M186 430 A 214 214 0 0 1 614 430" stroke="#6bbf59"/>
+    <path d="M208 430 A 192 192 0 0 1 592 430" stroke="#4a9fd8"/>
+    <path d="M230 430 A 170 170 0 0 1 570 430" stroke="#9d7ad1"/>
+  </g>
+  <ellipse cx="150" cy="130" rx="62" ry="28" fill="#ffffff" opacity="0.9"/>
+  <ellipse cx="205" cy="140" rx="48" ry="22" fill="#ffffff" opacity="0.9"/>
+  <ellipse cx="650" cy="110" rx="58" ry="26" fill="#ffffff" opacity="0.9"/>
+  <path d="M0 430 Q 400 360 800 430 L800 600 L0 600 Z" fill="#8ec756"/>
+  <g transform="translate(300 355)">
+    <path d="M20 60 L30 22 Q34 8 50 8 L130 8 Q146 8 152 22 L164 60 Z" fill="#ffd23f"/>
+    <path d="M0 60 L184 60 Q196 60 196 74 L196 96 L-12 96 L-12 74 Q-12 60 0 60 Z" fill="#ef476f"/>
+    <circle cx="34" cy="100" r="20" fill="#3f3a36"/><circle cx="34" cy="100" r="8" fill="#fff"/>
+    <circle cx="150" cy="100" r="20" fill="#3f3a36"/><circle cx="150" cy="100" r="8" fill="#fff"/>
+  </g>
+  <text x="400" y="560" text-anchor="middle" font-family="sans-serif" font-size="34" fill="#ffffff" opacity="0.9" font-weight="bold">にじいろピクニック</text>
+</svg>

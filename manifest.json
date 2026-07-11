@@ -8,9 +8,9 @@
   "theme_color": "#6bbf59",
   "icons": [
     {
-      "src": "content/assets/scene-leaf.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "content/assets/%E3%82%A2%E3%82%A4%E3%82%B3%E3%83%B3.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
       "purpose": "any"
     }
   ]

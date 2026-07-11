@@ -7,6 +7,29 @@ export function playAudio(url) {
   new Audio(url).play().catch(() => {});
 }
 
+// 何度も短い間隔で鳴らす効果音（ページめくり音など）用に、Audio要素を1つだけ作って使い回す。
+// サーバーが no-store で配信しているため、毎回 new Audio() すると鳴らすたびに取れ直しになり、
+// めくりアニメーションの短さに読み込みが間に合わず鳴らないことがあった。あらかじめ読み込んで
+// おいた同じ要素を巻き戻して再生するだけにすることで、取得待ちなしで確実に鳴らす。
+export function createRepeatableSound(url) {
+  if (!url) return () => {};
+  const audio = new Audio(url);
+  audio.preload = "auto";
+  audio.load();
+  return () => {
+    try { audio.currentTime = 0; } catch (_) {}
+    audio.play().catch(() => {});
+  };
+}
+
+// 達成の演出音。毎回同じだと飽きるので、このなかからランダムに1つ鳴らす。
+// ミッション達成（Achieve）でも絵本を読み終えたとき（Complete）でも同じものを使う。
+export const CELEBRATION_SOUNDS = ["assets/jajan.mp3", "assets/shinein.mp3", "assets/tousen.mp3"];
+export function playCelebrationSound(ctx) {
+  const sound = CELEBRATION_SOUNDS[Math.floor(Math.random() * CELEBRATION_SOUNDS.length)];
+  playAudio(ctx.repo.assetUrl(sound));
+}
+
 // カメラ（ファイル入力）を開き、選ばれた画像をdataURL化して onPicked に渡す。
 export function openCamera(ctx, onPicked) {
   const input = ctx.els.camera;
@@ -31,6 +54,15 @@ export const stage = (html) => `
 // 背景写真（.scene の1枚目）の上に、gifキャラクターを重ねて表示する<img>を作る。
 export const characterLayer = (url) =>
   url ? `<img class="character" src="${url}" alt="" onerror="this.remove()">` : "";
+
+// 挿絵の「まだ色がついていない部分」（＝画像の透明な部分。くるま・おうち・おはななど）から、
+// こどもが撮った写真がのぞくように、挿絵の下に写真を敷く。
+// どのミッションの写真を敷くかは page.fillFrom にミッションのIDで書く。
+// まだそのミッションを撮っていなければ何も敷かない（＝色のないままの絵に見える）。
+export const fillLayer = (ctx, page) => {
+  const photo = page.fillFrom ? ctx.session.missionPhoto(page.fillFrom) : null;
+  return photo ? `<img class="fill" src="${photo}" alt="">` : "";
+};
 
 // 背景写真の上に、好きな写真を好きな位置・重なり順で自由に重ねるためのレイヤー群を作る。
 // page.layers に配列で並べる。各要素の項目はすべて省略可：

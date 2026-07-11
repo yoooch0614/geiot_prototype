@@ -1,0 +1,95 @@
+{
+  "id": "book-niji",
+  "title": "にじいろピクニックへ、しゅっぱつ！",
+  "ageRange": "3-6",
+  "cover": "assets/cover-niji.svg",
+  "pages": [
+    {
+      "id": "n1",
+      "type": "story",
+      "text": "あるあさ、うさぎのミミと、くまのポコは、もりのはらっぱへ ぴくにっくに いくことにしました。「おべんとうをもって、しゅっぱつしよう！」",
+      "image": "assets/niji/p1.png"
+    },
+    {
+      "id": "nm1",
+      "type": "mission",
+      "text": "ところが、ふたりがのるくるまは、まだまっしろです。「これでは、どのくるまが、ぼくたちのくるまか、わからないよ。」",
+      "prompt": "どんなくるまで、おでかけしたい？ すきないろやもようを みつけて、しゃしんをとろう！",
+      "doneLabel": "とってみよう！",
+      "diaryCaption": "きみだけの くるま、できたよ！",
+      "developmentDomains": [
+        "色",
+        "もよう"
+      ],
+      "image": "assets/niji/p2.png"
+    },
+    {
+      "id": "n2",
+      "type": "story",
+      "text": "「わあ、すてきなくるま！ こんなくるま、みたことないよ！」",
+      "image": "assets/niji/p3.png",
+      "fillFrom": "nm1"
+    },
+    {
+      "id": "n3",
+      "type": "story",
+      "text": "ミミとポコは、かんせいしたくるまにのって しゅっぱつしました。",
+      "image": "assets/niji/p4.png",
+      "fillFrom": "nm1"
+    },
+    {
+      "id": "nm2",
+      "type": "mission",
+      "text": "しばらくはしると、ちいさなまちにつきました。ところが、まちのいえは、かべもやねもまっしろです。まちのひとたちはこまっています。",
+      "prompt": "このおうちには、どんなかべや やねが にあうかな？ おもしろいもようを みつけて、しゃしんをとろう！",
+      "doneLabel": "とってみよう！",
+      "diaryCaption": "まちのおうち、すてきになったよ！",
+      "developmentDomains": [
+        "もよう",
+        "形"
+      ],
+      "image": "assets/niji/p5.png",
+      "fillFrom": "nm1"
+    },
+    {
+      "id": "n4",
+      "type": "story",
+      "text": "「わあ、すてきなおうち！ きみがつくってくれたおうちなら、すぐにみつけられるよ！」まちのひとたちはよろこびました。",
+      "image": "assets/niji/p6.png",
+      "fillFrom": "nm2"
+    },
+    {
+      "id": "n5",
+      "type": "story",
+      "text": "ミミとポコはまちをでて、はしをわたり、おおきなきのある はらっぱへ むかいました。",
+      "image": "assets/niji/p7.png",
+      "fillFrom": "nm1"
+    },
+    {
+      "id": "nm3",
+      "type": "mission",
+      "text": "はらっぱには、たくさんのおはながありました。けれども、おはなにはいろがありません。ちょうちょのはねも、まっしろです。",
+      "prompt": "おはなや ちょうちょに、どんないろを あげたい？ きれいだとおもういろやもようを、しゃしんにとろう！",
+      "doneLabel": "とってみよう！",
+      "diaryCaption": "きみだけの おはなと ちょうちょ！",
+      "developmentDomains": [
+        "色",
+        "自然"
+      ],
+      "image": "assets/niji/p8.png"
+    },
+    {
+      "id": "n6",
+      "type": "story",
+      "text": "「わあ！ きみだけの、おはなとちょうちょだ！」はらっぱには、いろとりどりのおはながさき、ちょうちょがたのしそうにとびはじめました。",
+      "image": "assets/niji/p9.png",
+      "fillFrom": "nm3"
+    },
+    {
+      "id": "nend",
+      "type": "end",
+      "text": "くるまも、おうちも、おはなも、ちょうちょも、きみがみつけたいろでいっぱい。せかいにひとつだけの、にじいろぴくにっくが かんせいしました。",
+      "image": "assets/niji/p1.png"
+    }
+  ]
+}
