@@ -5,10 +5,10 @@ export const ModeScreen = {
         <h1 class="brand">そとであそぼ！<br>えほん</h1>
         <div class="mode-grid">
           <button class="mode-card mode-card--child" data-go="child">
-            <span class="mode-emoji">🧒</span><span>こども</span>
+            <span>こども</span>
           </button>
           <button class="mode-card mode-card--parent" data-go="parent">
-            <span class="mode-emoji">👨‍👩‍👧</span><span>おうちのひと</span>
+            <span>おうちのひと</span>
           </button>
         </div>
       </div>`;
