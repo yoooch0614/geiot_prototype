@@ -15,7 +15,7 @@ export const AchieveScreen = {
         </div>
         <div class="sticker" aria-hidden="true"></div>
         <p class="lead">やったね！</p>
-      </div>`);
+      </div>`;
   },
   mount(ctx, _params, root) {
     const layer = root.querySelector("[data-confetti]");
