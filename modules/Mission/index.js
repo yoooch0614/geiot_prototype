@@ -13,9 +13,8 @@ export const MissionScreen = {
         </div>
         <p class="lead">${esc(page.text)}</p>
         <p class="prompt">${esc(page.prompt)}</p>
-        <button class="mission-shoot" data-shoot>📷 ${esc(page.doneLabel || "とってみよう！")}</button>
-        <button class="tapdone" data-tap>できた！（しゃしんなし）</button>
-      </div>`);
+        <button class="mission-shoot" data-shoot> ${esc(page.doneLabel || "とってみよう！")}</button>
+      </div>`;
   },
   mount(ctx, { page }, root) {
     playAudio(ctx.repo.assetUrl(page.audio));

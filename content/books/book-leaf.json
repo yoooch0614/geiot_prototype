@@ -57,7 +57,7 @@
     {
       "id": "end",
       "type": "end",
-      "text": "きょうは たくさん あそんだね。また そとで あおうね！",
+      "text": "きょうは たくさん あそんだね。また あおうね！",
       "image": "assets/scene-sunset.svg",
       "audio": "assets/end.mp3"
     }

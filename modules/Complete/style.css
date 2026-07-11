@@ -1,0 +1,259 @@
+.complete {
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 42%, #fff7e0 0%, transparent 65%);
+}
+
+/* ---------- 背景の光の放射 ---------- */
+.complete .rays {
+  position: absolute;
+  top: 42%;
+  left: 50%;
+  width: 480px;
+  height: 480px;
+  transform: translate(-50%, -50%);
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(255, 209, 102, 0.35) 0deg 8deg,
+    transparent 8deg 20deg
+  );
+  border-radius: 50%;
+  pointer-events: none;
+  /* デフォルトは完全に見えている状態 */
+  opacity: 1;
+}
+
+.complete .rays.pop-in {
+  animation: raysIn 0.8s ease-out both,
+    raysSpin 12s linear 0.8s infinite;
+}
+
+@keyframes raysIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+@keyframes raysSpin {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/* ---------- メダル本体 ---------- */
+.medal-wrap {
+  position: relative;
+  width: 120px;
+  height: 140px;
+  margin: 0 auto 8px;
+}
+
+.medal-disc {
+  position: absolute;
+  top: 20px;
+  left: 10px;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffd166, #ff7bac);
+  box-shadow: 0 10px 22px rgba(255, 123, 172, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  /* デフォルトは完全に見えている状態。消える要因を作らない */
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.medal-disc.pop-in {
+  animation: medalDrop 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s;
+}
+
+@keyframes medalDrop {
+  0% {
+    transform: translateY(-40px) scale(0.4);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(4px) scale(1.08);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.medal-inner {
+  width: 66px;
+  height: 66px;
+  clip-path: polygon(
+    50% 6%,
+    61% 38%,
+    92% 38%,
+    66% 58%,
+    76% 88%,
+    50% 70%,
+    24% 88%,
+    34% 58%,
+    8% 38%,
+    39% 38%
+  );
+  background: rgba(255, 255, 255, 0.9);
+}
+
+/* ---------- メダルのリボン（V字の帯） ---------- */
+.medal-tail {
+  position: absolute;
+  top: 0;
+  width: 26px;
+  height: 60px;
+  opacity: 1;
+}
+
+.tail-left {
+  left: 30px;
+  background: #06d6a0;
+  transform-origin: top center;
+  transform: rotate(-18deg);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%);
+}
+
+.tail-right {
+  right: 30px;
+  background: #118ab2;
+  transform-origin: top center;
+  transform: rotate(18deg);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%);
+}
+
+.medal-tail.pop-in {
+  animation: tailDrop 0.5s ease-out 0.15s both;
+}
+
+@keyframes tailDrop {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) rotate(0deg);
+  }
+  to {
+    opacity: 1;
+  }
+}
+/* tail-left / tail-right の回転角は上のベース指定を維持するため、
+   pop-inのkeyframeでは角度を上書きしていません（transformが混在しないよう注意） */
+
+/* ---------- 左右から流れ込むリボン帯 ---------- */
+.ribbon-fly {
+  position: absolute;
+  top: 30%;
+  width: 140px;
+  height: 14px;
+  border-radius: 8px;
+  pointer-events: none;
+  opacity: 0; /* これは一過性の演出なので、出た後は消えたままでよい */
+}
+
+.ribbon-left {
+  left: -160px;
+  background: linear-gradient(90deg, transparent, #ffd166);
+}
+
+.ribbon-right {
+  right: -160px;
+  top: 58%;
+  background: linear-gradient(-90deg, transparent, #ff7bac);
+}
+
+.ribbon-left.pop-in {
+  animation: flyRight 1s ease-out 0.5s both;
+}
+.ribbon-right.pop-in {
+  animation: flyLeft 1s ease-out 0.65s both;
+}
+
+@keyframes flyRight {
+  0% {
+    transform: translateX(0) rotate(-8deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(340px) rotate(-8deg);
+    opacity: 0;
+  }
+}
+@keyframes flyLeft {
+  0% {
+    transform: translateX(0) rotate(8deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-340px) rotate(8deg);
+    opacity: 0;
+  }
+}
+
+/* ---------- テキスト ---------- */
+.complete .lead {
+  font-size: 1.3em;
+  opacity: 1;
+}
+.complete .sub {
+  opacity: 0.85;
+}
+
+.complete .lead.pop-in {
+  animation: leadIn 0.6s ease-out 0.75s both;
+}
+.complete .sub.pop-in {
+  animation: leadIn 0.6s ease-out 0.9s both;
+}
+
+@keyframes leadIn {
+  from {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ---------- つぎへボタン ---------- */
+.complete .next-btn {
+  margin-top: 28px;
+  padding: 14px 32px;
+  font-size: 1.05em;
+  font-weight: bold;
+  color: #fff;
+  background: linear-gradient(135deg, #ffd166, #ff7bac);
+  border: none;
+  border-radius: 999px;
+  box-shadow: 0 6px 16px rgba(255, 123, 172, 0.4);
+  cursor: pointer;
+  opacity: 1;
+  transition: transform 0.15s ease;
+}
+
+.complete .next-btn.pop-in {
+  animation: leadIn 0.6s ease-out 1.05s both;
+}
+
+.complete .next-btn:active {
+  transform: scale(0.95);
+}

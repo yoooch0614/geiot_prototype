@@ -7,7 +7,7 @@ export const PreviewScreen = {
         <p class="lead">これで いい？</p>
         <div class="scene photo"><img src="${dataUrl}" alt="とったしゃしん"></div>
         <div class="preview-actions">
-          <button class="retry" data-retry>🔄 もういちど</button>
+          <button class="retry" data-retry>もういちど</button>
           <button class="mission-shoot" data-keep>✓ これにする</button>
         </div>
       </div>`);
