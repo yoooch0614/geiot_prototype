@@ -1,0 +1,21 @@
+.parent { justify-content: flex-start; padding-top: 64px; }
+.parent-title { font-size: 24px; font-weight: 900; margin: 0 0 4px; }
+.stat-row { display: flex; gap: 14px; }
+.stat {
+  flex: 1; background: #fff; border-radius: 20px; padding: 18px; text-align: center;
+  box-shadow: 0 4px 14px rgba(58,74,63,.08);
+}
+.stat b { display: block; font-size: 40px; color: var(--green); line-height: 1; }
+.stat span { font-size: 13px; color: #7a877e; }
+.note { font-size: 13px; color: #7a877e; background: #f0f6ea; border-radius: 14px; padding: 12px; margin: 0; }
+.log-title { font-size: 17px; margin: 4px 0; }
+.log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.log-row { display: flex; gap: 10px; align-items: center; background: #fff; border-radius: 14px; padding: 12px 14px; font-size: 14px; }
+.log-date { color: #a2ada4; font-size: 12px; }
+.log-book { font-weight: 700; flex: 1; }
+.log-count { color: var(--green); font-weight: 700; }
+.empty { color: #a2ada4; text-align: center; padding: 24px; line-height: 1.8; }
+.ghost {
+  margin-top: 8px; font-family: inherit; font-size: 14px; color: #a2ada4;
+  background: none; border: 1px dashed #cdd6ce; border-radius: 12px; padding: 10px; cursor: pointer;
+}

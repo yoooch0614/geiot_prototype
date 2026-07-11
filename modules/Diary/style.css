@@ -1,0 +1,9 @@
+.diary { padding-top: 24px; }
+.diary-cover { background: var(--green); color: #fff; border-radius: 22px; padding: 22px; text-align: center; }
+.diary-cover h2 { margin: 6px 0 0; font-size: 22px; }
+.diary-date { font-size: 14px; opacity: .9; }
+.diary-entry { background: #fff; border-radius: 20px; padding: 12px; box-shadow: 0 4px 14px rgba(58,74,63,.08); }
+.diary-entry img { width: 100%; border-radius: 14px; display: block; }
+.diary-caption { font-size: 18px; font-weight: 700; text-align: center; margin: 10px 0 4px; }
+.hint { text-align: center; line-height: 1.9; }
+.hint code { display: inline-block; background: #2f3a32; color: #eafbe2; padding: 10px 16px; border-radius: 12px; font-size: 15px; margin: 8px 0; }

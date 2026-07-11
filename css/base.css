@@ -1,11 +1,3 @@
-@import "../modules/shared/style.css";
-@import "../modules/shared/reader.css";
-@import "../modules/Mode/style.css";
-@import "../modules/Pin/style.css";
-@import "../modules/Parent/style.css";
-@import "../modules/Home/style.css";
-@import "../modules/Diary/style.css";
-
 :root {
   --paper:  #f3f7ee;
   --card:   #ffffff;
@@ -29,7 +21,6 @@ html, body {
 .app {
   max-width: 520px; min-height: 100dvh; margin: 0 auto;
 }
-
 .screen {
   min-height: 100dvh;
   padding: max(18px, env(safe-area-inset-top)) 18px max(18px, env(safe-area-inset-bottom));
@@ -38,6 +29,5 @@ html, body {
 .screen.center { justify-content: center; align-items: center; text-align: center; }
 .page--in { animation: pageIn 420ms cubic-bezier(0.22,1,0.36,1); }
 @keyframes pageIn { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: none; } }
-
 @media (prefers-reduced-motion: reduce) { .page--in, .sparkle, .sticker { animation: none; } }
 :focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; }
