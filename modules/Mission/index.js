@@ -9,8 +9,7 @@ export const MissionScreen = {
         <div class="scene"><img src="${img}" alt="" onerror="this.style.opacity=0"></div>
         <p class="lead">${esc(page.text)}</p>
         <p class="prompt">${esc(page.prompt)}</p>
-        <button class="mission-shoot" data-shoot>📷 ${esc(page.doneLabel || "とってみよう！")}</button>
-        <button class="tapdone" data-tap>できた！（しゃしんなし）</button>
+        <button class="mission-shoot" data-shoot> ${esc(page.doneLabel || "とってみよう！")}</button>
       </div>`;
   },
   mount(ctx, { page }, root) {
