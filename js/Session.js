@@ -7,11 +7,19 @@
  * ・完成した絵本日記（思い出）＝ギャラリー
  * ・外で活動した日（健全なストリーク：没収しない・責めない）
  *
- * 進捗のメタ情報は localStorage に保存する。
- * 写真そのものはメモリ内だけ（リロードで消える）。永続化は後回し（IndexedDB）。
+ * 保存先は2段構え：
+ *   - localStorage … 軽いメタ情報（活動日・親レポート・PIN）
+ *   - IndexedDB   … 写真を含む大きいデータ（思い出・読みかけの本）
+ *     → リロードしても、思い出ギャラリーと撮った写真は消えない。
+ *     → 読みかけの本は「つづきから」再開できる（撮った写真も残る）。
  */
+import { Storage } from "./Storage.js";
+
 const STORAGE_KEY = "ehon.session.v2";
-const DEFAULT_PIN = "0000"; // おうちのひとゲート（プロト用の固定PIN）
+const MEMORIES_KEY = "memories.v1"; // IndexedDB: 完成した絵本日記（写真つき）
+const RUN_KEY = "run.v1";           // IndexedDB: 読みかけの本（ページ位置＋達成ミッション）
+const MAX_MEMORIES = 30;            // 端末容量の保険。古い思い出から順に押し出す
+const DEFAULT_PIN = "0000";         // おうちのひとゲート（プロト用の固定PIN）
 
 function today() {
   return new Date().toISOString().slice(0, 10); // YYYY-MM-DD
@@ -19,19 +27,33 @@ function today() {
 
 export class Session {
   constructor() {
-    // --- メモリ内（保存しない）---
+    // --- メモリ内 ---
     this.mode = null;         // 'child' | 'parent'
     this.bookId = null;
     this.pageIndex = 0;
     this.runMissions = [];    // 今回のプレイの達成 [{missionId, photoUrl, caption, missionText}]
-    this.memories = [];       // 完成した絵本日記（写真つき・当セッション限り）
+    this.memories = [];       // 完成した絵本日記（写真つき・IndexedDBから復元される）
 
-    // --- 保存する（メタのみ）---
+    // --- localStorage（メタのみ）---
     this.activityDays = new Set(); // 外で活動した日
     this.memoryLog = [];           // [{id, bookTitle, date, count}] 親レポート用（写真なし）
     this.pin = DEFAULT_PIN;
 
+    // --- IndexedDBに保存中の「読みかけの本」 ---
+    this._savedRun = null;    // {bookId, pageIndex, missions}
+    this._runTimer = null;
+
     this._restore();
+  }
+
+  // ── 起動時にIndexedDBから復元（app.jsのboot()でawaitする）──
+  async restore() {
+    const [memories, run] = await Promise.all([
+      Storage.get(MEMORIES_KEY),
+      Storage.get(RUN_KEY),
+    ]);
+    if (Array.isArray(memories)) this.memories = memories;
+    if (run && run.bookId) this._savedRun = run;
   }
 
   // ── モード ─────────────────────────
@@ -39,14 +61,28 @@ export class Session {
   checkPin(input) { return String(input) === String(this.pin); }
 
   // ── 絵本プレイ ───────────────────────
+  // 同じ本の「読みかけ」が保存されていれば、そこから再開する
+  // （リロードや本棚に戻った後でも、撮った写真とページ位置が残る）。
   startBook(bookId) {
     this.bookId = bookId;
-    this.pageIndex = 0;
-    this.runMissions = [];
+    if (this.hasResume(bookId)) {
+      this.pageIndex = this._savedRun.pageIndex ?? 0;
+      this.runMissions = this._savedRun.missions ?? [];
+    } else {
+      this.pageIndex = 0;
+      this.runMissions = [];
+    }
+    this._saveRun();
   }
-  goTo(i) { this.pageIndex = i; }
-  next(count) { if (this.pageIndex < count - 1) this.pageIndex++; }
-  prev() { if (this.pageIndex > 0) this.pageIndex--; }
+  // この本に「つづき」があるか（本棚の「つづきから」バッジにも使う）
+  hasResume(bookId) {
+    const r = this._savedRun;
+    return !!(r && r.bookId === bookId &&
+      ((r.missions?.length ?? 0) > 0 || (r.pageIndex ?? 0) > 0));
+  }
+  goTo(i) { this.pageIndex = i; this._saveRunSoon(); }
+  next(count) { if (this.pageIndex < count - 1) { this.pageIndex++; this._saveRunSoon(); } }
+  prev() { if (this.pageIndex > 0) { this.pageIndex--; this._saveRunSoon(); } }
 
   // ── ミッション達成 ─────────────────────
   // photoUrl が null なら「タップ達成」（写真なし）
@@ -56,6 +92,7 @@ export class Session {
     this.runMissions.push({ missionId, missionText, caption, photoUrl, missionImage, missionCharacter });
     this.activityDays.add(today()); // 外で活動した日として記録
     this._save();
+    this._saveRun(); // 写真はすぐIndexedDBへ（リロードしても消えない）
   }
   isMissionDone(missionId) {
     return this.runMissions.some((m) => m.missionId === missionId);
@@ -94,7 +131,8 @@ export class Session {
       date: today(),
       entries,
     };
-    this.memories.unshift(memory);               // ギャラリー（写真つき・メモリ）
+    this.memories.unshift(memory);               // ギャラリー（写真つき）
+    if (this.memories.length > MAX_MEMORIES) this.memories.length = MAX_MEMORIES;
     this.memoryLog.unshift({                      // 親レポート（メタのみ・保存）
       id: memory.id,
       bookTitle: book.title,
@@ -102,6 +140,8 @@ export class Session {
       count: this.runMissions.length,             // 親レポートは達成ミッション数のまま
     });
     this._save();
+    Storage.set(MEMORIES_KEY, this.memories);     // 思い出をIndexedDBへ
+    this._clearRun();                             // 読み終えたので「つづき」は消す
     return memory;
   }
 
@@ -121,9 +161,33 @@ export class Session {
     this.memories = [];
     this.runMissions = [];
     this._save();
+    Storage.remove(MEMORIES_KEY);
+    this._clearRun();
   }
 
   // ── 保存 / 復元 ───────────────────────
+  // 「読みかけの本」をIndexedDBへ保存する。
+  // ページをめくるたびに写真ごと書き直すのはもったいないので、
+  // ページ移動は少し待ってからまとめて保存する（_saveRunSoon）。
+  _saveRun() {
+    clearTimeout(this._runTimer);
+    this._savedRun = {
+      bookId: this.bookId,
+      pageIndex: this.pageIndex,
+      missions: this.runMissions,
+    };
+    Storage.set(RUN_KEY, this._savedRun);
+  }
+  _saveRunSoon() {
+    clearTimeout(this._runTimer);
+    this._runTimer = setTimeout(() => this._saveRun(), 300);
+  }
+  _clearRun() {
+    clearTimeout(this._runTimer);
+    this._savedRun = null;
+    Storage.remove(RUN_KEY);
+  }
+
   _save() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({

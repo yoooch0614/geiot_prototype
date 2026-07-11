@@ -1,7 +1,11 @@
 export const HomeScreen = {
   render() {
     return `
-      <div class="screen center">
+      <div class="screen center screen--sunny">
+        <div class="sunny-sky" aria-hidden="true">
+          <span class="sunny-sun"></span>
+          <span class="sunny-cloud sunny-cloud--1"></span>
+        </div>
         <button class="back" data-back>‹</button>
         <h1 class="brand">なにして あそぶ？</h1>
         <div class="mode-grid">

@@ -29,11 +29,14 @@ function bookCard(ctx, b, { labelType = "age" } = {}) {
   const badgeText = labelType === "date"
     ? esc(b.createdAt || "")
     : `${esc(age)}さい`;
+  // 読みかけの本には「つづきから」バッジを出す（こどもの本棚のみ）
+  const resume = labelType === "age" && ctx.session.hasResume?.(b.id);
   return `
     <button class="book-card" data-book="${b.id}">
       <div class="book-cover">
         <img src="${ctx.repo.assetUrl(cover)}" alt="" draggable="false">
         <span class="book-age-badge">${badgeText}</span>
+        ${resume ? `<span class="book-resume-badge">つづきから</span>` : ""}
       </div>
       <span class="book-title">${esc(title)}</span>
     </button>`;

@@ -1,11 +1,39 @@
-.pin-label { font-size: 20px; font-weight: 700; }
-.pin-dots { font-size: 26px; letter-spacing: 4px; color: var(--green); min-height: 34px; }
-.pin-dots.shake { animation: shake 400ms; color: var(--coral); }
-@keyframes shake { 0%,100%{transform:none} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
-.keypad { display: grid; grid-template-columns: repeat(3, 72px); gap: 12px; }
-.key {
-  font-family: inherit; font-size: 26px; font-weight: 700; color: var(--ink);
-  background: #fff; border: 2px solid #e5efdd; border-radius: 18px; padding: 16px 0; cursor: pointer;
+/* おうちのひとゲート（PIN） */
+.pin-card {
+  background: #fff; border-radius: var(--radius);
+  padding: 26px 26px 18px;
+  box-shadow: var(--shadow);
+  display: flex; flex-direction: column; align-items: center; gap: 16px;
 }
-.key:active { background: #eef8e9; }
-.pin-hint { font-size: 13px; color: #a2ada4; }
+.pin-label { font-size: 19px; font-weight: 700; margin: 0; }
+
+.pin-dots { display: flex; gap: 14px; min-height: 18px; align-items: center; }
+.pin-dot {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 3px solid #cfe3c6; background: transparent;
+  transition: background 140ms, border-color 140ms, transform 140ms;
+}
+.pin-dot.is-filled {
+  background: var(--green); border-color: var(--green);
+  transform: scale(1.12);
+}
+.pin-dots.shake { animation: shake 400ms; }
+.pin-dots.shake .pin-dot.is-filled { background: var(--coral); border-color: var(--coral); }
+@keyframes shake { 0%,100%{transform:none} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+
+.keypad { display: grid; grid-template-columns: repeat(3, 76px); gap: 12px; }
+.key {
+  font-family: inherit; font-size: 26px; font-weight: 900; color: var(--ink);
+  background: #f4f9f0; border: none; border-radius: 18px; padding: 16px 0;
+  box-shadow: 0 4px 0 #dcead3; cursor: pointer;
+  transition: transform 100ms, box-shadow 100ms, background 100ms;
+}
+.key:active {
+  background: #eef8e9;
+  transform: translateY(3px); box-shadow: 0 1px 0 #dcead3;
+}
+.pin-hint { font-size: 13px; color: #a2ada4; margin: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pin-dots.shake { animation: none; }
+}

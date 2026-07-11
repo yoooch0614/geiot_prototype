@@ -29,6 +29,7 @@ function go(name, params = {}) {
   if (!screen) return;
   currentScreen?.unmount?.(ctx);
   root.innerHTML = screen.render(ctx, params);
+  root.querySelector(".screen")?.classList.add("page--in"); // 画面切り替えの入場アニメを全画面に統一
   screen.mount?.(ctx, params, root);
   currentScreen = screen;
   root.scrollTop = 0;
@@ -57,7 +58,9 @@ function advance() {
 
 async function boot() {
   try {
-    await repo.load();
+    // コンテンツの読み込みと、保存済みデータ（思い出・読みかけの本）の復元を並行で待つ。
+    // session.restore() は失敗しても例外を出さない（保存が効かないだけで動く）。
+    await Promise.all([repo.load(), session.restore()]);
   } catch (err) {
     showServerHint();
     return;

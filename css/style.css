@@ -49,3 +49,35 @@ html, body {
 
 @media (prefers-reduced-motion: reduce) { .page--in, .sparkle, .sticker { animation: none; } }
 :focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; }
+
+/* ── 起動スプラッシュ ─────────────────────
+   index.html に静的に書いてあり、最初の画面が描画されると消える。
+   白画面のまま待たせないためのもの。 */
+.splash { gap: 20px; }
+.splash-sun {
+  width: 76px; height: 76px; border-radius: 50%;
+  background: radial-gradient(circle at 36% 32%, #fff3b0 0%, var(--yellow) 65%);
+  box-shadow: 0 0 0 12px rgba(255, 210, 63, .22), 0 0 0 26px rgba(255, 210, 63, .10);
+  animation: splash-pop 600ms cubic-bezier(.34, 1.56, .64, 1) both;
+}
+.splash-dots { display: flex; gap: 8px; }
+.splash-dots i {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--green); opacity: .4;
+  animation: splash-bounce 1s ease-in-out infinite;
+}
+.splash-dots i:nth-child(2) { animation-delay: .15s; }
+.splash-dots i:nth-child(3) { animation-delay: .3s; }
+@keyframes splash-pop { from { opacity: 0; scale: .5; } to { opacity: 1; scale: 1; } }
+@keyframes splash-bounce {
+  0%, 100% { translate: 0 0; opacity: .4; }
+  50% { translate: 0 -6px; opacity: 1; }
+}
+
+/* ── 全体の仕上げ ───────────────────── */
+/* iOSでボタン連打時に文字が選択されて青くなるのを防ぐ */
+button { -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .splash-sun, .splash-dots i { animation: none; }
+}

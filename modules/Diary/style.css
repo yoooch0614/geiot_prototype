@@ -1,5 +1,9 @@
-.diary { padding-top: 24px; }
-/* 絵本の表紙をぼかして敷く背景。内容はその上に浮かせる */
+/* 絵本日記 ── スクラップブック（アルバム）風。
+   写真と挿絵を白フチの台紙にのせ、マスキングテープでとめたように見せる。 */
+
+.diary { padding-top: 24px; gap: 26px; }
+
+/* ページ背景にはその絵本の表紙をぼかして敷く。内容はその上に浮かせる */
 .diary-bg {
   position: absolute; inset: 0; z-index: 0;
   background-size: cover; background-position: center;
@@ -8,6 +12,60 @@
   pointer-events: none;
 }
 .diary > :not(.diary-bg) { position: relative; z-index: 1; }
+
+/* 表紙カード：日付は白いピルで */
+.diary-cover {
+  background: linear-gradient(180deg, #85cf72, var(--green));
+  color: #fff; border-radius: 22px; padding: 22px; text-align: center;
+  box-shadow: 0 4px 0 rgba(79, 154, 69, .6), var(--shadow);
+}
+.diary-cover h2 { margin: 10px 0 0; font-size: 22px; }
+.diary-date {
+  display: inline-block;
+  font-size: 13px; font-weight: 900; color: var(--green);
+  background: #fff; padding: 5px 14px; border-radius: 999px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .12);
+}
+
+/* 1枚の台紙。左右こうごに少しかたむけて、上をテープでとめる */
+.diary-entry {
+  position: relative;
+  background: #fff; border-radius: 20px; padding: 12px;
+  box-shadow: 0 4px 14px rgba(58, 74, 63, .12);
+  animation: diary-rise 480ms cubic-bezier(.22, 1, .36, 1) both;
+}
+.diary-entry:nth-child(odd)  { rotate: -1.1deg; }
+.diary-entry:nth-child(even) { rotate: 1.1deg; }
+.diary-entry::before {
+  content: "";
+  position: absolute; top: -11px; left: 50%;
+  width: 92px; height: 24px;
+  translate: -50% 0; rotate: -3deg;
+  background: rgba(255, 210, 63, .8);
+  border-radius: 3px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .12);
+}
+.diary-entry:nth-child(even)::before {
+  rotate: 3deg;
+  background: rgba(255, 122, 92, .55);
+}
+
+/* 下の台紙ほど少し遅れてふわっと現れる */
+.diary-entry:nth-child(2) { animation-delay: 60ms; }
+.diary-entry:nth-child(3) { animation-delay: 120ms; }
+.diary-entry:nth-child(4) { animation-delay: 180ms; }
+.diary-entry:nth-child(5) { animation-delay: 240ms; }
+.diary-entry:nth-child(6) { animation-delay: 300ms; }
+.diary-entry:nth-child(7) { animation-delay: 360ms; }
+.diary-entry:nth-child(n+8) { animation-delay: 420ms; }
+@keyframes diary-rise {
+  from { opacity: 0; translate: 0 22px; }
+  to   { opacity: 1; translate: 0 0; }
+}
+
+.diary-entry img { width: 100%; border-radius: 14px; display: block; }
+.diary-caption { font-size: 18px; font-weight: 700; text-align: center; margin: 12px 0 4px; }
+
 /* 「しゃしんなし」の枠にも表紙を敷き、ラベルは白帯で読めるようにする */
 .diary .no-photo { background-size: cover; background-position: center; border-radius: 14px; }
 .no-photo-label {
@@ -16,11 +74,7 @@
   padding: 8px 16px; border-radius: 999px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, .15);
 }
-.diary-cover { background: var(--green); color: #fff; border-radius: 22px; padding: 22px; text-align: center; }
-.diary-cover h2 { margin: 6px 0 0; font-size: 22px; }
-.diary-date { font-size: 14px; opacity: .9; }
-.diary-entry { background: #fff; border-radius: 20px; padding: 12px; box-shadow: 0 4px 14px rgba(58,74,63,.08); }
-.diary-entry img { width: 100%; border-radius: 14px; display: block; }
-.diary-caption { font-size: 18px; font-weight: 700; text-align: center; margin: 10px 0 4px; }
-.hint { text-align: center; line-height: 1.9; }
-.hint code { display: inline-block; background: #2f3a32; color: #eafbe2; padding: 10px 16px; border-radius: 12px; font-size: 15px; margin: 8px 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .diary-entry { animation: none; }
+}

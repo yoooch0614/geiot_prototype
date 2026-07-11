@@ -1,0 +1,100 @@
+/* タイトル画面 ── 絵本の表紙のように、空とおかの上にタイトルを置く。
+   .screen--sunny（空・太陽・雲）は HOME でも共用する。 */
+
+.screen--sunny {
+  overflow: hidden;
+  background: linear-gradient(180deg, #d9efff 0%, #ecf7ff 34%, rgba(236, 247, 255, 0) 62%);
+}
+/* .back は position:absolute のままにしたいので除外する */
+.screen--sunny > :not(.sunny-sky):not(.title-hills):not(.back) { position: relative; z-index: 2; }
+
+.sunny-sky { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+.sunny-sun {
+  position: absolute; top: 7%; right: 10%;
+  width: 84px; height: 84px; border-radius: 50%;
+  background: radial-gradient(circle at 36% 32%, #fff3b0 0%, var(--yellow) 65%);
+  box-shadow: 0 0 0 14px rgba(255, 210, 63, .22), 0 0 0 30px rgba(255, 210, 63, .10);
+  animation: sunny-breathe 4.5s ease-in-out infinite alternate;
+}
+@keyframes sunny-breathe {
+  from { box-shadow: 0 0 0 14px rgba(255, 210, 63, .22), 0 0 0 30px rgba(255, 210, 63, .10); }
+  to   { box-shadow: 0 0 0 20px rgba(255, 210, 63, .26), 0 0 0 40px rgba(255, 210, 63, .12); }
+}
+
+/* 雲：白いだ円のかたまり。ゆっくり左右にただよう */
+.sunny-cloud {
+  position: absolute;
+  width: 110px; height: 34px; border-radius: 999px;
+  background: rgba(255, 255, 255, .95);
+  box-shadow: 0 4px 10px rgba(109, 157, 197, .18);
+  animation: sunny-drift 9s ease-in-out infinite alternate;
+}
+.sunny-cloud::before,
+.sunny-cloud::after {
+  content: ""; position: absolute; bottom: 8px;
+  border-radius: 50%; background: inherit;
+}
+.sunny-cloud::before { left: 18px;  width: 44px; height: 44px; }
+.sunny-cloud::after  { right: 20px; width: 34px; height: 34px; }
+.sunny-cloud--1 { top: 12%; left: 6%; }
+.sunny-cloud--2 { top: 26%; right: -8px; transform: scale(.72); animation-delay: 2.4s; opacity: .9; }
+@keyframes sunny-drift {
+  from { translate: 0 0; }
+  to   { translate: 18px 0; }
+}
+
+/* おか：画面の下に大小2つの緑の丘。ねこはその上を歩く */
+.title-hills { position: absolute; left: 0; right: 0; bottom: 0; height: 30dvh; pointer-events: none; z-index: 1; }
+.title-hill { position: absolute; border-radius: 50%; }
+.title-hill--far {
+  left: -30%; right: -10%; bottom: -34dvh; height: 52dvh;
+  background: linear-gradient(180deg, #b6e29e, #9ed683);
+}
+.title-hill--near {
+  left: -12%; right: -32%; bottom: -40dvh; height: 56dvh;
+  background: linear-gradient(180deg, #8fce74, #79bf5f);
+  box-shadow: inset 0 10px 0 rgba(255, 255, 255, .25);
+}
+.title-cat {
+  position: absolute; bottom: 5dvh; right: 14%;
+  height: min(15dvh, 110px);
+  mix-blend-mode: multiply; /* 白背景gifを丘になじませる（readerと同じ手法） */
+  animation: cat-bob 2.6s ease-in-out infinite alternate;
+}
+@keyframes cat-bob {
+  from { translate: 0 0; }
+  to   { translate: 0 -6px; }
+}
+
+/* タイトルの白い表紙プレート */
+.title-plate {
+  background: rgba(255, 255, 255, .94);
+  border-radius: 26px;
+  padding: 22px 30px 24px;
+  box-shadow: 0 4px 0 rgba(107, 191, 89, .25), var(--shadow);
+  rotate: -1.2deg;
+  animation: plate-pop 520ms cubic-bezier(.34, 1.56, .64, 1) both;
+}
+.title-plate .brand { margin: 0; }
+.title-eyebrow {
+  display: block;
+  font-size: 13px; font-weight: 700; letter-spacing: .14em;
+  color: var(--coral); margin-bottom: 6px;
+}
+@keyframes plate-pop {
+  from { opacity: 0; scale: .82; }
+  to   { opacity: 1; scale: 1; }
+}
+
+.title-ask { font-size: 16px; font-weight: 700; color: #5d6c63; margin: 8px 0 0; }
+
+/* こども/おうちのひと ボタンは押し込み感を足して統一（big-nextと同じ文法） */
+.title-screen .mode-card--child  { box-shadow: 0 6px 0 #4f9a45, var(--shadow); }
+.title-screen .mode-card--parent { box-shadow: 0 6px 0 #4f7ba3, var(--shadow); }
+.title-screen .mode-card:active  { transform: translateY(4px) scale(.98); }
+.title-screen .mode-card--child:active  { box-shadow: 0 2px 0 #4f9a45, var(--shadow); }
+.title-screen .mode-card--parent:active { box-shadow: 0 2px 0 #4f7ba3, var(--shadow); }
+
+@media (prefers-reduced-motion: reduce) {
+  .sunny-sun, .sunny-cloud, .title-cat, .title-plate { animation: none; }
+}

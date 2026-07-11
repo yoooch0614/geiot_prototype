@@ -4,21 +4,24 @@ export const PinScreen = {
     return `
       <div class="screen center">
         <button class="back" data-back>‹ もどる</button>
-        <p class="pin-label">あんしょうばんごうを いれてね</p>
-        <div class="pin-dots" id="pin-dots"></div>
-        <div class="keypad">
-          ${keys.map((k) => k === ""
-            ? `<span></span>`
-            : `<button class="key" data-key="${k}">${k}</button>`).join("")}
+        <div class="pin-card">
+          <p class="pin-label">あんしょうばんごうを いれてね</p>
+          <div class="pin-dots" id="pin-dots"></div>
+          <div class="keypad">
+            ${keys.map((k) => k === ""
+              ? `<span></span>`
+              : `<button class="key" data-key="${k}">${k}</button>`).join("")}
+          </div>
+          <p class="pin-hint">（プロト用: 0000）</p>
         </div>
-        <p class="pin-hint">（プロト用: ${"0000"}）</p>
       </div>`;
   },
   mount(ctx, _p, root) {
     let buf = "";
     const dots = root.querySelector("#pin-dots");
     const draw = () => {
-      dots.textContent = "● ".repeat(buf.length) + "○ ".repeat(4 - buf.length);
+      dots.innerHTML = Array.from({ length: 4 }, (_, i) =>
+        `<span class="pin-dot${i < buf.length ? " is-filled" : ""}"></span>`).join("");
     };
     draw();
     root.querySelector("[data-back]").onclick = () => ctx.go("MODE");
