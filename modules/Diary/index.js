@@ -34,10 +34,17 @@ export const DiaryScreen = {
           <h2>${esc(memory.bookTitle)} の きろく</h2>
         </div>
         ${entries}
-        <button class="big-next" data-close>${fromPlay ? "とじる" : "‹ もどる"}</button>
+        <button class="big-next" data-close>本棚にもどる</button>
       </div>`;
   },
-  mount(ctx, { fromPlay }, root) {
-    root.querySelector("[data-close]").onclick = () => ctx.go("GALLERY");
+  mount(ctx, params = {}, root) {
+    const { view } = params;
+    root.querySelector("[data-close]").onclick = () => {
+      if (view === "memories") {
+        ctx.go("SELECT", { view: "memories" });
+      } else {
+        ctx.go("SELECT");
+      }
+    };
   },
 };

@@ -15,7 +15,7 @@ function padPage(books) {
   return padded;
 }
 
-function bookCard(ctx, b) {
+function bookCard(ctx, b, { labelType = "age" } = {}) {
   if (!b) {
     return `
       <div class="book-card book-card--ghost" aria-hidden="true">
@@ -23,47 +23,79 @@ function bookCard(ctx, b) {
         <span class="book-title book-title--ghost">おたのしみに</span>
       </div>`;
   }
+  const cover = ctx.repo.book(b.id)?.cover ?? b.cover;
+  const age = ctx.repo.book(b.id)?.ageRange ?? b.ageRange;
+  const title = ctx.repo.book(b.id)?.title ?? b.title;
+  const badgeText = labelType === "date"
+    ? esc(b.createdAt || "")
+    : `${esc(age)}さい`;
   return `
     <button class="book-card" data-book="${b.id}">
       <div class="book-cover">
-        <img src="${ctx.repo.assetUrl(b.cover)}" alt="" draggable="false">
-        <span class="book-age-badge">${esc(b.ageRange)}さい</span>
+        <img src="${ctx.repo.assetUrl(cover)}" alt="" draggable="false">
+        <span class="book-age-badge">${badgeText}</span>
       </div>
-      <span class="book-title">${esc(b.title)}</span>
+      <span class="book-title">${esc(title)}</span>
     </button>`;
 }
 
 // 本を2冊ずつ棚の段に分ける
-function shelfRows(ctx, books) {
+function shelfRows(ctx, books, labelType) {
   const rows = chunk(padPage(books), 2);
   return rows
     .map((row, i) => `
-      <div class="shelf-row">${row.map((b) => bookCard(ctx, b)).join("")}</div>
+      <div class="shelf-row">${row.map((b) => bookCard(ctx, b, { labelType })).join("")}</div>
       ${i < rows.length - 1 ? '<div class="shelf-board"></div>' : ""}`)
     .join("");
 }
 
-function shelfPage(ctx, books) {
+function shelfPage(ctx, books, labelType) {
   return `
     <div class="shelf-page">
       <div class="shelf">
         <div class="shelf-awning"><span class="shelf-emblem">📖</span></div>
         <span class="shelf-deco shelf-deco--plant" aria-hidden="true">🌱</span>
         <span class="shelf-deco shelf-deco--books" aria-hidden="true">📚</span>
-        <div class="shelf-body">${shelfRows(ctx, books)}</div>
+        <div class="shelf-body">${shelfRows(ctx, books, labelType)}</div>
         <div class="shelf-base"></div>
       </div>
     </div>`;
 }
 
+function parentBooks(ctx) {
+  return ctx.session.memories
+    .map((memory) => ({
+      id: memory.bookId,
+      title: memory.bookTitle,
+      createdAt: memory.date,
+      ageRange: ctx.repo.book(memory.bookId)?.ageRange ?? "",
+      cover: ctx.repo.book(memory.bookId)?.cover ?? null,
+    }))
+    .filter((book) => book.id);
+}
+
 export const SelectScreen = {
-  render(ctx) {
-    const pages = chunk(ctx.repo.books, BOOKS_PER_SHELF);
+  render(ctx, params = {}) {
+    const isMemoryView = params.view === "memories";
+    const isParent = ctx.session.mode === "parent" || isMemoryView;
+    const books = isParent ? parentBooks(ctx) : ctx.repo.books;
+    const pages = books.length ? chunk(books, BOOKS_PER_SHELF) : [];
     const dots = pages
       .map((_, i) => `<button class="shelf-dot" data-dot="${i}" aria-label="${i + 1}ばんめの たな"></button>`)
       .join("");
+    const parentActions = isParent && !isMemoryView ? `
+      <div class="select-toolbar">
+        <button class="select-action" data-go="PARENT">活動履歴</button>
+        <button class="select-action" data-go="ANALYSIS">子どもの特性分析</button>
+      </div>` : "";
+    const emptyState = isParent && books.length === 0 ? `
+      <div class="select-empty">
+        <p>まだ こどもが つくった えほんは ありません。</p>
+        <p>えほんを よんで できたら、ここに すぐ あらわれます。</p>
+      </div>` : "";
+    const badgeType = isMemoryView ? "date" : "age";
     return `
-      <div class="screen screen--select">
+      <div class="screen screen--select${isParent ? " screen--select--memory" : ""}">
         <div class="select-sky" aria-hidden="true">
           <span style="top:5%;left:7%">✨</span>
           <span style="top:11%;right:9%;animation-delay:.9s">⭐</span>
@@ -73,18 +105,28 @@ export const SelectScreen = {
           <span style="bottom:12%;right:11%;animation-delay:.5s">⭐</span>
         </div>
         <button class="back" data-back>‹ もどる</button>
-        <h2 class="section-title select-title">どの えほんを よむ？</h2>
-        <div class="shelf-pager" data-pager>${pages.map((p) => shelfPage(ctx, p)).join("")}</div>
-        ${pages.length > 1 ? `<div class="shelf-dots" data-dots>${dots}</div>` : ""}
+        <h2 class="section-title select-title">${isParent ? "おもいで" : "どの えほんを よむ？"}</h2>
+        ${parentActions}
+        ${emptyState || `<div class="shelf-pager" data-pager>${pages.map((p) => shelfPage(ctx, p, badgeType)).join("")}</div>${pages.length > 1 ? `<div class="shelf-dots" data-dots>${dots}</div>` : ""}`}
       </div>`;
   },
   mount(ctx, _p, root) {
-    root.querySelector("[data-back]").onclick = () => ctx.go("HOME");
+    root.querySelector("[data-back]").onclick = () => ctx.go(ctx.session.mode === "parent" ? "MODE" : "HOME");
+    root.querySelectorAll("[data-go]").forEach((b) => b.onclick = () => ctx.go(b.dataset.go));
     root.querySelectorAll("[data-book]").forEach((b) => {
-      b.onclick = () => { ctx.session.startBook(b.dataset.book); ctx.showPage(); };
+      b.onclick = () => {
+        const memory = ctx.session.memories.find((m) => m.bookId === b.dataset.book);
+        if ((ctx.session.mode === "parent" || _p?.view === "memories") && memory) {
+          ctx.go("DIARY", { memory, fromPlay: false, view: _p?.view });
+        } else {
+          ctx.session.startBook(b.dataset.book);
+          ctx.showPage();
+        }
+      };
     });
 
     const pager = root.querySelector("[data-pager]");
+    if (!pager) return;
     const pageEls = [...root.querySelectorAll(".shelf-page")];
     const dots = [...root.querySelectorAll("[data-dot]")];
     if (pageEls.length === 0) return;

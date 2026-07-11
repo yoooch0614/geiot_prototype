@@ -9,6 +9,7 @@
 @import "../modules/Achieve/style.css";
 @import "../modules/Complete/style.css";
 @import "../modules/Select/style.css";
+@import "../modules/Analysis/style.css";
 
 :root {
   --paper:  #f3f7ee;
