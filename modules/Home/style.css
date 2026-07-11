@@ -28,7 +28,42 @@
   box-shadow: var(--shadow); transition: transform 120ms;
 }
 .mode-card:active { transform: scale(.97); }
-.mode-emoji { font-size: 44px; }
+.mode-icon {
+  width: 48px; height: 48px; display: inline-block; position: relative;
+}
+.mode-icon::before {
+  content: "";
+  position: absolute; inset: 0;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.3);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+}
+.mode-icon::after {
+  content: "";
+  position: absolute;
+}
+.mode-icon--book {
+  background: linear-gradient(180deg, #f0fbeb, #d6eed1);
+}
+.mode-icon--book::after {
+  left: 12px; right: 12px; top: 14px; height: 4px;
+  background: rgba(0, 0, 0, .16);
+  border-radius: 2px;
+  box-shadow: 0 10px 0 rgba(0, 0, 0, .12);
+}
+.mode-icon--memory {
+  background: linear-gradient(135deg, #fff5c8, #ffe987);
+  border-radius: 50%;
+}
+.mode-icon--memory::before {
+  border-radius: 50%;
+}
+.mode-icon--memory::after {
+  width: 10px; height: 10px; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .92);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, .65);
+}
 .mode-card--child  { background: var(--green); }
 .mode-card--parent { background: var(--blue); }
 .mode-card--memory { background: var(--yellow); color: var(--ink); }

@@ -18,7 +18,7 @@ export const GalleryScreen = {
                     <img src="${p.src}" alt="">
                   </span>`)
                 .join("")}</div>`
-            : `<div class="no-photo">🌟</div>`;
+            : `<div class="no-photo"><span class="no-photo-icon" aria-hidden="true"></span></div>`;
           return `
             <button class="memory-card" data-mem="${m.id}">
               ${photoGrid}
