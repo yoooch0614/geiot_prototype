@@ -1,4 +1,4 @@
-import { stage, openCamera } from "../shared/utils.js";
+import { stage, composeMissionPhoto } from "../shared/utils.js";
 
 export const PreviewScreen = {
   render(_ctx, { dataUrl }) {
@@ -17,11 +17,25 @@ export const PreviewScreen = {
       ctx.session.completeMission({
         missionId: page.id, missionText: page.prompt,
         caption: page.diaryCaption || page.prompt, photoUrl: dataUrl,
+        missionImage: page.image,
       });
       ctx.go("ACHIEVE", { page });
     };
     root.querySelector("[data-retry]").onclick = () => {
-      openCamera(ctx, (dataUrl) => ctx.go("PREVIEW", { page, dataUrl }));
+      const input = ctx.els.camera;
+      input.value = "";
+      input.onchange = () => {
+        const file = input.files && input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = async () => {
+          const originalDataUrl = reader.result;
+          const nextDataUrl = await composeMissionPhoto(ctx.repo.assetUrl(page.image), originalDataUrl);
+          ctx.go("PREVIEW", { page, dataUrl: nextDataUrl });
+        };
+        reader.readAsDataURL(file);
+      };
+      input.click();
     };
   },
 };
