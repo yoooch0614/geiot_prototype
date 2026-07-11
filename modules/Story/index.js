@@ -76,6 +76,7 @@ export const StoryScreen = {
     const bookEl = root.querySelector("[data-flipbook]");
     const progressEl = root.querySelector("[data-progress]");
     const playPageAudio = (localIdx) => playAudio(ctx.repo.assetUrl(pages[localIdx].audio));
+    const playPageTurnSound = () => playAudio(ctx.repo.assetUrl("assets/page_sound.mp3"));
 
     root.querySelector("[data-back]").onclick = () => ctx.go("HOME");
 
@@ -95,7 +96,10 @@ export const StoryScreen = {
       startPage: offset,
       showCover: false,
       maxShadowOpacity: 0.3,
-      flippingTime: 650,
+      // 途中で指を離しても、残りの角度ぶん律儀に長く再生せず早めにめくり切るための短さ
+      // （St.PageFlip は「残り角度 ÷ 全体 × flippingTime」で自動めくりの時間を決めるため、
+      // 値そのものを小さくすると早い段階で離してもすぐにめくれる）。
+      flippingTime: 300,
       useMouseEvents: true,
       swipeDistance: 30,
       mobileScrollSupport: true,
@@ -104,11 +108,15 @@ export const StoryScreen = {
       disableFlipByClick: false,
     });
 
-    flip.on("init", (e) => playPageAudio(e.data.page));
+    // St.PageFlip は初期表示（loadFromHTML直後）にも内部的に "flip" を発火することがあるため、
+    // めくり音は "init" が済んだあと＝実際にユーザーがめくった時だけ鳴らす。
+    let initialized = false;
+    flip.on("init", (e) => { initialized = true; playPageAudio(e.data.page); });
     flip.on("flip", (e) => {
       const localIdx = e.data;
       ctx.session.goTo(start + localIdx);
       progressEl.textContent = `${start + localIdx + 1} / ${count}`;
+      if (initialized) playPageTurnSound();
       playPageAudio(localIdx);
     });
 

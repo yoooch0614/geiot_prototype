@@ -1,4 +1,7 @@
-import { stage } from "../shared/utils.js";
+import { stage, playAudio } from "../shared/utils.js";
+
+// 達成の演出音。毎回同じだと飽きるので、このなかからランダムに1つ鳴らす。
+const CELEBRATION_SOUNDS = ["assets/jajan.mp3", "assets/shinein.mp3", "assets/tousen.mp3"];
 
 export const AchieveScreen = {
   render(ctx) {
@@ -18,6 +21,9 @@ export const AchieveScreen = {
       </div>`;
   },
   mount(ctx, _params, root) {
+    const sound = CELEBRATION_SOUNDS[Math.floor(Math.random() * CELEBRATION_SOUNDS.length)];
+    playAudio(ctx.repo.assetUrl(sound));
+
     const layer = root.querySelector("[data-confetti]");
     const shapes = ["circle", "square", "star"];
     const colors = ["#FFD166", "#EF476F", "#06D6A0", "#118AB2", "#FF7BAC"];
