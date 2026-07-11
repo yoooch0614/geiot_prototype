@@ -6,6 +6,8 @@
   },
   "books": [
     "books/book-leaf.json",
-    "books/book-town.json"
+    "books/book-town.json",
+    "books/book-bear.json",
+    "books/book-star.json"
   ]
 }

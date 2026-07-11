@@ -1,0 +1,36 @@
+/* 絵本選択画面 ── 本棚のみため */
+.shelf {
+  position: relative;
+  padding: 0 12px 12px;
+  border-radius: 24px;
+  background: linear-gradient(90deg,
+    var(--wood-deep) 0 10px,
+    var(--wood) 10px calc(100% - 10px),
+    var(--wood-deep) calc(100% - 10px) 100%);
+  box-shadow: var(--shadow);
+}
+.shelf-top {
+  height: 36px;
+  margin: 0 -12px;
+  border-radius: 24px 24px 8px 8px;
+  background: linear-gradient(180deg, var(--wood-dark), var(--wood));
+  box-shadow: inset 0 -4px 0 rgba(0, 0, 0, .08);
+  display: flex; align-items: center; justify-content: center;
+}
+.shelf-emblem { font-size: 18px; filter: drop-shadow(0 1px 0 rgba(255, 255, 255, .35)); }
+.shelf-body { padding-top: 14px; }
+.shelf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding-bottom: 14px; }
+.shelf-row > .book-card { min-width: 0; }
+.shelf-board {
+  height: 14px;
+  margin: 0 -12px 14px;
+  background: linear-gradient(180deg, var(--wood) 0%, var(--wood-dark) 55%, var(--wood-dark) 100%);
+  box-shadow: 0 3px 5px rgba(58, 40, 20, .25), inset 0 2px 0 rgba(255, 255, 255, .25);
+}
+.shelf-base {
+  height: 16px;
+  margin: 0 -12px;
+  border-radius: 8px 8px 20px 20px;
+  background: linear-gradient(180deg, var(--wood-dark), var(--wood));
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, .2);
+}

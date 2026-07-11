@@ -1,0 +1,36 @@
+{
+  "id": "book-star",
+  "title": "きらきら ほしのよる",
+  "ageRange": "3-5",
+  "cover": "assets/cover-star.svg",
+  "pages": [
+    {
+      "id": "s1",
+      "type": "story",
+      "text": "よぞらには ほしが いっぱい。きらきら ひかって いるよ。",
+      "image": "assets/scene-sky.svg",
+      "audio": "assets/s1.mp3"
+    },
+    {
+      "id": "sm1",
+      "type": "mission",
+      "text": "ほしを さがそう！",
+      "prompt": "そとに でて、いちばん ひかる ほしを みつけてみよう。",
+      "doneLabel": "みつけた！",
+      "diaryCaption": "ひかる ほし、みつけたよ！",
+      "developmentDomains": [
+        "観察",
+        "自然"
+      ],
+      "image": "assets/scene-round.svg",
+      "audio": "assets/sm1.mp3"
+    },
+    {
+      "id": "send",
+      "type": "end",
+      "text": "きょうも たくさん ほしを みつけたね！",
+      "image": "assets/scene-sky.svg",
+      "audio": "assets/send.mp3"
+    }
+  ]
+}

@@ -5,6 +5,7 @@
 @import "../modules/Parent/style.css";
 @import "../modules/Home/style.css";
 @import "../modules/Diary/style.css";
+@import "../modules/Select/style.css";
 
 :root {
   --paper:  #f3f7ee;
@@ -14,6 +15,9 @@
   --yellow: #ffd23f;
   --coral:  #ff7a5c;
   --blue:   #6d9dc5;
+  --wood:      #dcb47f;
+  --wood-dark: #b98951;
+  --wood-deep: #96693a;
   --shadow: 0 12px 30px rgba(58, 74, 63, 0.16);
   --radius: 28px;
   --font: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", "Segoe UI Rounded",
