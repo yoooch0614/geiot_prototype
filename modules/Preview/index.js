@@ -1,6 +1,8 @@
+import { stage } from "../shared/utils.js";
+
 export const PreviewScreen = {
   render(_ctx, { dataUrl }) {
-    return `
+    return stage(`
       <div class="screen reader">
         <p class="lead">これで いい？</p>
         <div class="scene photo"><img src="${dataUrl}" alt="とったしゃしん"></div>
@@ -8,7 +10,7 @@ export const PreviewScreen = {
           <button class="retry" data-retry>🔄 もういちど</button>
           <button class="mission-shoot" data-keep>✓ これにする</button>
         </div>
-      </div>`;
+      </div>`);
   },
   mount(ctx, { page, dataUrl }, root) {
     root.querySelector("[data-keep]").onclick = () => {
