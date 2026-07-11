@@ -1,0 +1,11 @@
+{
+  "meta": {
+    "id": "library-01",
+    "title": "そとであそぼ！えほん",
+    "language": "ja"
+  },
+  "books": [
+    "books/book-leaf.json",
+    "books/book-town.json"
+  ]
+}

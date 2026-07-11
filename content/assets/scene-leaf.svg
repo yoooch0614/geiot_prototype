@@ -1,0 +1,5 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="はっぱ">
+  <rect width="800" height="600" fill="#eaf6df"/>
+  <ellipse cx="400" cy="320" rx="160" ry="110" fill="#6bbf59"/><path d="M400 220 L400 420" stroke="#3f8a45" stroke-width="10" stroke-linecap="round"/><path d="M400 280 L330 250 M400 320 L320 300 M400 360 L330 350 M400 280 L470 250 M400 320 L480 300 M400 360 L470 350" stroke="#3f8a45" stroke-width="6" stroke-linecap="round"/>
+  <text x="400" y="560" text-anchor="middle" font-family="sans-serif" font-size="34" fill="#ffffff" opacity="0.85" font-weight="bold">はっぱ</text>
+</svg>

@@ -1,0 +1,5 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ゆうやけ">
+  <rect width="800" height="600" fill="#ffd9a0"/>
+  <rect x="0" y="0" width="800" height="600" fill="url(#g)"/><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffcf87"/><stop offset="1" stop-color="#ff9a5a"/></linearGradient></defs><circle cx="400" cy="430" r="90" fill="#ff7a3d"/><path d="M0 470 Q200 440 400 470 T800 470 V600 H0 Z" fill="#c9633a"/>
+  <text x="400" y="560" text-anchor="middle" font-family="sans-serif" font-size="34" fill="#ffffff" opacity="0.85" font-weight="bold">ゆうやけ</text>
+</svg>

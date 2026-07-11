@@ -1,0 +1,5 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="まち">
+  <rect width="800" height="600" fill="#cfe3f5"/>
+  <rect x="120" y="300" width="110" height="160" fill="#f2a65a"/><rect x="260" y="240" width="110" height="220" fill="#e56b6f"/><rect x="400" y="290" width="110" height="170" fill="#6d9dc5"/><rect x="540" y="250" width="110" height="210" fill="#8ecf6a"/><circle cx="640" cy="120" r="50" fill="#ffd23f"/>
+  <text x="400" y="560" text-anchor="middle" font-family="sans-serif" font-size="34" fill="#ffffff" opacity="0.85" font-weight="bold">まち</text>
+</svg>

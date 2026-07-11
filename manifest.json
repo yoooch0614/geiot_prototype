@@ -1,0 +1,17 @@
+{
+  "name": "そとであそぼ！えほん",
+  "short_name": "えほん",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f3f7ee",
+  "theme_color": "#6bbf59",
+  "icons": [
+    {
+      "src": "content/assets/scene-leaf.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

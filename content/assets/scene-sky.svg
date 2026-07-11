@@ -1,0 +1,5 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="そら">
+  <rect width="800" height="600" fill="#bfe3f2"/>
+  <circle cx="620" cy="150" r="80" fill="#ffd23f"/><ellipse cx="240" cy="200" rx="110" ry="55" fill="#ffffff" opacity="0.9"/><ellipse cx="330" cy="180" rx="80" ry="45" fill="#ffffff" opacity="0.9"/>
+  <text x="400" y="560" text-anchor="middle" font-family="sans-serif" font-size="34" fill="#ffffff" opacity="0.85" font-weight="bold">そら</text>
+</svg>

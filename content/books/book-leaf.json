@@ -1,0 +1,64 @@
+{
+  "id": "book-leaf",
+  "title": "はっぱのぼうけん",
+  "ageRange": "3-6",
+  "cover": "assets/cover-leaf.svg",
+  "pages": [
+    {
+      "id": "p1",
+      "type": "story",
+      "text": "こんにちは！ぼくは かぜの ふぅ。",
+      "image": "assets/scene-sky.svg",
+      "audio": "assets/p1.mp3"
+    },
+    {
+      "id": "p2",
+      "type": "story",
+      "text": "きょうは そとに たからものが かくれてるよ。いっしょに さがしにいこう！",
+      "image": "assets/scene-meadow.svg",
+      "audio": "assets/p2.mp3"
+    },
+    {
+      "id": "m1",
+      "type": "mission",
+      "text": "さいしょの たからもの！",
+      "prompt": "そとに でて、まるい はっぱ を さがしてみよう。",
+      "doneLabel": "みつけた！",
+      "diaryCaption": "まるい はっぱ、みつけたよ！",
+      "developmentDomains": [
+        "観察",
+        "自然"
+      ],
+      "image": "assets/scene-leaf.svg",
+      "audio": "assets/m1.mp3"
+    },
+    {
+      "id": "p3",
+      "type": "story",
+      "text": "すごい！よく みつけたね。かぜが よろこんでるよ。",
+      "image": "assets/scene-cheer.svg",
+      "audio": "assets/p3.mp3"
+    },
+    {
+      "id": "m2",
+      "type": "mission",
+      "text": "つぎの たからもの！",
+      "prompt": "あかい いろの もの を さがしてみよう。",
+      "doneLabel": "みつけた！",
+      "diaryCaption": "あかい もの、みつけたよ！",
+      "developmentDomains": [
+        "色",
+        "観察"
+      ],
+      "image": "assets/scene-red.svg",
+      "audio": "assets/m2.mp3"
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "text": "きょうは たくさん あそんだね。また そとで あおうね！",
+      "image": "assets/scene-sunset.svg",
+      "audio": "assets/end.mp3"
+    }
+  ]
+}

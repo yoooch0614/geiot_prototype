@@ -1,0 +1,5 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="やったね">
+  <rect width="800" height="600" fill="#fdeecb"/>
+  <circle cx="400" cy="300" r="120" fill="#ffd23f"/><circle cx="360" cy="285" r="14" fill="#5a4632"/><circle cx="440" cy="285" r="14" fill="#5a4632"/><path d="M355 340 Q400 380 445 340" stroke="#5a4632" stroke-width="10" fill="none" stroke-linecap="round"/><path d="M230 180 l20 40 M570 180 l-20 40 M180 320 l40 10 M620 320 l-40 10" stroke="#ff9a3d" stroke-width="8" stroke-linecap="round"/>
+  <text x="400" y="560" text-anchor="middle" font-family="sans-serif" font-size="34" fill="#ffffff" opacity="0.85" font-weight="bold">やったね</text>
+</svg>

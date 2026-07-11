@@ -1,0 +1,181 @@
+/* =========================================================
+   えほん web ── 見た目の設定
+   いろ・おおきさ・レイアウトはここ。トークンは :root。
+   ========================================================= */
+:root {
+  --paper:  #f3f7ee;
+  --card:   #ffffff;
+  --ink:    #3a4a3f;
+  --green:  #6bbf59;
+  --yellow: #ffd23f;
+  --coral:  #ff7a5c;
+  --blue:   #6d9dc5;
+  --shadow: 0 12px 30px rgba(58, 74, 63, 0.16);
+  --radius: 28px;
+  --font: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", "Segoe UI Rounded",
+          system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; height: 100%;
+  background: radial-gradient(120% 80% at 50% -10%, #ffffff 0%, var(--paper) 55%);
+  font-family: var(--font); color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+.app {
+  max-width: 520px; min-height: 100dvh; margin: 0 auto;
+}
+
+/* ── 画面の共通枠 ─────────────────────────── */
+.screen {
+  min-height: 100dvh;
+  padding: max(18px, env(safe-area-inset-top)) 18px max(18px, env(safe-area-inset-bottom));
+  display: flex; flex-direction: column; gap: 16px; position: relative;
+}
+.screen.center { justify-content: center; align-items: center; text-align: center; }
+.page--in { animation: pageIn 420ms cubic-bezier(0.22,1,0.36,1); }
+@keyframes pageIn { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: none; } }
+
+.brand {
+  font-size: clamp(30px, 9vw, 44px); font-weight: 900; line-height: 1.4;
+  color: var(--green); margin: 0 0 8px;
+}
+.section-title { font-size: 24px; font-weight: 900; margin: 4px 0; }
+.lead {
+  font-size: clamp(22px, 6vw, 30px); font-weight: 700; line-height: 1.7;
+  letter-spacing: .02em; margin: 0; text-align: center;
+}
+.sub { font-size: 18px; color: #7a877e; margin: 0; }
+
+.back {
+  position: absolute; top: 16px; left: 14px;
+  font-family: inherit; font-size: 18px; font-weight: 700; color: var(--green);
+  background: #fff; border: none; border-radius: 999px; padding: 8px 16px;
+  box-shadow: 0 2px 8px rgba(58,74,63,.12); cursor: pointer; z-index: 2;
+}
+.progress {
+  position: absolute; top: 16px; right: 16px;
+  font-weight: 700; font-size: 15px; color: var(--green);
+  background: #fff; padding: 4px 14px; border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(58,74,63,.1);
+}
+
+/* ── モード選択 / ホーム ───────────────────── */
+.mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%; max-width: 420px; }
+.mode-card {
+  font-family: inherit; font-weight: 900; font-size: 22px; color: #fff;
+  border: none; border-radius: 24px; padding: 34px 12px; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  box-shadow: var(--shadow); transition: transform 120ms;
+}
+.mode-card:active { transform: scale(.97); }
+.mode-emoji { font-size: 44px; }
+.mode-card--child  { background: var(--green); }
+.mode-card--parent { background: var(--blue); }
+.mode-card--memory { background: var(--yellow); color: var(--ink); }
+
+/* ── PINゲート ───────────────────────────── */
+.pin-label { font-size: 20px; font-weight: 700; }
+.pin-dots { font-size: 26px; letter-spacing: 4px; color: var(--green); min-height: 34px; }
+.pin-dots.shake { animation: shake 400ms; color: var(--coral); }
+@keyframes shake { 0%,100%{transform:none} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+.keypad { display: grid; grid-template-columns: repeat(3, 72px); gap: 12px; }
+.key {
+  font-family: inherit; font-size: 26px; font-weight: 700; color: var(--ink);
+  background: #fff; border: 2px solid #e5efdd; border-radius: 18px; padding: 16px 0; cursor: pointer;
+}
+.key:active { background: #eef8e9; }
+.pin-hint { font-size: 13px; color: #a2ada4; }
+
+/* ── 大人レポート ─────────────────────────── */
+.parent { justify-content: flex-start; padding-top: 64px; }
+.parent-title { font-size: 24px; font-weight: 900; margin: 0 0 4px; }
+.stat-row { display: flex; gap: 14px; }
+.stat {
+  flex: 1; background: #fff; border-radius: 20px; padding: 18px; text-align: center;
+  box-shadow: 0 4px 14px rgba(58,74,63,.08);
+}
+.stat b { display: block; font-size: 40px; color: var(--green); line-height: 1; }
+.stat span { font-size: 13px; color: #7a877e; }
+.note { font-size: 13px; color: #7a877e; background: #f0f6ea; border-radius: 14px; padding: 12px; margin: 0; }
+.log-title { font-size: 17px; margin: 4px 0; }
+.log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.log-row { display: flex; gap: 10px; align-items: center; background: #fff; border-radius: 14px; padding: 12px 14px; font-size: 14px; }
+.log-date { color: #a2ada4; font-size: 12px; }
+.log-book { font-weight: 700; flex: 1; }
+.log-count { color: var(--green); font-weight: 700; }
+.empty { color: #a2ada4; text-align: center; padding: 24px; line-height: 1.8; }
+.ghost {
+  margin-top: 8px; font-family: inherit; font-size: 14px; color: #a2ada4;
+  background: none; border: 1px dashed #cdd6ce; border-radius: 12px; padding: 10px; cursor: pointer;
+}
+
+/* ── 絵本 / 思い出カード ───────────────────── */
+.book-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.book-card, .memory-card {
+  font-family: inherit; background: #fff; border: none; border-radius: 22px;
+  padding: 10px 10px 16px; cursor: pointer; display: flex; flex-direction: column; gap: 6px;
+  box-shadow: var(--shadow); transition: transform 120ms;
+}
+.book-card:active, .memory-card:active { transform: scale(.97); }
+.book-card img, .memory-card img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 14px; }
+.book-title { font-weight: 900; font-size: 17px; }
+.book-age { font-size: 12px; color: #a2ada4; }
+.no-photo {
+  width: 100%; aspect-ratio: 4/3; border-radius: 14px; background: #eef4e7;
+  display: flex; align-items: center; justify-content: center; font-size: 30px;
+}
+
+/* ── リーダー（物語 / ミッション）─────────────── */
+.reader { justify-content: center; }
+.scene { border-radius: 20px; overflow: hidden; background: #eef4e7; aspect-ratio: 4/3; display: flex; }
+.scene img { width: 100%; height: 100%; object-fit: cover; }
+.scene.photo img { object-fit: contain; background: #333; }
+.prompt {
+  font-size: clamp(19px, 5vw, 24px); font-weight: 700; color: var(--green);
+  background: #eef8e9; border-radius: 18px; padding: 14px 16px; margin: 0; text-align: center;
+}
+.big-next {
+  align-self: center; font-family: inherit; font-weight: 900; font-size: 22px; color: #fff;
+  background: var(--green); border: none; border-radius: 999px; padding: 16px 40px;
+  box-shadow: 0 6px 0 #4f9a45; cursor: pointer; transition: transform 120ms, box-shadow 120ms;
+}
+.big-next:active { transform: translateY(4px); box-shadow: 0 2px 0 #4f9a45; }
+.mission-shoot {
+  align-self: center; font-family: inherit; font-weight: 900; font-size: 22px; color: #fff;
+  background: var(--coral); border: none; border-radius: 999px; padding: 16px 34px;
+  box-shadow: 0 6px 0 #e0563c; cursor: pointer; transition: transform 120ms, box-shadow 120ms;
+}
+.mission-shoot:active { transform: translateY(4px); box-shadow: 0 2px 0 #e0563c; }
+.tapdone {
+  align-self: center; font-family: inherit; font-weight: 700; font-size: 15px; color: #7a877e;
+  background: none; border: none; text-decoration: underline; cursor: pointer;
+}
+.preview-actions { display: flex; gap: 12px; justify-content: center; }
+.retry {
+  font-family: inherit; font-weight: 700; font-size: 18px; color: var(--ink);
+  background: var(--yellow); border: none; border-radius: 999px; padding: 16px 24px;
+  box-shadow: 0 6px 0 #e0b62f; cursor: pointer;
+}
+
+/* ── 達成演出 ─────────────────────────────── */
+.achieve { gap: 10px; }
+.sparkle { font-size: 48px; animation: pop 700ms ease; }
+.sticker { width: 140px; height: 140px; animation: pop 700ms ease; }
+@keyframes pop { 0%{transform: scale(.4); opacity: 0} 60%{transform: scale(1.12)} 100%{transform: scale(1); opacity: 1} }
+
+/* ── 絵本日記 ─────────────────────────────── */
+.diary { padding-top: 24px; }
+.diary-cover { background: var(--green); color: #fff; border-radius: 22px; padding: 22px; text-align: center; }
+.diary-cover h2 { margin: 6px 0 0; font-size: 22px; }
+.diary-date { font-size: 14px; opacity: .9; }
+.diary-entry { background: #fff; border-radius: 20px; padding: 12px; box-shadow: 0 4px 14px rgba(58,74,63,.08); }
+.diary-entry img { width: 100%; border-radius: 14px; display: block; }
+.diary-caption { font-size: 18px; font-weight: 700; text-align: center; margin: 10px 0 4px; }
+
+/* ── 起動ヒント ───────────────────────────── */
+.hint { text-align: center; line-height: 1.9; }
+.hint code { display: inline-block; background: #2f3a32; color: #eafbe2; padding: 10px 16px; border-radius: 12px; font-size: 15px; margin: 8px 0; }
+
+@media (prefers-reduced-motion: reduce) { .page--in, .sparkle, .sticker { animation: none; } }
+:focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; }

@@ -1,0 +1,5 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="はっぱのぼうけん">
+  <rect width="800" height="600" fill="#c8ecb0"/>
+  <circle cx="640" cy="120" r="55" fill="#ffd23f"/><ellipse cx="400" cy="330" rx="150" ry="105" fill="#6bbf59"/><path d="M400 235 L400 425" stroke="#3f8a45" stroke-width="10" stroke-linecap="round"/>
+  <text x="400" y="560" text-anchor="middle" font-family="sans-serif" font-size="34" fill="#ffffff" opacity="0.85" font-weight="bold">はっぱのぼうけん</text>
+</svg>

@@ -1,0 +1,17 @@
+# OS が勝手に作るゴミ
+.DS_Store
+Thumbs.db
+
+# Python のキャッシュ
+__pycache__/
+*.pyc
+
+# ログ
+*.log
+
+# エディタ / 環境
+.idea/
+*.swp
+
+# 配布用 zip（GitHubには上げない）
+*.zip

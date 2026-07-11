@@ -1,0 +1,5 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="まちのたからさがし">
+  <rect width="800" height="600" fill="#cfe3f5"/>
+  <rect x="230" y="250" width="90" height="180" fill="#f2a65a"/><rect x="340" y="200" width="90" height="230" fill="#e56b6f"/><rect x="450" y="280" width="90" height="150" fill="#6d9dc5"/><circle cx="600" cy="130" r="50" fill="#ffd23f"/>
+  <text x="400" y="560" text-anchor="middle" font-family="sans-serif" font-size="34" fill="#ffffff" opacity="0.85" font-weight="bold">まちのたからさがし</text>
+</svg>

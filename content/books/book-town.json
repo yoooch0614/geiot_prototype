@@ -1,0 +1,36 @@
+{
+  "id": "book-town",
+  "title": "まちのたからさがし",
+  "ageRange": "4-6",
+  "cover": "assets/cover-town.svg",
+  "pages": [
+    {
+      "id": "t1",
+      "type": "story",
+      "text": "まちには おもしろい かたちが いっぱい！",
+      "image": "assets/scene-town.svg",
+      "audio": "assets/t1.mp3"
+    },
+    {
+      "id": "tm1",
+      "type": "mission",
+      "text": "たからさがし スタート！",
+      "prompt": "まるい かたちの もの を さがしてみよう。",
+      "doneLabel": "みつけた！",
+      "diaryCaption": "まるい かたち、みつけたよ！",
+      "developmentDomains": [
+        "形",
+        "観察"
+      ],
+      "image": "assets/scene-round.svg",
+      "audio": "assets/tm1.mp3"
+    },
+    {
+      "id": "tend",
+      "type": "end",
+      "text": "まちの たからもの、たくさん みつけたね！",
+      "image": "assets/scene-town.svg",
+      "audio": "assets/tend.mp3"
+    }
+  ]
+}
