@@ -1,5 +1,16 @@
 <svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="はっぱのぼうけん">
-  <rect width="800" height="600" fill="#c8ecb0"/>
-  <circle cx="640" cy="120" r="55" fill="#ffd23f"/><ellipse cx="400" cy="330" rx="150" ry="105" fill="#6bbf59"/><path d="M400 235 L400 425" stroke="#3f8a45" stroke-width="10" stroke-linecap="round"/>
+  <defs>
+    <linearGradient id="leafSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#eaf9d8"/><stop offset="1" stop-color="#c8ecb0"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#leafSky)"/>
+  <circle cx="640" cy="120" r="55" fill="#ffd23f"/>
+  <path d="M120 150 q40 -26 80 0 q40 -26 80 0" stroke="#ffffff" stroke-width="14" fill="none" stroke-linecap="round" opacity="0.8"/>
+  <ellipse cx="400" cy="335" rx="155" ry="110" fill="#6bbf59"/>
+  <path d="M400 240 L400 430" stroke="#3f8a45" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="355" cy="305" r="12" fill="#2f6b39"/><circle cx="445" cy="305" r="12" fill="#2f6b39"/>
+  <path d="M355 355 q45 32 90 0" stroke="#2f6b39" stroke-width="9" fill="none" stroke-linecap="round"/>
+  <circle cx="340" cy="330" r="14" fill="#ff9a8a" opacity="0.55"/><circle cx="460" cy="330" r="14" fill="#ff9a8a" opacity="0.55"/>
   <text x="400" y="560" text-anchor="middle" font-family="sans-serif" font-size="34" fill="#ffffff" opacity="0.85" font-weight="bold">はっぱのぼうけん</text>
 </svg>
