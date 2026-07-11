@@ -1,4 +1,4 @@
-import { stage } from "../shared/utils.js";
+import { stage, openCamera } from "../shared/utils.js";
 
 export const PreviewScreen = {
   render(_ctx, { dataUrl }) {
@@ -21,16 +21,7 @@ export const PreviewScreen = {
       ctx.go("ACHIEVE", { page });
     };
     root.querySelector("[data-retry]").onclick = () => {
-      const input = ctx.els.camera;
-      input.value = "";
-      input.onchange = () => {
-        const file = input.files && input.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = () => ctx.go("PREVIEW", { page, dataUrl: reader.result });
-        reader.readAsDataURL(file);
-      };
-      input.click();
+      openCamera(ctx, (dataUrl) => ctx.go("PREVIEW", { page, dataUrl }));
     };
   },
 };

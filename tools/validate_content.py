@@ -68,6 +68,8 @@ def validate_book(book, where, content_dir, seen_books, errors, warnings):
         check_asset(content_dir, pw, "image", page.get("image"), True, errors, warnings)
         check_asset(content_dir, pw, "audio", page.get("audio"), False, errors, warnings)
         check_asset(content_dir, pw, "character", page.get("character"), False, errors, warnings)
+        for li, layer in enumerate(page.get("layers", [])):
+            check_asset(content_dir, f"{pw}.layers[{li}]", "image", layer.get("image"), True, errors, warnings)
 
 
 def validate(index_path: Path):

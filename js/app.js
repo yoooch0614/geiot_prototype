@@ -21,21 +21,25 @@ const ctx = {
   advance,
 };
 
+let currentScreen = null;
+
 // 画面を描画
 function go(name, params = {}) {
   const screen = Screens[name];
   if (!screen) return;
+  currentScreen?.unmount?.(ctx);
   root.innerHTML = screen.render(ctx, params);
   screen.mount?.(ctx, params, root);
+  currentScreen = screen;
   root.scrollTop = 0;
   root.querySelector(".screen")?.scrollTo(0, 0);
 }
 
-// いまのページを種類に応じた画面へ振り分け（物語/ミッション/おわり）
+// いまのページを種類に応じた画面へ振り分け（物語・ミッション/おわり）
+// 物語とミッションは同じ StoryScreen（1冊の本）が受け持つ。
 function showPage() {
   const page = repo.pageAt(session.bookId, session.pageIndex);
   if (!page) return go("HOME");
-  if (page.type === "mission") return go("MISSION", { page });
   if (page.type === "end") return go("COMPLETE", { page });
   return go("STORY", { page });
 }
