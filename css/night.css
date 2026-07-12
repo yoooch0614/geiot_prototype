@@ -1,5 +1,5 @@
-/* ── 夜间主题 ─────────────────────────────
-   夜空是产品 UI 的背景；绘本里的插图仍按各自内容显示，方便夜间阅读时保留故事原色。 */
+/* ── 夜間テーマ ─────────────────────────────
+   夜空を UI の背景にし、絵本の挿絵は元の色を保って夜でも読みやすくする。 */
 
 body.night-theme {
   color-scheme: dark;
@@ -18,12 +18,11 @@ body.night-theme {
   color: var(--ink);
 }
 
-/* 测试用的昼夜切换按钮。默认主题仍由设备时间决定；按钮只在当前页面会话里强制切换。 */
+/* テスト用の昼夜切り替えボタン。通常は端末時刻で判定し、このボタンを押している間だけ強制切り替えを行う。 */
 .theme-toggle {
   position: fixed;
   top: max(10px, env(safe-area-inset-top));
-  /* 右端的页码胶囊会占位，所以测试按钮放在它的左侧。 */
-  right: 78px;
+  right: 12px;
   z-index: 100;
   border: 1px solid rgba(58, 74, 63, .16);
   border-radius: 999px;
@@ -43,7 +42,7 @@ body.night-theme .theme-toggle {
   box-shadow: 0 3px 10px rgba(1, 8, 22, .3);
 }
 
-/* 同一组天空元素按主题显示：白天太阳/云，夜间月亮/星星。 */
+/* 同じ空の要素をテーマに応じて表示する：昼は太陽・雲、夜は月・星。 */
 body.night-theme .screen--sky {
   background: linear-gradient(180deg, #101c36 0%, #17294a 42%, #223856 70%, #263e4d 100%);
 }
@@ -105,7 +104,7 @@ body.night-theme .screen {
 
 body.night-theme .splash-dots i { background: var(--green); }
 
-/* 通用导航与文字 */
+/* 共通ナビゲーションとテキスト */
 body.night-theme .back,
 body.night-theme .progress {
   color: #e3edff;
@@ -125,7 +124,7 @@ body.night-theme .book-age {
   color: #aebfda;
 }
 
-/* 首页的两张模式卡：保留绿色/蓝色识别，但压低亮度以免夜间刺眼 */
+/* ホームの2つのモードカード：緑・青の識別は残し、夜にまぶしくならないよう明るさを抑える。 */
 body.night-theme .mode-card--child {
   background: #347d70;
   color: #f2fff7;
@@ -168,8 +167,18 @@ body.night-theme .title-screen .mode-card--parent:active {
 body.night-theme .title-icon {
   box-shadow: 0 12px 24px rgba(1, 8, 22, .46);
 }
+body.night-theme .bookmark-launch {
+  color: #a9e8c0;
+  background: rgba(24, 41, 67, .9);
+  border-color: rgba(120, 211, 155, .3);
+  box-shadow: 0 4px 12px rgba(1, 8, 22, .25);
+}
+body.night-theme .bookmark-count {
+  color: #2d3d5b;
+  background: rgba(245, 212, 126, .86);
+}
 
-/* PIN、家长统计与分析卡片 */
+/* PIN・保護者レポート・分析カード */
 body.night-theme .pin-card,
 body.night-theme .stat,
 body.night-theme .log-row,
@@ -196,7 +205,7 @@ body.night-theme .ghost {
   border-color: #4f6280;
 }
 
-/* 选书本棚：棚子变成夜间书店，书封本身不变 */
+/* 本棚：棚を夜の本屋の雰囲気に変更し、表紙自体はそのままにする。 */
 body.night-theme .screen--select {
   background: linear-gradient(180deg, rgba(33, 57, 94, .72) 0%, rgba(13, 24, 48, 0) 48%);
 }
@@ -232,6 +241,22 @@ body.night-theme .book-cover--ghost::after {
   box-shadow: 0 0 0 4px rgba(210, 226, 247, .16);
 }
 body.night-theme .book-title--ghost { color: #afc3df; }
+body.night-theme .bookmark-thumb { background: #14263f; }
+body.night-theme .bookmark-info > span:last-child { color: #aebfda; }
+body.night-theme .bookmarks-lead { color: #aebfda; }
+body.night-theme .bookmark-remove {
+  color: #aebfda;
+  background: rgba(31, 52, 85, .92);
+}
+body.night-theme .bookmark-empty {
+  color: #aebfda;
+  background: rgba(24, 41, 67, .86);
+}
+body.night-theme .memory-bookmark {
+  color: #a9e8c0;
+  background: rgba(24, 41, 67, .94);
+  border-color: rgba(120, 211, 155, .28);
+}
 body.night-theme .shelf-emblem {
   background: #e5efff;
   box-shadow: 0 1px 4px rgba(1, 8, 22, .36);
@@ -264,7 +289,7 @@ body.night-theme .screen--select--memory .shelf-deco--plant {
               radial-gradient(circle at 70% 30%, #edf5ff 16%, #5f70a0 16%);
 }
 
-/* 阅读器与拍照预览：把操作层变暗，故事插图保持原色 */
+/* リーダーと撮影プレビュー：操作レイヤーを暗くし、物語の挿絵は元の色を保つ。 */
 body.night-theme .stage-outer,
 body.night-theme .flip-page {
   background: var(--paper);
@@ -299,7 +324,7 @@ body.night-theme .retry:active {
   box-shadow: 0 1px 0 #b28e43;
 }
 
-/* 日记与回忆 */
+/* 日記とおもいで */
 body.night-theme .diary-bg { opacity: .16; }
 body.night-theme .diary-cover {
   background: linear-gradient(180deg, #3a8178, #315d73);
@@ -324,7 +349,7 @@ body.night-theme .no-photo-label {
   background: rgba(234, 242, 255, .92);
 }
 
-/* 完成与成就：保留庆祝色，但让底色进入夜空 */
+/* 完了・達成：お祝いの色は残し、背景を夜空にする。 */
 body.night-theme .complete {
   background: radial-gradient(circle at 50% 42%, rgba(75, 91, 145, .72) 0%, transparent 68%);
 }

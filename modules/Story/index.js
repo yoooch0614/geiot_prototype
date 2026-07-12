@@ -18,9 +18,14 @@ function bookChapter(ctx) {
   return { pages: all.slice(start, end + 1), start, count, all };
 }
 
-function pageMarkup(ctx, page, { index, showFinish }) {
+function pageMarkup(ctx, page, { index, globalIndex, showFinish }) {
   const img = ctx.repo.assetUrl(page.image);
   const character = ctx.repo.assetUrl(page.character);
+  const bookmarked = ctx.session.isPageBookmarked(ctx.session.bookId, page.id, globalIndex);
+  const bookmark = `
+    <button type="button" class="page-bookmark${bookmarked ? " is-active" : ""}"
+      data-bookmark-page data-bookmark-index="${index}" aria-pressed="${bookmarked}"
+      aria-label="${bookmarked ? "しおりをはずす" : "しおりに追加"}">${bookmarked ? "★" : "☆"}</button>`;
   const scene = `
     <div class="scene">
       ${fillLayer(ctx, page)}
@@ -37,6 +42,7 @@ function pageMarkup(ctx, page, { index, showFinish }) {
       : `<button class="mission-shoot" data-shoot="${index}">${esc(page.doneLabel || "とってみよう！")}</button>`;
     return `
       <div class="flip-page">
+        ${bookmark}
         ${scene}
         <p class="lead">${esc(page.text)}</p>
         <p class="prompt">${esc(page.prompt)}</p>
@@ -46,6 +52,7 @@ function pageMarkup(ctx, page, { index, showFinish }) {
   }
   return `
     <div class="flip-page">
+      ${bookmark}
       ${scene}
       <p class="lead">${esc(page.text)}</p>
       ${finishBtn}
@@ -63,7 +70,11 @@ export const StoryScreen = {
     const lastPage = pages[lastIdx];
     const lastPageDone = lastPage.type !== "mission" || ctx.session.isMissionDone(lastPage.id);
     const body = pages
-      .map((p, i) => pageMarkup(ctx, p, { index: i, showFinish: i === lastIdx && tailIsEnd && lastPageDone }))
+      .map((p, i) => pageMarkup(ctx, p, {
+        index: i,
+        globalIndex: start + i,
+        showFinish: i === lastIdx && tailIsEnd && lastPageDone,
+      }))
       .join("");
     return stage(`
       <div class="screen reader page--in">
@@ -84,6 +95,33 @@ export const StoryScreen = {
     const playPageTurnSound = createRepeatableSound(ctx.repo.assetUrl("assets/page_sound.mp3"));
 
     root.querySelector("[data-back]").onclick = () => ctx.go("HOME");
+
+    const book = ctx.repo.book(ctx.session.bookId);
+    root.querySelectorAll("[data-bookmark-page]").forEach((button) => {
+      const localIndex = Number(button.dataset.bookmarkIndex);
+      const page = pages[localIndex];
+      if (!page) return;
+      const sync = () => {
+        const active = ctx.session.isPageBookmarked(ctx.session.bookId, page.id, start + localIndex);
+        button.classList.toggle("is-active", active);
+        button.textContent = active ? "★" : "☆";
+        button.setAttribute("aria-pressed", String(active));
+        button.setAttribute("aria-label", active ? "しおりをはずす" : "しおりに追加");
+      };
+      button.onclick = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        ctx.session.togglePageBookmark({
+          bookId: ctx.session.bookId,
+          bookTitle: book?.title || ctx.session.bookId,
+          pageId: page.id,
+          pageIndex: start + localIndex,
+          image: page.image,
+          text: page.text,
+        });
+        sync();
+      };
+    });
 
     root.querySelectorAll("[data-shoot]").forEach((btn) => {
       const idx = Number(btn.dataset.shoot);
@@ -188,7 +226,7 @@ export const StoryScreen = {
     root.querySelectorAll("[data-vehicle-art]").forEach(async (overlay) => {
       let color = overlay.dataset.vehicleColor;
       if (!color && overlay.dataset.vehiclePhoto) {
-        // 兼容在加入车身颜色功能前已经完成的任务：从旧照片重新提取颜色。
+        // 車体カラー機能を追加する前に完了したタスクにも対応するため、古い写真から色を再抽出する。
         color = await extractPhotoColor(overlay.dataset.vehiclePhoto);
       }
       const region = JSON.parse(overlay.dataset.vehicleRegion);

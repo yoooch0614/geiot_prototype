@@ -60,7 +60,7 @@
   box-shadow: inset 0 10px 0 rgba(255, 255, 255, .25);
 }
 .title-cat {
-  position: absolute; bottom: 5dvh; right: 14%;
+  position: absolute; bottom: 12dvh; right: 14%;
   height: min(15dvh, 110px);
   /* 画像じたいが透過ずみなので mix-blend-mode: multiply は使わない。
      multiplyだと丘の緑と掛け算されて、きつねがうすぐらくなる。 */
@@ -110,4 +110,97 @@
 
 @media (prefers-reduced-motion: reduce) {
   .sky-sun, .sky-moon, .sky-cloud, .sky-star, .title-cat, .title-logo, .title-icon { animation: none; }
+}
+/* ==========================================================================
+   空を飛ぶ鳥（bird.gif）のアニメーション
+   ========================================================================== */
+.sky-bird {
+  position: absolute;
+  top: 20%;     /* 空の高さ */
+  width: 100px;  /* ★ここで鳥全体のサイズを自由に変えられるようになります！ */
+  height: auto;
+  z-index: 1;
+  
+  /* 12秒かけて「飛ぶ＋画面外でお休み」を無限ループ */
+  animation: fly-loop 12s linear infinite;
+}
+
+/* ★これが必要！中の画像が外枠（.sky-bird）のサイズに追従するようにします */
+.sky-bird img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+@keyframes fly-loop {
+  /* 0%〜60%（約7秒間）：波を打ちながら画面を左から右へ横切る */
+  0% {
+    left: -110px;
+    transform: translateY(0);
+    opacity: 1;
+  }
+  30% {
+    transform: translateY(-80px); /* 中間地点でふわっと上がる */
+  }
+  60% {
+    left: 100%;
+    transform: translateY(0);
+    opacity: 1; 
+  }
+  /* 60.1%〜100%（約5秒間）：画面外（左端）に戻り、非表示のまま待機 */
+  60.1% {
+    left: -110px;
+    opacity: 0; 
+  }
+  100% {
+    left: -110px;
+    opacity: 0; 
+  }
+}
+
+/* ==========================================================================
+   丘を歩くきつね（fox.gif）のアニメーション
+   ========================================================================== */
+.title-fox {
+  position: absolute;
+  bottom: 0dvh;  /* 丘の高さ基準 */
+  width: 200px;   /* きつねのサイズ（お好みで調整してください） */
+  height: auto;
+  z-index: 1;    /* 猫や手前の丘との重なり順 */
+  
+  /* 16秒かけて「歩く＋画面外でお休み」を無限ループ */
+  animation: walk-loop 16s linear infinite;
+}
+
+/* 中の画像が枠にしっかり収まるようにする */
+.title-fox img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+@keyframes walk-loop {
+  /* 0%〜70%（約11秒間）：左から右へ、丘の斜面に沿ってゆるやかに上下しながら歩く */
+  0% {
+    left: -70px;
+    transform: translateY(0);
+    opacity: 1;
+  }
+  35% {
+    transform: translateY(-4dvh); /* 丘のてっぺんに向かって少し上がる */
+  }
+  70% {
+    left: 100%;
+    transform: translateY(2dvh);  /* 丘を下りながら右端へ消える */
+    opacity: 1;
+  }
+  /* 70.1%〜100%（約5秒間）：画面外（左端）に戻り、非表示のまま待機（ここでGIFがリセットされます） */
+  70.1% {
+    left: -70px;
+    opacity: 0;
+  }
+  100% {
+    left: -70px;
+    opacity: 0;
+  }
 }

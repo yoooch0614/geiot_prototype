@@ -4,7 +4,14 @@ export const DiaryScreen = {
   render(ctx, { memory, fromPlay }) {
     // ページ背景にはその絵本の表紙をぼかして敷く
     const cover = ctx.repo.assetUrl(ctx.repo.book(memory.bookId)?.cover);
-    const entries = memory.entries.map((e) => {
+    const bookmarkButton = (entryIndex, label) => {
+      const bookmarked = ctx.session.isMemoryBookmarked(memory.id, entryIndex);
+      return `<button type="button" class="memory-bookmark${bookmarked ? " is-active" : ""}"
+        data-bookmark-memory data-entry-index="${entryIndex}" aria-pressed="${bookmarked}"
+        aria-label="${bookmarked ? "お気に入りをはずす" : `${esc(label)}をお気に入りに追加`}"
+        title="${bookmarked ? "お気に入りをはずす" : "お気に入りに追加"}">${bookmarked ? "★" : "☆"}</button>`;
+    };
+    const entries = memory.entries.map((e, entryIndex) => {
       const colorFills = (e.colorFills ?? []).filter((fill) => memory.bookColorPhotos?.[fill.from]);
       const hasColorFills = colorFills.length > 0;
       // おはなしの挿絵は1枚の絵として見せる（キャプションなし）。
@@ -13,6 +20,7 @@ export const DiaryScreen = {
       if (e.kind === "story") {
         return `
       <div class="diary-entry">
+        ${bookmarkButton(entryIndex, "挿絵")}
         <div class="diary-scene${hasColorFills ? " has-book-color" : ""}"${hasColorFills ? ` data-memory-color data-memory-source="${ctx.repo.assetUrl(e.image)}" data-memory-fills='${esc(JSON.stringify(colorFills))}'` : ""}>
           ${e.fillPhoto ? `<img class="fill" src="${e.fillPhoto}" alt="">` : ""}
           <img class="art" src="${ctx.repo.assetUrl(e.image)}" alt="">
@@ -24,6 +32,7 @@ export const DiaryScreen = {
       const fallback = ctx.repo.assetUrl(e.missionImage) || cover;
       return `
       <div class="diary-entry">
+        ${bookmarkButton(entryIndex, "写真")}
         ${e.photoUrl
           ? `<div class="photo-scene">
                <img src="${e.photoUrl}" alt="">
@@ -46,14 +55,39 @@ export const DiaryScreen = {
       </div>`;
   },
   mount(ctx, params = {}, root) {
-    const { view, memory } = params;
+    const { view, memory, fromBookmarks } = params;
     root.querySelector("[data-close]").onclick = () => {
-      if (view === "memories") {
+      if (fromBookmarks) {
+        ctx.go("BOOKMARKS");
+      } else if (view === "memories") {
         ctx.go("SELECT", { view: "memories" });
       } else {
         ctx.go("SELECT");
       }
     };
+    root.querySelectorAll("[data-bookmark-memory]").forEach((button) => {
+      const entryIndex = Number(button.dataset.entryIndex);
+      const entry = memory.entries[entryIndex];
+      const label = entry?.kind === "story" ? "挿絵" : "写真";
+      const sync = () => {
+        const active = ctx.session.isMemoryBookmarked(memory.id, entryIndex);
+        button.classList.toggle("is-active", active);
+        button.textContent = active ? "★" : "☆";
+        button.setAttribute("aria-pressed", String(active));
+        button.setAttribute("aria-label", active ? "お気に入りをはずす" : `${label}をお気に入りに追加`);
+      };
+      button.onclick = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        ctx.session.toggleMemoryBookmark({
+          memoryId: memory.id,
+          bookTitle: memory.bookTitle,
+          entryIndex,
+          label,
+        });
+        sync();
+      };
+    });
     root.querySelectorAll("[data-memory-color]").forEach(async (scene) => {
       const fills = JSON.parse(scene.dataset.memoryFills || "[]");
       scene.querySelectorAll("[data-memory-color-layer]").forEach(async (layer) => {

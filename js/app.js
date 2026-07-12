@@ -55,6 +55,10 @@ function applyTheme(mode = "auto") {
   updateThemeToggle(isNight, mode);
 }
 
+function updateThemeTestVisibility(screenName) {
+  if (themeToggle) themeToggle.hidden = screenName !== "MODE";
+}
+
 function scheduleThemeSync() {
   if (themeTimer) window.clearTimeout(themeTimer);
   if (themeOverride) return;
@@ -71,7 +75,7 @@ function scheduleThemeSync() {
     next.setHours(DAY_START_HOUR, 0, 0, 0);
   }
 
-  // 页面一直开着时，也会在下一个切换时间自动更新，不需要重新加载。
+  // ページを開いたままでも、次の切り替え時刻に自動更新する。
   themeTimer = window.setTimeout(() => {
     if (themeOverride) return;
     applyTheme("auto");
@@ -111,6 +115,7 @@ let currentScreen = null;
 function go(name, params = {}) {
   const screen = Screens[name];
   if (!screen) return;
+  updateThemeTestVisibility(name);
   currentScreen?.unmount?.(ctx);
   root.innerHTML = screen.render(ctx, params);
   root.querySelector(".screen")?.classList.add("page--in"); // 画面切り替えの入場アニメを全画面に統一

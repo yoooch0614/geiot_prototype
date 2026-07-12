@@ -34,6 +34,20 @@
   box-shadow: 0 4px 14px rgba(58, 74, 63, .12);
   animation: diary-rise 480ms cubic-bezier(.22, 1, .36, 1) both;
 }
+.memory-bookmark {
+  position: absolute; top: 8px; right: 8px; z-index: 4;
+  width: 38px; height: 38px; padding: 0;
+  border: 1px solid rgba(107, 191, 89, .24); border-radius: 50%;
+  color: var(--green); background: rgba(255, 255, 255, .94);
+  font: 900 23px/1 inherit; cursor: pointer;
+  box-shadow: 0 2px 8px rgba(58, 74, 63, .16);
+  transition: transform 120ms, color 120ms, background 120ms;
+}
+.memory-bookmark:active { transform: scale(.9); }
+.memory-bookmark.is-active {
+  color: #b98214; background: #fff1b8;
+  border-color: rgba(185, 130, 20, .3);
+}
 .diary-entry:nth-child(odd)  { rotate: -1.1deg; }
 .diary-entry:nth-child(even) { rotate: 1.1deg; }
 .diary-entry::before {

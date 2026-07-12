@@ -31,8 +31,23 @@
   width: 100%; height: 100%; box-sizing: border-box;
   background: var(--paper);
   display: flex; flex-direction: column; gap: 16px; justify-content: center;
-  padding: 8px 6px; overflow-y: auto;
+  padding: 8px 6px; overflow-y: auto; position: relative;
   align-items: center; text-align: center;
+}
+
+.page-bookmark {
+  position: absolute; top: 14px; right: 14px; z-index: 8;
+  width: 42px; height: 42px; padding: 0;
+  border: 1px solid rgba(107, 191, 89, .25); border-radius: 50%;
+  color: var(--green); background: var(--card);
+  font: 900 25px/1 inherit; cursor: pointer;
+  box-shadow: 0 3px 10px rgba(58, 74, 63, .16);
+  transition: transform 120ms, color 120ms, background 120ms;
+}
+.page-bookmark:active { transform: scale(.9); }
+.page-bookmark.is-active {
+  color: #b98214; background: #fff1b8;
+  border-color: rgba(185, 130, 20, .3);
 }
 
 .scene { position: relative; border-radius: 20px; overflow: hidden; background: #eef4e7; aspect-ratio: 4/3; display: flex; flex-shrink: 0; }

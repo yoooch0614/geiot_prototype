@@ -5,6 +5,7 @@
  * ・いま読んでいる絵本とページ
  * ・今回のプレイで達成したミッション（写真つき）
  * ・完成した絵本日記（思い出）＝ギャラリー
+ * ・お気に入りのページ／写真＝しおり
  * ・外で活動した日（健全なストリーク：没収しない・責めない）
  *
  * 保存先は2段構え：
@@ -33,6 +34,7 @@ export class Session {
     this.pageIndex = 0;
     this.runMissions = [];    // 今回のプレイの達成 [{missionId, photoUrl, caption, missionText}]
     this.memories = [];       // 完成した絵本日記（写真つき・IndexedDBから復元される）
+    this.bookmarks = [];      // お気に入りのページ／日記エントリー（軽いメタ情報だけ）
 
     // --- localStorage（メタのみ）---
     this.activityDays = new Set(); // 外で活動した日
@@ -104,6 +106,70 @@ export class Session {
   // 敷いて見せるために使う（page.fillFrom）。
   missionPhoto(missionId) {
     return this.runMissions.find((m) => m.missionId === missionId)?.photoUrl ?? null;
+  }
+
+  // ── しおり（お気に入り） ─────────────────
+  // 写真本体は保存せず、完成した memory と entryIndex だけを参照する。
+  // そのため localStorage の容量を圧迫せず、写真は今までどおり IndexedDB に任せられる。
+  isPageBookmarked(bookId, pageId, pageIndex) {
+    return this.bookmarks.some((b) => b.kind === "page" && b.bookId === bookId &&
+      (pageId ? b.pageId === pageId : b.pageIndex === pageIndex));
+  }
+
+  togglePageBookmark({ bookId, bookTitle, pageId, pageIndex, image, text }) {
+    const stablePageId = pageId || `page-${pageIndex}`;
+    const id = `page:${bookId}:${stablePageId}`;
+    const i = this.bookmarks.findIndex((b) => b.id === id);
+    if (i >= 0) {
+      this.bookmarks.splice(i, 1);
+      this._save();
+      return false;
+    }
+    this.bookmarks.unshift({
+      id,
+      kind: "page",
+      bookId,
+      bookTitle,
+      pageId: stablePageId,
+      pageIndex,
+      image,
+      text,
+      createdAt: new Date().toISOString(),
+    });
+    this._save();
+    return true;
+  }
+
+  isMemoryBookmarked(memoryId, entryIndex) {
+    return this.bookmarks.some((b) => b.kind === "memory" &&
+      b.memoryId === memoryId && b.entryIndex === entryIndex);
+  }
+
+  toggleMemoryBookmark({ memoryId, bookTitle, entryIndex, label }) {
+    const id = `memory:${memoryId}:${entryIndex}`;
+    const i = this.bookmarks.findIndex((b) => b.id === id);
+    if (i >= 0) {
+      this.bookmarks.splice(i, 1);
+      this._save();
+      return false;
+    }
+    this.bookmarks.unshift({
+      id,
+      kind: "memory",
+      memoryId,
+      bookTitle,
+      entryIndex,
+      label,
+      createdAt: new Date().toISOString(),
+    });
+    this._save();
+    return true;
+  }
+
+  removeBookmark(id) {
+    const before = this.bookmarks.length;
+    this.bookmarks = this.bookmarks.filter((b) => b.id !== id);
+    if (this.bookmarks.length !== before) this._save();
   }
 
   // ── 絵本完了 → 絵本日記を生成 ──────────────
@@ -186,6 +252,7 @@ export class Session {
     this.activityDays = new Set();
     this.memoryLog = [];
     this.memories = [];
+    this.bookmarks = [];
     this.runMissions = [];
     this._save();
     Storage.remove(MEMORIES_KEY);
@@ -220,6 +287,7 @@ export class Session {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
         activityDays: [...this.activityDays],
         memoryLog: this.memoryLog,
+        bookmarks: this.bookmarks,
         pin: this.pin,
       }));
     } catch (_) {}
@@ -231,6 +299,7 @@ export class Session {
       const s = JSON.parse(raw);
       this.activityDays = new Set(s.activityDays ?? []);
       this.memoryLog = s.memoryLog ?? [];
+      this.bookmarks = Array.isArray(s.bookmarks) ? s.bookmarks : [];
       this.pin = s.pin ?? DEFAULT_PIN;
     } catch (_) {}
   }
