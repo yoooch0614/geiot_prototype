@@ -1,13 +1,11 @@
 export const ModeScreen = {
   render(ctx) {
-    // gifは背景（うすいクリーム色）を消せないので、透過つきの webp にした。
-    // gifのままだと丘の緑と混ぜて消すしかなく、きつねまで暗くなってしまう。
     const cat = ctx.repo.assetUrl("assets/char-cat.webp");
-    // タイトルはアイコンそのもの（「えほえほ」のロゴが絵に入っている）。
-    // 白い看板は置かず、空にふわふわ浮かんでいるように見せる。
-    // png(455KB)ではなく webp(46KB)を使う。重いと、Wi-Fi経由のiPadで
-    // 読み込み途中の「上半分だけ」が見えてしまうため。
     const icon = ctx.repo.assetUrl("assets/icon.webp");
+    const bird = ctx.repo.assetUrl("assets/bird.gif");
+    // 1. 歩くきつねのGIFアセットを読み込む
+    const fox = ctx.repo.assetUrl("assets/wolk_foxy.gif");
+
     return `
       <div class="screen center title-screen screen--sky">
         <div class="sky-scene" aria-hidden="true">
@@ -19,11 +17,16 @@ export const ModeScreen = {
           <span class="sky-star sky-star--2"></span>
           <span class="sky-star sky-star--3"></span>
           <span class="sky-star sky-star--4"></span>
+          ${bird ? `<span class="sky-bird"><img src="${bird}" alt=""></span>` : ""}
         </div>
         <div class="title-hills" aria-hidden="true">
           <span class="title-hill title-hill--far"></span>
           <span class="title-hill title-hill--near"></span>
+          
+          <!-- 2. きつねの要素を追加（手前の丘の上に表示されるようにここに配置） -->
           ${cat ? `<img class="title-cat" src="${cat}" alt="">` : ""}
+          ${fox ? `<img class="title-fox" src="${fox}" alt="">` : ""}
+          
         </div>
         <div class="title-logo">
           <img class="title-icon" src="${icon}" alt="えほえほ" onerror="this.remove()">
