@@ -36,7 +36,7 @@ def lan_ip() -> str:
 
 # 音声・画像などの素材。no-store にすると鳴らすたびに mp3 を取り直すことになり、
 # 取得が間に合わず音が出ないことがあるので、端末に持たせておきたい。
-MEDIA_SUFFIXES = (".mp3", ".wav", ".m4a", ".ogg", ".png", ".jpg", ".jpeg", ".gif", ".svg")
+MEDIA_SUFFIXES = (".mp3", ".wav", ".m4a", ".ogg", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp")
 
 
 class Handler(http.server.SimpleHTTPRequestHandler):

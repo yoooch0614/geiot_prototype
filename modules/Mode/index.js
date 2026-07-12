@@ -1,9 +1,11 @@
 export const ModeScreen = {
   render(ctx) {
     const cat = ctx.repo.assetUrl("assets/char-cat.gif");
-    // タイトルは icon.png そのもの（「えほえほ」のロゴが絵に入っている）。
+    // タイトルはアイコンそのもの（「えほえほ」のロゴが絵に入っている）。
     // 白い看板は置かず、空にふわふわ浮かんでいるように見せる。
-    const icon = ctx.repo.assetUrl("assets/icon.png");
+    // png(455KB)ではなく webp(46KB)を使う。重いと、Wi-Fi経由のiPadで
+    // 読み込み途中の「上半分だけ」が見えてしまうため。
+    const icon = ctx.repo.assetUrl("assets/icon.webp");
     return `
       <div class="screen center title-screen screen--sunny">
         <div class="sunny-sky" aria-hidden="true">
