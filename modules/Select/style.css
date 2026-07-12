@@ -30,6 +30,7 @@
 
 .select-title {
   position: relative;
+  flex: 0 0 auto;
 }
 .select-title::before,
 .select-title::after {
@@ -47,6 +48,7 @@
 .select-toolbar {
   display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
   margin: 4px 0 8px; position: relative; z-index: 1;
+  flex: 0 0 auto;
 }
 .select-action {
   font-family: inherit; font-size: 13px; font-weight: 700; color: var(--ink);
@@ -60,9 +62,14 @@
   color: #5d6c63; box-shadow: 0 4px 14px rgba(58,74,63,.08);
 }
 
+/* ---------- 画面内に「本棚全体」を縦横比を保ったまま収める ---------- */
+
 .shelf-pager {
+  flex: 1 1 0;
+  min-height: 0;
   display: flex; gap: 14px;
-  overflow-x: auto; overflow-y: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-x;
@@ -73,10 +80,25 @@
 }
 .shelf-pager::-webkit-scrollbar { display: none; }
 .shelf-pager img { -webkit-user-drag: none; user-drag: none; }
-.shelf-page { flex: 0 0 100%; min-width: 0; scroll-snap-align: center; }
+
+.shelf-page {
+  flex: 0 0 100%;
+  min-width: 0;
+  min-height: 0;
+  scroll-snap-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;      /* 本棚を横方向に中央寄せ */
+  justify-content: center;  /* 本棚を縦方向にも中央寄せ */
+}
+
+/* ---------- ここまで ---------- */
 
 /* ページ送りは小さな星で */
-.shelf-dots { display: flex; justify-content: center; gap: 10px; }
+.shelf-dots {
+  display: flex; justify-content: center; gap: 10px;
+  flex: 0 0 auto;
+}
 .shelf-dot {
   width: auto; height: auto; padding: 0; border: none; background: none;
   font-size: 15px; line-height: 1; color: #d8c8a4; cursor: pointer;
@@ -98,6 +120,14 @@
     var(--wood) 10px calc(100% - 10px),
     var(--wood-deep) calc(100% - 10px) 100%);
   box-shadow: var(--shadow);
+
+  height: 100%;              /* まず縦幅は親(.shelf-page)いっぱいに */
+  min-height: 0;
+  width: auto;                  /* 幅は高さとaspect-ratioから逆算 */
+  aspect-ratio: 4 / 5;           /* 本棚全体の縦横比（要調整・下記参照） */
+  max-width: 100%;               /* 横がはみ出す場合の保険 */
+  display: flex;
+  flex-direction: column;
 }
 
 /* 屋根：緑のひさし＋波形の垂れかざり */
@@ -109,6 +139,7 @@
   background: linear-gradient(180deg, #85cf72, var(--green));
   display: flex; align-items: center; justify-content: center;
   box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .10);
+  flex: 0 0 auto;
 }
 .shelf-awning::after {
   content: "";
@@ -152,14 +183,26 @@
   border-radius: 4px;
 }
 
-.shelf-body { padding-top: 22px; }
-.shelf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding-bottom: 14px; }
+.shelf-body {
+  padding-top: 22px;
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.shelf-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding-bottom: 14px;
+  flex: 1 1 0;
+  min-height: 0;
+}
 .shelf-row > .book-card { min-width: 0; }
 .shelf-board {
   height: 14px;
   margin: 0 -12px 14px;
   background: linear-gradient(180deg, var(--wood) 0%, var(--wood-dark) 55%, var(--wood-dark) 100%);
   box-shadow: 0 3px 5px rgba(58, 40, 20, .25), inset 0 2px 0 rgba(255, 255, 255, .25);
+  flex: 0 0 auto;
 }
 .shelf-base {
   height: 16px;
@@ -167,10 +210,30 @@
   border-radius: 8px 8px 20px 20px;
   background: linear-gradient(180deg, var(--wood-dark), var(--wood));
   box-shadow: inset 0 2px 0 rgba(255, 255, 255, .2);
+  flex: 0 0 auto;
 }
 
-/* 表紙にかぶせる年齢バッジ */
-.book-cover { position: relative; }
+/* ---------- 本のカードと表紙：棚のセルに素直にフィット ---------- */
+.book-card {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.book-cover {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 0;
+  aspect-ratio: auto;
+  width: 100%;
+}
+.book-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .book-age-badge {
   position: absolute; top: 8px; right: 8px;
   background: rgba(255, 255, 255, .92); color: var(--ink);
@@ -185,7 +248,7 @@
 }
 .book-card--ghost:active { transform: none; }
 .book-cover--ghost {
-  width: 100%; aspect-ratio: 4/3; border-radius: 16px;
+  width: 100%; border-radius: 16px;
   border: 3px dashed rgba(150, 105, 58, .5);
   display: flex; align-items: center; justify-content: center;
   background: linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,255,255,.6));

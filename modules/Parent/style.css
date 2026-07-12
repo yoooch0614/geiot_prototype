@@ -1,5 +1,5 @@
 .parent { justify-content: flex-start; padding-top: 64px; }
-.parent-title { font-size: 24px; font-weight: 900; margin: 0 0 4px; }
+.parent-title { font-size: 24px; font-weight: 900; margin: 0 0 4px; text-align: center;}
 .stat-row { display: flex; gap: 14px; }
 .stat {
   flex: 1; background: #fff; border-radius: 20px; padding: 18px; text-align: center;
