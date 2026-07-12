@@ -93,10 +93,18 @@ export const StoryScreen = {
 
     // 物語もミッションも同じ1冊として読み込む。ミッション未達成でも先のページを
     // 読めるようにし、写真撮影は各ミッションページのボタンから行う。
+    const container = bookEl.parentElement;
+    const availableWidth = Math.max(360, container?.clientWidth || window.innerWidth);
+    const availableHeight = Math.max(520, container?.clientHeight || window.innerHeight);
     const flip = new St.PageFlip(bookEl, {
-      width: 380, height: 560,
+      width: availableWidth,
+      height: availableHeight,
       size: "stretch",
-      minWidth: 240, maxWidth: 460, minHeight: 340, maxHeight: 760,
+      usePortrait: true,
+      minWidth: availableWidth,
+      maxWidth: availableWidth,
+      minHeight: availableHeight,
+      maxHeight: availableHeight,
       startPage: offset,
       showCover: false,
       maxShadowOpacity: 0.3,
