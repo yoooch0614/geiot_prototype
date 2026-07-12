@@ -44,27 +44,6 @@ html, body {
   position: relative;
 }
 
-.ai-watermark {
-  position: fixed;
-  right: max(12px, env(safe-area-inset-right));
-  bottom: max(54px, calc(env(safe-area-inset-bottom) + 54px));
-  z-index: 90;
-  padding: 4px 8px;
-  border: 1px solid rgba(58, 74, 63, .18);
-  border-radius: 999px;
-  color: rgba(58, 74, 63, .62);
-  background: rgba(255, 255, 255, .58);
-  font: 700 10px/1 var(--font);
-  letter-spacing: .04em;
-  pointer-events: none;
-  user-select: none;
-}
-body.night-theme .ai-watermark {
-  color: rgba(233, 241, 255, .62);
-  background: rgba(31, 52, 85, .58);
-  border-color: rgba(180, 205, 238, .2);
-}
-
 .screen {
   height: 100dvh;
   padding: max(18px, env(safe-area-inset-top)) 18px max(18px, env(safe-area-inset-bottom));
