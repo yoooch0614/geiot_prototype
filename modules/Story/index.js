@@ -2,17 +2,19 @@ import { playAudio, esc, stage, characterLayer, layersMarkup, fillLayer, bookCol
 
 // 物語ページとミッションページを、いまのページを含む「1冊にできる範囲」で取り出す。
 // ・ end ページの手前で必ず区切る（達成の演出は別画面 COMPLETE が受け持つため）。
-// ・ ミッション未達成でも、本の続きは先に読めるようにする。
-//   写真撮影は対応するミッションページで行い、達成後は fillFrom によって
-//   後続ページの絵に写真が反映される。
+// ・ 未達成のミッションページの先は、まだ含めない（そこから先はミッション達成待ち＝
+//   本の続きがまだ用意できていない）。写真撮影は対応するミッションページで行い、
+//   達成すると次にこの画面を開いたときに、fillFrom によって後続ページの絵に
+//   写真が反映された状態で、その先まで含めた新しい本が作られる。
 function bookChapter(ctx) {
   const bookId = ctx.session.bookId;
   const count = ctx.repo.pageCount(bookId);
   const all = Array.from({ length: count }, (_, i) => ctx.repo.pageAt(bookId, i));
+  const canPassThrough = (page) => page.type !== "mission" || ctx.session.isMissionDone(page.id);
   let start = ctx.session.pageIndex;
   let end = ctx.session.pageIndex;
   while (start > 0 && all[start - 1].type !== "end") start--;
-  while (end < count - 1 && all[end + 1].type !== "end") end++;
+  while (end < count - 1 && all[end + 1].type !== "end" && canPassThrough(all[end])) end++;
   return { pages: all.slice(start, end + 1), start, count, all };
 }
 
