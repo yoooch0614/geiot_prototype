@@ -67,7 +67,7 @@ function scheduleThemeSync() {
     next.setHours(DAY_START_HOUR, 0, 0, 0);
   }
 
-  // 页面一直开着时，也会在下一个切换时间自动更新，不需要重新加载。
+  // ページを開いたままでも、次の切り替え時刻に自動更新する。
   themeTimer = window.setTimeout(() => {
     if (themeOverride) return;
     applyTheme("auto");

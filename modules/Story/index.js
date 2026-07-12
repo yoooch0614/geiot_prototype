@@ -216,7 +216,7 @@ export const StoryScreen = {
     root.querySelectorAll("[data-vehicle-art]").forEach(async (overlay) => {
       let color = overlay.dataset.vehicleColor;
       if (!color && overlay.dataset.vehiclePhoto) {
-        // 兼容在加入车身颜色功能前已经完成的任务：从旧照片重新提取颜色。
+        // 車体カラー機能を追加する前に完了したタスクにも対応するため、古い写真から色を再抽出する。
         color = await extractPhotoColor(overlay.dataset.vehiclePhoto);
       }
       const region = JSON.parse(overlay.dataset.vehicleRegion);
