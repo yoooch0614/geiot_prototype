@@ -18,34 +18,160 @@
   gap: 8px;
   color: #5c6d63;
 }
+
+/* ---------- レーダーチャート ---------- */
+.analysis-chart-wrap {
+  position: relative;
+  margin: 12px auto 0;
+}
+.analysis-chart-glow {
+  position: absolute;
+  inset: 0;
+  opacity: 0.55;
+  filter: blur(1px);
+}
 .analysis-chart {
+  position: relative;
   display: block;
   width: 100%;
-  max-width: 260px;
-  margin: 12px auto 0;
+  height: 100%;
+  z-index: 1;
 }
 .analysis-ring {
   fill: none;
-  stroke: #d9e6cf;
+  stroke: rgba(58, 74, 63, 0.14);
   stroke-width: 1;
+}
+.analysis-ring-label {
+  font-size: 14px;
+  fill: rgba(58, 74, 63, 0.4);
+  text-anchor: start;
 }
 .analysis-axis {
-  stroke: #d9e6cf;
+  stroke: rgba(58, 74, 63, 0.14);
   stroke-width: 1;
 }
-.analysis-label {
-  fill: #5c6d63;
-  font-size: 11px;
-  text-anchor: middle;
-}
 .analysis-polygon {
-  fill: rgba(107, 191, 89, 0.24);
-  stroke: rgba(107, 191, 89, 0.8);
+  fill: none;
+  stroke: rgba(58, 74, 63, 0.5);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+/* fillはここで指定せず、SVG側の fill="${p.color}" を活かす
+   （CSSでfillを指定すると、軸ごとの色分けが効かなくなるため） */
+.analysis-point {
+  stroke: #fff;
   stroke-width: 2;
 }
-.analysis-point {
-  fill: var(--green);
-}
 .analysis-center {
-  fill: var(--green);
+  fill: rgba(58, 74, 63, 0.3);
+}
+.analysis-label {
+  font-size: 17px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+.analysis-label-value {
+  font-size: 15px;
+  fill: #5d6c63;
+  text-anchor: middle;
+}
+
+/* ---------- 特性リスト ---------- */
+.trait-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.trait-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, .7);
+  border-radius: 14px;
+}
+.trait-label {
+  font-weight: 700;
+  color: var(--ink);
+  flex: 0 0 auto;
+  min-width: 92px;
+}
+.trait-value {
+  color: #5d6c63;
+  flex: 1 1 auto;
+}
+
+/* アイコン共通の土台 */
+.trait-icon {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  display: inline-block;
+}
+
+/* 好きな色：3色のドットが重なったパレット */
+.trait-icon--palette .dot {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  box-shadow: 0 1px 2px rgba(0,0,0,.15);
+}
+.trait-icon--palette .d1 { background: var(--blue); top: 0; left: 4px; }
+.trait-icon--palette .d2 { background: var(--yellow); top: 10px; left: 0; }
+.trait-icon--palette .d3 { background: var(--coral); top: 10px; left: 14px; }
+
+/* 性格：まる顔（にっこり） */
+.trait-icon--smile {
+  background: var(--yellow);
+  border-radius: 50%;
+}
+.trait-icon--smile .eye {
+  position: absolute;
+  width: 3px; height: 3px;
+  border-radius: 50%;
+  background: var(--ink);
+  top: 10px;
+}
+.trait-icon--smile .e1 { left: 8px; }
+.trait-icon--smile .e2 { right: 8px; }
+.trait-icon--smile .mouth {
+  position: absolute;
+  left: 50%; top: 13px;
+  width: 12px; height: 6px;
+  border-radius: 0 0 12px 12px;
+  border-bottom: 2px solid var(--ink);
+  transform: translateX(-50%);
+}
+
+/* 好きなこと：星形（本棚の★と同じ描き方） */
+.trait-icon--star {
+  background: linear-gradient(135deg, var(--yellow), var(--coral));
+  clip-path: polygon(
+    50% 0%, 61% 35%, 98% 35%, 68% 57%,
+    79% 91%, 50% 70%, 21% 91%, 32% 57%,
+    2% 35%, 39% 35%
+  );
+}
+
+/* 習い事の提案：閉じた本 */
+.trait-icon--book {
+  background: var(--green);
+  border-radius: 3px 6px 6px 3px;
+}
+.trait-icon--book::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+  background: rgba(0,0,0,.15);
+  border-radius: 3px 0 0 3px;
+}
+.trait-icon--book .page {
+  position: absolute;
+  top: 4px; left: 8px; right: 4px; bottom: 4px;
+  background: #fff;
+  border-radius: 1px 4px 4px 1px;
 }
