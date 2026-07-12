@@ -2,7 +2,7 @@
   "id": "book-niji",
   "title": "にじいろピクニックへ、しゅっぱつ！",
   "ageRange": "3-6",
-  "cover": "assets/cover-niji.svg",
+  "cover": "assets/niji/cover-niji.png",
   "pages": [
     {
       "id": "n1",
