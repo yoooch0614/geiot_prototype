@@ -96,10 +96,18 @@ export const StoryScreen = {
     // 物語もミッションも同じ1冊として読み込む。まだ達成していないミッションの先は
     // 本に含まれていないので、そこから先はスワイプでもめくれない
     // （＝ミッションを済ませないと物語が続かない）。
+    const container = bookEl.parentElement;
+    const availableWidth = Math.max(360, container?.clientWidth || window.innerWidth);
+    const availableHeight = Math.max(520, container?.clientHeight || window.innerHeight);
     const flip = new St.PageFlip(bookEl, {
-      width: 380, height: 560,
+      width: availableWidth,
+      height: availableHeight,
       size: "stretch",
-      minWidth: 240, maxWidth: 460, minHeight: 340, maxHeight: 760,
+      usePortrait: true,
+      minWidth: availableWidth,
+      maxWidth: availableWidth,
+      minHeight: availableHeight,
+      maxHeight: availableHeight,
       startPage: offset,
       showCover: false,
       maxShadowOpacity: 0.3,
