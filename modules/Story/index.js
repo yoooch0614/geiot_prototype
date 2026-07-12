@@ -1,21 +1,18 @@
-import { playAudio, esc, stage, characterLayer, layersMarkup, fillLayer, openCamera, createRepeatableSound } from "../shared/utils.js";
+import { playAudio, esc, stage, characterLayer, layersMarkup, fillLayer, bookColorLayer, vehicleColorLayer, extractPhotoColor, fillArtworkHoles, recolorVehicleImage, openCamera, createRepeatableSound } from "../shared/utils.js";
 
 // 物語ページとミッションページを、いまのページを含む「1冊にできる範囲」で取り出す。
 // ・ end ページの手前で必ず区切る（達成の演出は別画面 COMPLETE が受け持つため）。
-// ・ 未達成のミッションページの先は、まだ含めない（そこから先はミッション達成待ち＝
-//   本の続きがまだ用意できていない）。写真撮影は対応するミッションページで行い、
-//   達成すると次にこの画面を開いたときに、fillFrom によって後続ページの絵に
-//   写真が反映された状態で、その先まで含めた新しい本が作られる。
+// ・ ミッション未達成でも、本の続きは先に読めるようにする。
+//   写真撮影は対応するミッションページで行い、達成後は fillFrom によって
+//   後続ページの絵に写真が反映される。
 function bookChapter(ctx) {
   const bookId = ctx.session.bookId;
   const count = ctx.repo.pageCount(bookId);
   const all = Array.from({ length: count }, (_, i) => ctx.repo.pageAt(bookId, i));
-  const canPassThrough = (page) => page.type !== "mission" || ctx.session.isMissionDone(page.id);
-
   let start = ctx.session.pageIndex;
   let end = ctx.session.pageIndex;
   while (start > 0 && all[start - 1].type !== "end") start--;
-  while (end < count - 1 && all[end + 1].type !== "end" && canPassThrough(all[end])) end++;
+  while (end < count - 1 && all[end + 1].type !== "end") end++;
   return { pages: all.slice(start, end + 1), start, count, all };
 }
 
@@ -26,6 +23,7 @@ function pageMarkup(ctx, page, { index, showFinish }) {
     <div class="scene">
       ${fillLayer(ctx, page)}
       <img class="art" src="${img}" alt="" onerror="this.style.opacity=0">
+      ${ctx.session.bookId === "book-niji" ? bookColorLayer(ctx, page) : vehicleColorLayer(ctx, page)}
       ${characterLayer(character)}
       ${layersMarkup(ctx, page.layers)}
     </div>`;
@@ -162,6 +160,40 @@ export const StoryScreen = {
     });
 
     flip.loadFromHTML(bookEl.querySelectorAll(".flip-page"));
+    root.querySelectorAll("[data-book-color-art]").forEach(async (overlay) => {
+      const filled = await fillArtworkHoles(
+        overlay.dataset.bookColorSource,
+        overlay.dataset.bookColorPhoto,
+        Number(overlay.dataset.bookColorScale) || 1,
+      );
+      if (filled) {
+        overlay.src = filled;
+        overlay.style.opacity = "1";
+      } else {
+        overlay.remove();
+      }
+    });
+    root.querySelectorAll("[data-vehicle-art]").forEach(async (overlay) => {
+      let color = overlay.dataset.vehicleColor;
+      if (!color && overlay.dataset.vehiclePhoto) {
+        // 兼容在加入车身颜色功能前已经完成的任务：从旧照片重新提取颜色。
+        color = await extractPhotoColor(overlay.dataset.vehiclePhoto);
+      }
+      const region = JSON.parse(overlay.dataset.vehicleRegion);
+      const recolored = await recolorVehicleImage(
+        overlay.dataset.vehicleSource,
+        color,
+        region,
+        overlay.dataset.vehicleTone,
+        overlay.dataset.vehiclePhoto,
+      );
+      if (recolored) {
+        overlay.src = recolored;
+        overlay.style.opacity = "1";
+      } else {
+        overlay.remove();
+      }
+    });
     currentFlip = flip;
   },
   unmount() {

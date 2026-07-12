@@ -22,21 +22,30 @@
         "もよう"
       ],
       "image": "assets/niji/p2.png",
-      "frame": { "x": 290, "y": 340, "width": 420, "height": 260, "radius": 20 }
+      "frame": { "x": 290, "y": 340, "width": 420, "height": 260, "radius": 20 },
+      "vehicleColorFrom": "nm1",
+      "vehicleRegion": { "x": 0.29, "y": 0.48, "width": 0.43, "height": 0.28 },
+      "vehicleTone": "transparent"
     },
     {
       "id": "n2",
       "type": "story",
       "text": "「わあ、すてきなくるま！ こんなくるま、みたことないよ！」",
       "image": "assets/niji/p3.png",
-      "fillFrom": "nm1"
+      "fillFrom": "nm1",
+      "vehicleColorFrom": "nm1",
+      "vehicleRegion": { "x": 0.27, "y": 0.45, "width": 0.47, "height": 0.33 },
+      "vehicleTone": "transparent"
     },
     {
       "id": "n3",
       "type": "story",
       "text": "ミミとポコは、かんせいしたくるまにのって しゅっぱつしました。",
       "image": "assets/niji/p4.png",
-      "fillFrom": "nm1"
+      "fillFrom": "nm1",
+      "vehicleColorFrom": "nm1",
+      "vehicleRegion": { "x": 0.02, "y": 0.52, "width": 0.38, "height": 0.33 },
+      "vehicleTone": "transparent"
     },
     {
       "id": "nm2",
@@ -51,6 +60,9 @@
       ],
       "image": "assets/niji/p5.png",
       "fillFrom": "nm1",
+      "vehicleColorFrom": "nm1",
+      "vehicleRegion": { "x": 0.00, "y": 0.43, "width": 0.37, "height": 0.34 },
+      "vehicleTone": "transparent",
       "frame": { "x": 294, "y": 211, "width": 691, "height": 328, "radius": 20 }
     },
     {
@@ -65,7 +77,10 @@
       "type": "story",
       "text": "ミミとポコはまちをでて、はしをわたり、おおきなきのある はらっぱへ むかいました。",
       "image": "assets/niji/p7.png",
-      "fillFrom": "nm1"
+      "fillFrom": "nm1",
+      "vehicleColorFrom": "nm1",
+      "vehicleRegion": { "x": 0.03, "y": 0.49, "width": 0.38, "height": 0.35 },
+      "vehicleTone": "transparent"
     },
     {
       "id": "nm3",
@@ -86,7 +101,10 @@
       "type": "story",
       "text": "「わあ！ きみだけの、おはなとちょうちょだ！」はらっぱには、いろとりどりのおはながさき、ちょうちょがたのしそうにとびはじめました。",
       "image": "assets/niji/p9.png",
-      "fillFrom": "nm3"
+      "fillFrom": "nm3",
+      "vehicleColorFrom": "nm1",
+      "vehicleRegion": { "x": 0.49, "y": 0.46, "width": 0.42, "height": 0.35 },
+      "vehicleTone": "transparent"
     },
     {
       "id": "nend",

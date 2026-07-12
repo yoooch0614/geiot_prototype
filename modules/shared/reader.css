@@ -61,10 +61,24 @@
 }
 .zoom-button:active { transform: translateY(2px); box-shadow: 0 1px 0 #e0b62f; }
 .photo-zoom output { min-width: 48px; text-align: right; font-size: 14px; }
+.photo-convert {
+  display: inline-flex; align-items: center; gap: 8px; margin-top: -4px;
+  color: var(--ink); font-weight: 700; cursor: pointer;
+}
+.photo-convert input { width: 20px; height: 20px; accent-color: var(--green); }
+.convert-hint { margin: -12px 0 0; color: #7a877e; font-size: 12px; }
 /* 挿絵の透明な部分（＝まだ色のないくるま・おうち・おはな）から、こどもが撮った写真がのぞく。
    写真（.fill）を挿絵（.art）の下に敷くだけで、はめこみになる。 */
 .scene .fill { position: absolute; inset: 0; z-index: 0; }
 .scene .art { position: relative; z-index: 1; }
+.scene .vehicle-color-art {
+  position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%;
+  object-fit: cover; pointer-events: none; opacity: 0;
+}
+.scene .book-color-art {
+  position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%;
+  object-fit: cover; pointer-events: none; opacity: 0;
+}
 /* gifキャラクターは背景写真の上に重ねる。文字（.lead など）は .scene の外、下に続く。
    mix-blend-mode: multiply で、白背景のgifでも白い部分が背景となじんで透明に見える
    （黒い線画やはっきりした色は残る）。本当に透明なgifを用意できるなら、これは不要。 */
