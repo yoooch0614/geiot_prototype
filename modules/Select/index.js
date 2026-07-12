@@ -1,6 +1,40 @@
 import { esc } from "../shared/utils.js";
+import { openGuide } from "../shared/guide.js";
 
 const BOOKS_PER_SHELF = 4; // 1つの棚 = 2段 x 2冊
+
+const PARENT_GUIDE_STEPS = [
+  {
+    number: "1",
+    image: "assets/cover-nono.png",
+    type: "tap",
+    target: "ほん",
+    title: "おもいでを ひらく",
+    action: "本棚の ほんを タッチ",
+    text: "かんせいした えほんと しゃしんを みられます",
+    focus: "[data-book]",
+  },
+  {
+    number: "2",
+    image: "assets/scene-cheer.svg",
+    type: "tap",
+    target: "活動履歴",
+    title: "活動履歴を みる",
+    action: "「活動履歴」を タッチ",
+    text: "あそんだ日と ミッションの数を みられます",
+    focus: '[data-go="PARENT"]',
+  },
+  {
+    number: "3",
+    image: "assets/scene-meadow.svg",
+    type: "tap",
+    target: "分析",
+    title: "特性分析を みる",
+    action: "「子どもの特性分析」を タッチ",
+    text: "こどもの あそびの ようすを みられます",
+    focus: '[data-go="ANALYSIS"]',
+  },
+];
 
 // 読みかけの本を選んだとき、「つづきから」か「はじめから」かをたずねる。
 // 黙って続きから始めると、読み直したいのに戻れない。逆に黙って最初からにすると、
@@ -121,6 +155,7 @@ export const SelectScreen = {
       <div class="select-toolbar">
         <button class="select-action" data-go="PARENT">活動履歴</button>
         <button class="select-action" data-go="ANALYSIS">子どもの特性分析</button>
+        <button class="select-action" data-parent-guide>操作方法</button>
       </div>` : "";
     const emptyState = isParent && books.length === 0 ? `
       <div class="select-empty">
@@ -147,6 +182,15 @@ export const SelectScreen = {
   mount(ctx, _p, root) {
     root.querySelector("[data-back]").onclick = () => ctx.go(ctx.session.mode === "parent" ? "MODE" : "HOME");
     root.querySelectorAll("[data-go]").forEach((b) => b.onclick = () => ctx.go(b.dataset.go));
+    const showParentGuide = () => openGuide(ctx, root, {
+      steps: PARENT_GUIDE_STEPS,
+      kicker: "おうちのひとへ",
+      title: "操作方法",
+      finalLabel: "わかった！",
+      onComplete: () => ctx.session.markParentGuideSeen(),
+    });
+    root.querySelector("[data-parent-guide]")?.addEventListener("click", showParentGuide);
+    if (ctx.session.mode === "parent" && !_p?.view && !ctx.session.hasSeenParentGuide()) showParentGuide();
     root.querySelectorAll("[data-book]").forEach((b) => {
       b.onclick = () => {
         const memory = ctx.session.memories.find((m) => m.bookId === b.dataset.book);

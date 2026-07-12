@@ -1,3 +1,33 @@
+import { openGuide } from "../shared/guide.js";
+
+const GUIDE_STEPS = [
+  {
+    number: "1",
+    image: "assets/cover-nono.png",
+    type: "tap",
+    title: "えほん！",
+    action: "「えほん」を タッチ！",
+    text: "すきな ほんを えらぶよ",
+    focus: '[data-go="SELECT"]:not([data-view])',
+  },
+  {
+    number: "2",
+    image: "assets/niji/p1.png",
+    type: "swipe",
+    title: "みぎへ スーッ！",
+    action: "ゆびで すべらせる！",
+    text: "ページが めくれるよ",
+  },
+  {
+    number: "3",
+    image: "assets/char-cat.webp",
+    type: "camera",
+    title: "しゃしん！",
+    action: "「とってみよう！」を タッチ！",
+    text: "いっしょに やってみよう",
+  },
+];
+
 export const HomeScreen = {
   render(ctx) {
     return `
@@ -25,6 +55,7 @@ export const HomeScreen = {
         <button class="bookmark-launch" data-go="BOOKMARKS">
           <span aria-hidden="true">☆</span> しおり <span class="bookmark-count">${ctx.session.bookmarks.length}</span>
         </button>
+        <button class="guide-launch" type="button" data-guide-open>？ あそびかた</button>
       </div>`;
   },
   mount(ctx, _p, root) {
@@ -32,5 +63,11 @@ export const HomeScreen = {
     root.querySelectorAll("[data-go]").forEach((b) => {
       b.onclick = () => ctx.go(b.dataset.go, b.dataset.view ? { view: b.dataset.view } : {});
     });
+    const showGuide = () => openGuide(ctx, root, {
+      steps: GUIDE_STEPS,
+      onComplete: () => ctx.session.markGuideSeen(),
+    });
+    root.querySelector("[data-guide-open]").onclick = showGuide;
+    if (ctx.session.mode === "child" && !ctx.session.hasSeenGuide()) showGuide();
   },
 };

@@ -35,6 +35,8 @@ export class Session {
     this.runMissions = [];    // 今回のプレイの達成 [{missionId, photoUrl, caption, missionText}]
     this.memories = [];       // 完成した絵本日記（写真つき・IndexedDBから復元される）
     this.bookmarks = [];      // お気に入りのページ／日記エントリー（軽いメタ情報だけ）
+    this.guideSeen = false;  // こども向けの初回「あそびかた」案内を見たか
+    this.parentGuideSeen = false; // おうちのひと向けの初回「操作方法」案内を見たか
 
     // --- localStorage（メタのみ）---
     this.activityDays = new Set(); // 外で活動した日
@@ -61,6 +63,10 @@ export class Session {
   // ── モード ─────────────────────────
   setMode(mode) { this.mode = mode; }
   checkPin(input) { return String(input) === String(this.pin); }
+  hasSeenGuide() { return this.guideSeen; }
+  markGuideSeen() { this.guideSeen = true; this._save(); }
+  hasSeenParentGuide() { return this.parentGuideSeen; }
+  markParentGuideSeen() { this.parentGuideSeen = true; this._save(); }
 
   // ── 絵本プレイ ───────────────────────
   // 同じ本の「読みかけ」が保存されていれば、そこから再開する
@@ -253,6 +259,8 @@ export class Session {
     this.memoryLog = [];
     this.memories = [];
     this.bookmarks = [];
+    this.guideSeen = false;
+    this.parentGuideSeen = false;
     this.runMissions = [];
     this._save();
     Storage.remove(MEMORIES_KEY);
@@ -288,6 +296,8 @@ export class Session {
         activityDays: [...this.activityDays],
         memoryLog: this.memoryLog,
         bookmarks: this.bookmarks,
+        guideSeen: this.guideSeen,
+        parentGuideSeen: this.parentGuideSeen,
         pin: this.pin,
       }));
     } catch (_) {}
@@ -300,6 +310,8 @@ export class Session {
       this.activityDays = new Set(s.activityDays ?? []);
       this.memoryLog = s.memoryLog ?? [];
       this.bookmarks = Array.isArray(s.bookmarks) ? s.bookmarks : [];
+      this.guideSeen = Boolean(s.guideSeen);
+      this.parentGuideSeen = Boolean(s.parentGuideSeen);
       this.pin = s.pin ?? DEFAULT_PIN;
     } catch (_) {}
   }
