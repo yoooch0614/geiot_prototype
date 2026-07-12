@@ -47,6 +47,10 @@ function applyTheme(mode = "auto") {
   updateThemeToggle(isNight, mode);
 }
 
+function updateThemeTestVisibility(screenName) {
+  if (themeToggle) themeToggle.hidden = screenName !== "MODE";
+}
+
 function scheduleThemeSync() {
   if (themeTimer) window.clearTimeout(themeTimer);
   if (themeOverride) return;
@@ -103,6 +107,7 @@ let currentScreen = null;
 function go(name, params = {}) {
   const screen = Screens[name];
   if (!screen) return;
+  updateThemeTestVisibility(name);
   currentScreen?.unmount?.(ctx);
   root.innerHTML = screen.render(ctx, params);
   root.querySelector(".screen")?.classList.add("page--in"); // 画面切り替えの入場アニメを全画面に統一

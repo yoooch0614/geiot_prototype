@@ -1,0 +1,111 @@
+/* しおり画面 ── ページと写真のお気に入りをまとめる */
+
+.bookmarks {
+  justify-content: flex-start;
+  padding-top: 64px;
+}
+.bookmarks-lead {
+  margin: -8px 0 4px;
+  color: #7a877e;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+}
+.bookmark-list {
+  width: min(100%, 560px);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 14px;
+}
+.bookmark-card {
+  position: relative;
+  min-width: 0;
+  background: var(--card);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.bookmark-open {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  padding: 10px 42px 10px 10px;
+  border: 0;
+  color: var(--ink);
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.bookmark-open:active { transform: scale(.98); }
+.bookmark-thumb {
+  flex: 0 0 108px;
+  width: 108px;
+  aspect-ratio: 4 / 3;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 13px;
+  background: #eef4e7;
+}
+.bookmark-thumb img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+.bookmark-placeholder { color: var(--green); font-size: 42px; }
+.bookmark-info {
+  min-width: 0;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+}
+.bookmark-info strong,
+.bookmark-info > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bookmark-info strong { font-size: 16px; font-weight: 900; }
+.bookmark-info > span:last-child { color: #6f806f; font-size: 13px; }
+.bookmark-type {
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 900;
+}
+.bookmark-remove {
+  position: absolute;
+  top: 8px; right: 8px; z-index: 2;
+  width: 30px; height: 30px;
+  border: 0; border-radius: 50%;
+  color: #a2ada4;
+  background: rgba(243, 247, 238, .9);
+  font: 700 21px/1 inherit;
+  cursor: pointer;
+}
+.bookmark-remove:active { transform: scale(.9); color: var(--coral); }
+.bookmark-empty {
+  grid-column: 1 / -1;
+  padding: 28px 18px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, .78);
+  color: #7a877e;
+  line-height: 1.8;
+  text-align: center;
+}
+.bookmark-empty p { margin: 4px 0; }
+.bookmark-empty-star {
+  display: block;
+  color: var(--yellow);
+  font-size: 58px;
+  line-height: 1;
+}
+
+@media (max-width: 420px) {
+  .bookmark-list { grid-template-columns: 1fr; }
+}

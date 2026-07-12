@@ -1,5 +1,5 @@
 export const HomeScreen = {
-  render() {
+  render(ctx) {
     return `
       <div class="screen center screen--sky">
         <div class="sky-scene" aria-hidden="true">
@@ -22,6 +22,9 @@ export const HomeScreen = {
             <span class="mode-icon mode-icon--memory" aria-hidden="true"></span><span>おもいで</span>
           </button>
         </div>
+        <button class="bookmark-launch" data-go="BOOKMARKS">
+          <span aria-hidden="true">☆</span> しおり <span class="bookmark-count">${ctx.session.bookmarks.length}</span>
+        </button>
       </div>`;
   },
   mount(ctx, _p, root) {

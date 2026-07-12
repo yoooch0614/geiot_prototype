@@ -22,8 +22,7 @@ body.night-theme {
 .theme-toggle {
   position: fixed;
   top: max(10px, env(safe-area-inset-top));
-  /* 右端的页码胶囊会占位，所以测试按钮放在它的左侧。 */
-  right: 78px;
+  right: 12px;
   z-index: 100;
   border: 1px solid rgba(58, 74, 63, .16);
   border-radius: 999px;
@@ -168,6 +167,16 @@ body.night-theme .title-screen .mode-card--parent:active {
 body.night-theme .title-icon {
   box-shadow: 0 12px 24px rgba(1, 8, 22, .46);
 }
+body.night-theme .bookmark-launch {
+  color: #a9e8c0;
+  background: rgba(24, 41, 67, .9);
+  border-color: rgba(120, 211, 155, .3);
+  box-shadow: 0 4px 12px rgba(1, 8, 22, .25);
+}
+body.night-theme .bookmark-count {
+  color: #2d3d5b;
+  background: rgba(245, 212, 126, .86);
+}
 
 /* PIN、家长统计与分析卡片 */
 body.night-theme .pin-card,
@@ -232,6 +241,22 @@ body.night-theme .book-cover--ghost::after {
   box-shadow: 0 0 0 4px rgba(210, 226, 247, .16);
 }
 body.night-theme .book-title--ghost { color: #afc3df; }
+body.night-theme .bookmark-thumb { background: #14263f; }
+body.night-theme .bookmark-info > span:last-child { color: #aebfda; }
+body.night-theme .bookmarks-lead { color: #aebfda; }
+body.night-theme .bookmark-remove {
+  color: #aebfda;
+  background: rgba(31, 52, 85, .92);
+}
+body.night-theme .bookmark-empty {
+  color: #aebfda;
+  background: rgba(24, 41, 67, .86);
+}
+body.night-theme .memory-bookmark {
+  color: #a9e8c0;
+  background: rgba(24, 41, 67, .94);
+  border-color: rgba(120, 211, 155, .28);
+}
 body.night-theme .shelf-emblem {
   background: #e5efff;
   box-shadow: 0 1px 4px rgba(1, 8, 22, .36);

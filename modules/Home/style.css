@@ -21,6 +21,31 @@
   box-shadow: 0 2px 8px rgba(58,74,63,.1);
 }
 .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%; max-width: 420px; }
+.bookmark-launch {
+  margin-top: 2px;
+  padding: 9px 16px;
+  border: 1px solid rgba(107, 191, 89, .28);
+  border-radius: 999px;
+  color: var(--green);
+  background: rgba(255, 255, 255, .82);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 900;
+  box-shadow: 0 3px 10px rgba(58, 74, 63, .1);
+  cursor: pointer;
+}
+.bookmark-launch:active { transform: scale(.96); }
+.bookmark-launch > span:first-child { font-size: 20px; vertical-align: -1px; }
+.bookmark-count {
+  display: inline-flex;
+  min-width: 22px; height: 22px;
+  align-items: center; justify-content: center;
+  margin-left: 3px;
+  border-radius: 50%;
+  color: var(--ink);
+  background: rgba(255, 210, 63, .72);
+  font-size: 12px;
+}
 .mode-card {
   font-family: inherit; font-weight: 900; font-size: 22px; color: #fff;
   border: none; border-radius: 24px; padding: 34px 12px; cursor: pointer;
