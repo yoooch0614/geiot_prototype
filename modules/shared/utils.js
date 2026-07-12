@@ -111,6 +111,7 @@ export function createRepeatableSound(url) {
 //   画面を移っても、曲が頭から鳴り直したり途切れたりしない。
 // ・BGMを流さない画面（絵本を読んでいる最中など）に移ったら stopBgm() で止める。
 export const HOME_BGM = "assets/home-bgm.mp3";
+export const HOME_NIGHT_BGM = "assets/home-bgm-night.mp3";
 const BGM_VOLUME = 0.35;   // 効果音を 1.0 としたときの大きさ。ここを変えれば音量調整できる。
 const BGM_FADE = 0.4;      // 止めるときのフェードアウト（秒）。ぶつっと切れないように。
 

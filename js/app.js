@@ -10,7 +10,7 @@ import { Screens } from "./screens.js";
 import {
   unlockAudio, preloadAudio, playAudio, playBgm, stopBgm,
   isBgmEnabled, setBgmEnabled,
-  CELEBRATION_SOUNDS, CLICK_SOUND, HOME_BGM,
+  CELEBRATION_SOUNDS, CLICK_SOUND, HOME_BGM, HOME_NIGHT_BGM,
 } from "../modules/shared/utils.js";
 
 // BGMを流す画面。トップ（MODE）・あそびえらび（HOME）・本だな（SELECT）の3つ。
@@ -30,6 +30,8 @@ const DAY_START_HOUR = 6;
 const NIGHT_START_HOUR = 18;
 let themeOverride = null; // テストボタンを押した間だけ "day" / "night"
 let themeTimer = null;
+let currentScreen = null;
+let currentScreenName = null;
 
 function isNightTime(date = new Date()) {
   const hour = date.getHours();
@@ -55,6 +57,19 @@ function applyTheme(mode = "auto") {
   document.body.dataset.themeMode = mode;
   themeMeta?.setAttribute("content", isNight ? "#101c36" : "#6bbf59");
   updateThemeToggle(isNight, mode);
+  syncBgmForTheme();
+}
+
+function homeBgmUrl() {
+  return repo.assetUrl(document.body.classList.contains("night-theme")
+    ? HOME_NIGHT_BGM
+    : HOME_BGM);
+}
+
+function syncBgmForTheme() {
+  if (currentScreenName && BGM_SCREENS.has(currentScreenName)) {
+    playBgm(homeBgmUrl());
+  }
 }
 
 function updateThemeTestVisibility(screenName) {
@@ -129,12 +144,11 @@ const ctx = {
   advance,
 };
 
-let currentScreen = null;
-
 // 画面を描画
 function go(name, params = {}) {
   const screen = Screens[name];
   if (!screen) return;
+  currentScreenName = name;
   updateThemeTestVisibility(name);
   updateBgmToggleVisibility(name);
   currentScreen?.unmount?.(ctx);
@@ -145,7 +159,7 @@ function go(name, params = {}) {
   root.scrollTop = 0;
   root.querySelector(".screen")?.scrollTo(0, 0);
 
-  if (BGM_SCREENS.has(name)) playBgm(repo.assetUrl(HOME_BGM));
+  if (BGM_SCREENS.has(name)) playBgm(homeBgmUrl());
   else stopBgm();
 }
 
@@ -192,7 +206,7 @@ async function boot() {
   }
   // 鳴らす場面で取得待ちにならないよう、いつでも鳴りうる音は先に読み込んでおく。
   preloadAudio(
-    [CLICK_SOUND, HOME_BGM, "assets/page_sound.mp3", ...CELEBRATION_SOUNDS].map((s) => repo.assetUrl(s))
+    [CLICK_SOUND, HOME_BGM, HOME_NIGHT_BGM, "assets/page_sound.mp3", ...CELEBRATION_SOUNDS].map((s) => repo.assetUrl(s))
   );
   go("MODE");
 }
