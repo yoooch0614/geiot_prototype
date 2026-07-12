@@ -9,6 +9,7 @@ import { Session } from "./Session.js";
 import { Screens } from "./screens.js";
 import {
   unlockAudio, preloadAudio, playAudio, playBgm, stopBgm,
+  isBgmEnabled, setBgmEnabled,
   CELEBRATION_SOUNDS, CLICK_SOUND, HOME_BGM,
 } from "../modules/shared/utils.js";
 
@@ -19,6 +20,7 @@ const BGM_SCREENS = new Set(["MODE", "HOME", "SELECT"]);
 
 const root = document.getElementById("app");
 const themeToggle = document.getElementById("theme-toggle");
+const bgmToggle = document.getElementById("bgm-toggle");
 const themeMeta = document.querySelector('meta[name="theme-color"]');
 const repo = new ContentRepository();
 const session = new Session();
@@ -59,6 +61,19 @@ function updateThemeTestVisibility(screenName) {
   if (themeToggle) themeToggle.hidden = screenName !== "MODE";
 }
 
+function updateBgmToggleVisibility(screenName) {
+  if (bgmToggle) bgmToggle.hidden = !BGM_SCREENS.has(screenName);
+}
+
+function updateBgmToggle() {
+  if (!bgmToggle) return;
+  const enabled = isBgmEnabled();
+  bgmToggle.textContent = enabled ? "🔊 BGM" : "🔇 BGM";
+  bgmToggle.setAttribute("aria-pressed", String(enabled));
+  bgmToggle.setAttribute("aria-label", enabled ? "BGMをオフにする" : "BGMをオンにする");
+  bgmToggle.title = enabled ? "BGMをオフにする" : "BGMをオンにする";
+}
+
 function scheduleThemeSync() {
   if (themeTimer) window.clearTimeout(themeTimer);
   if (themeOverride) return;
@@ -93,6 +108,11 @@ themeToggle?.addEventListener("click", () => {
   themeTimer = null;
   applyTheme(nextMode);
 });
+bgmToggle?.addEventListener("click", () => {
+  setBgmEnabled(!isBgmEnabled());
+  updateBgmToggle();
+});
+updateBgmToggle();
 document.addEventListener("visibilitychange", () => {
   if (!document.hidden && !themeOverride) {
     applyTheme("auto");
@@ -116,6 +136,7 @@ function go(name, params = {}) {
   const screen = Screens[name];
   if (!screen) return;
   updateThemeTestVisibility(name);
+  updateBgmToggleVisibility(name);
   currentScreen?.unmount?.(ctx);
   root.innerHTML = screen.render(ctx, params);
   root.querySelector(".screen")?.classList.add("page--in"); // 画面切り替えの入場アニメを全画面に統一

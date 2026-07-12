@@ -42,6 +42,31 @@ body.night-theme .theme-toggle {
   box-shadow: 0 3px 10px rgba(1, 8, 22, .3);
 }
 
+/* BGM切り替えボタン。BGMが流れる画面だけ表示する。 */
+.bgm-toggle {
+  position: fixed;
+  right: max(12px, env(safe-area-inset-right));
+  bottom: max(12px, env(safe-area-inset-bottom));
+  z-index: 100;
+  min-width: 86px;
+  border: 1px solid rgba(58, 74, 63, .16);
+  border-radius: 999px;
+  padding: 8px 12px;
+  font: 700 13px/1.2 var(--font);
+  color: #405448;
+  background: rgba(255, 255, 255, .92);
+  box-shadow: 0 3px 10px rgba(58, 74, 63, .16);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.bgm-toggle:active { transform: translateY(2px); }
+body.night-theme .bgm-toggle {
+  color: #e9f1ff;
+  background: rgba(31, 52, 85, .94);
+  border-color: rgba(180, 205, 238, .18);
+  box-shadow: 0 3px 10px rgba(1, 8, 22, .3);
+}
+
 /* 同じ空の要素をテーマに応じて表示する：昼は太陽・雲、夜は月・星。 */
 body.night-theme .screen--sky {
   background: linear-gradient(180deg, #101c36 0%, #17294a 42%, #223856 70%, #263e4d 100%);

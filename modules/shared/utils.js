@@ -117,13 +117,14 @@ const BGM_FADE = 0.4;      // 止めるときのフェードアウト（秒）�
 let bgmUrl = null;         // いま鳴らしたいBGM（画面が決める）
 let bgmSource = null;
 let bgmGain = null;
+let bgmEnabled = true;
 
 // 鳴らす条件（曲が読み込み済み・AudioContextが動いている）がそろっていたら鳴らしはじめる。
 // 起動直後はまだ一度も画面を触っていないので AudioContext が止まっている。その場合は
 // 何もせず、最初のタップ（unlockAudio）からもう一度ここに来る。
 function startBgmIfReady() {
   const ac = context();
-  if (!ac || !bgmUrl || bgmSource) return;
+  if (!ac || !bgmEnabled || !bgmUrl || bgmSource) return;
   if (ac.state === "suspended") return;
   const buffer = buffers.get(bgmUrl);
   if (!buffer) return;
@@ -147,8 +148,7 @@ export function playBgm(url) {
   loadBuffer(url).then(() => { if (bgmUrl === url) startBgmIfReady(); });
 }
 
-export function stopBgm() {
-  bgmUrl = null;
+function stopBgmPlayback() {
   if (!bgmSource) return;
   const ac = context();
   const source = bgmSource;
@@ -163,6 +163,22 @@ export function stopBgm() {
   } catch (_) {
     try { source.stop(); } catch (_) {}
   }
+}
+
+export function stopBgm() {
+  bgmUrl = null;
+  stopBgmPlayback();
+}
+
+export function isBgmEnabled() {
+  return bgmEnabled;
+}
+
+export function setBgmEnabled(enabled) {
+  bgmEnabled = Boolean(enabled);
+  if (bgmEnabled) startBgmIfReady();
+  else stopBgmPlayback();
+  return bgmEnabled;
 }
 
 // ボタンを押したときの音。押した手ごたえとして、どの画面のボタンでも鳴る（登録は app.js）。
