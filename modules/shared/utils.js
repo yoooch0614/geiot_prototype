@@ -163,6 +163,217 @@ export const layersMarkup = (ctx, layers) =>
       onerror="this.remove()">`;
   }).join("");
 
+// ミッション写真から、車体などに引き継ぐ色を取り出す。白・黒・灰色は背景や輪郭と
+// 区別しにくいため避け、彩度の高いピクセルを少しずつ平均して代表色にする。
+export async function extractPhotoColor(photoUrl) {
+  try {
+    const image = await new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = photoUrl;
+    });
+    const canvas = document.createElement("canvas");
+    canvas.width = 64; canvas.height = 64;
+    const context = canvas.getContext("2d");
+    context.drawImage(image, 0, 0, 64, 64);
+    const pixels = context.getImageData(0, 0, 64, 64).data;
+    let r = 0, g = 0, b = 0, weightTotal = 0;
+    for (let i = 0; i < pixels.length; i += 4) {
+      const max = Math.max(pixels[i], pixels[i + 1], pixels[i + 2]);
+      const min = Math.min(pixels[i], pixels[i + 1], pixels[i + 2]);
+      const saturation = max - min;
+      if (pixels[i + 3] < 180 || saturation < 28 || max < 45 || max > 248) continue;
+      const weight = saturation * (0.35 + max / 255);
+      r += pixels[i] * weight; g += pixels[i + 1] * weight; b += pixels[i + 2] * weight;
+      weightTotal += weight;
+    }
+    if (!weightTotal) return null;
+    return `rgb(${Math.round(r / weightTotal)}, ${Math.round(g / weightTotal)}, ${Math.round(b / weightTotal)})`;
+  } catch (_) {
+    return null;
+  }
+}
+
+// 車体の透明な部分だけを、ミッションで選ばれた色に置き換えた絵を作る。
+// PNGでは車体が透明にくり抜かれているため、黒いピクセルを塗るのではなく、
+// 輪郭に囲まれた透明領域だけを塗る。これで背景の透明部分は汚さない。
+export async function recolorVehicleImage(imageUrl, color, region, tone = "dark", textureUrl = null) {
+  if ((!color && !textureUrl) || !region) return null;
+  try {
+    const image = await new Promise((resolve, reject) => {
+      const img = new Image(); img.onload = () => resolve(img); img.onerror = reject; img.src = imageUrl;
+    });
+    const texture = textureUrl ? await new Promise((resolve, reject) => {
+      const img = new Image(); img.onload = () => resolve(img); img.onerror = reject; img.src = textureUrl;
+    }) : null;
+    const canvas = document.createElement("canvas");
+    canvas.width = image.naturalWidth; canvas.height = image.naturalHeight;
+    const context = canvas.getContext("2d");
+    context.drawImage(image, 0, 0);
+    const source = context.getImageData(0, 0, canvas.width, canvas.height);
+    let textureData = null;
+    if (texture) {
+      const textureCanvas = document.createElement("canvas");
+      textureCanvas.width = canvas.width; textureCanvas.height = canvas.height;
+      const textureContext = textureCanvas.getContext("2d");
+      // 颜色照片按 cover 放大，保证汽车透明区域被完整填满。
+      const textureScale = Math.max(canvas.width / texture.naturalWidth, canvas.height / texture.naturalHeight);
+      const textureWidth = texture.naturalWidth * textureScale;
+      const textureHeight = texture.naturalHeight * textureScale;
+      textureContext.drawImage(texture, (canvas.width - textureWidth) / 2, (canvas.height - textureHeight) / 2, textureWidth, textureHeight);
+      textureData = textureContext.getImageData(0, 0, canvas.width, canvas.height).data;
+    }
+    // 出力は最初から透明にして、車体の色ピクセルだけを重ねる。
+    // 元画像全体を layer にすると、背景まで上書きされてしまう。
+    const data = context.createImageData(canvas.width, canvas.height);
+    const rgb = color?.match(/\d+(?:\.\d+)?/g)?.map(Number) || [255, 255, 255];
+    if (rgb.length < 3) return null;
+    const left = Math.floor(region.x * canvas.width);
+    const top = Math.floor(region.y * canvas.height);
+    const right = Math.ceil((region.x + region.width) * canvas.width);
+    const bottom = Math.ceil((region.y + region.height * 0.78) * canvas.height);
+
+    // 車体内部の透明領域に外側から到達できるかを先に調べる。
+    // region の端からつながる透明部分は背景、輪郭に囲まれた透明部分だけが車体。
+    const transparent = (x, y) => {
+      const i = (y * canvas.width + x) * 4;
+      return source.data[i + 3] < 80;
+    };
+    const outside = new Uint8Array(canvas.width * canvas.height);
+    const queue = [];
+    const visitOutside = (x, y) => {
+      if (x < left || x >= right || y < top || y >= bottom) return;
+      const p = y * canvas.width + x;
+      if (outside[p] || !transparent(x, y)) return;
+      outside[p] = 1;
+      queue.push(p);
+    };
+    for (let x = left; x < right; x++) { visitOutside(x, top); visitOutside(x, bottom - 1); }
+    for (let y = top; y < bottom; y++) { visitOutside(left, y); visitOutside(right - 1, y); }
+    while (queue.length) {
+      const p = queue.pop();
+      const x = p % canvas.width;
+      const y = (p / canvas.width) | 0;
+      visitOutside(x - 1, y); visitOutside(x + 1, y);
+      visitOutside(x, y - 1); visitOutside(x, y + 1);
+    }
+
+    for (let y = Math.max(0, top); y < Math.min(canvas.height, bottom); y++) {
+      for (let x = Math.max(0, left); x < Math.min(canvas.width, right); x++) {
+        const i = (y * canvas.width + x) * 4;
+        const max = Math.max(source.data[i], source.data[i + 1], source.data[i + 2]);
+        const min = Math.min(source.data[i], source.data[i + 1], source.data[i + 2]);
+        const p = y * canvas.width + x;
+        const carTransparent = tone === "transparent" && transparent(x, y) && !outside[p];
+        const dark = tone !== "transparent" && source.data[i + 3] >= 80 && max < 95;
+        const light = tone === "light" && min > 190 && max - min < 45;
+        if (!carTransparent && !dark && !light) continue;
+        if (carTransparent && textureData) {
+          data.data[i] = textureData[i];
+          data.data[i + 1] = textureData[i + 1];
+          data.data[i + 2] = textureData[i + 2];
+        } else {
+          const luminance = 0.72 + (source.data[i] + source.data[i + 1] + source.data[i + 2]) / (255 * 3) * 0.35;
+          data.data[i] = Math.min(255, rgb[0] * luminance);
+          data.data[i + 1] = Math.min(255, rgb[1] * luminance);
+          data.data[i + 2] = Math.min(255, rgb[2] * luminance);
+        }
+        data.data[i + 3] = carTransparent ? 255 : source.data[i + 3];
+      }
+    }
+    context.putImageData(data, 0, 0);
+    return canvas.toDataURL("image/png");
+  } catch (_) {
+    return null;
+  }
+}
+
+// 第1冊用：挿絵の外側からつながっていない透明部分（車・家・花・ちょうちょ等）を、
+// 子どもが選んだ画像のテクスチャでまとめて埋める。背景にある透明部分は塗らない。
+export async function fillArtworkHoles(artUrl, textureUrl, textureScale = 1) {
+  if (!artUrl || !textureUrl) return null;
+  try {
+    const load = (src) => new Promise((resolve, reject) => {
+      const img = new Image(); img.onload = () => resolve(img); img.onerror = reject; img.src = src;
+    });
+    const [art, texture] = await Promise.all([load(artUrl), load(textureUrl)]);
+    const canvas = document.createElement("canvas");
+    canvas.width = art.naturalWidth; canvas.height = art.naturalHeight;
+    const context = canvas.getContext("2d");
+    context.drawImage(art, 0, 0);
+    const source = context.getImageData(0, 0, canvas.width, canvas.height);
+    const transparent = (x, y) => source.data[(y * canvas.width + x) * 4 + 3] < 80;
+    const outside = new Uint8Array(canvas.width * canvas.height);
+    const queue = [];
+    const visit = (x, y) => {
+      if (x < 0 || x >= canvas.width || y < 0 || y >= canvas.height) return;
+      const p = y * canvas.width + x;
+      if (outside[p] || !transparent(x, y)) return;
+      outside[p] = 1; queue.push(p);
+    };
+    for (let x = 0; x < canvas.width; x++) { visit(x, 0); visit(x, canvas.height - 1); }
+    for (let y = 0; y < canvas.height; y++) { visit(0, y); visit(canvas.width - 1, y); }
+    while (queue.length) {
+      const p = queue.pop();
+      const x = p % canvas.width; const y = (p / canvas.width) | 0;
+      visit(x - 1, y); visit(x + 1, y); visit(x, y - 1); visit(x, y + 1);
+    }
+
+    const textureCanvas = document.createElement("canvas");
+    textureCanvas.width = canvas.width; textureCanvas.height = canvas.height;
+    const textureContext = textureCanvas.getContext("2d");
+    const factor = Math.max(canvas.width / texture.naturalWidth, canvas.height / texture.naturalHeight)
+      * Math.max(0.6, Math.min(2, Number(textureScale) || 1));
+    const width = texture.naturalWidth * factor;
+    const height = texture.naturalHeight * factor;
+    textureContext.drawImage(texture, (canvas.width - width) / 2, (canvas.height - height) / 2, width, height);
+    const textureData = textureContext.getImageData(0, 0, canvas.width, canvas.height).data;
+    const output = context.createImageData(canvas.width, canvas.height);
+    for (let y = 0; y < canvas.height; y++) {
+      for (let x = 0; x < canvas.width; x++) {
+        const p = y * canvas.width + x;
+        if (!transparent(x, y) || outside[p]) continue;
+        const i = p * 4;
+        output.data[i] = textureData[i];
+        output.data[i + 1] = textureData[i + 1];
+        output.data[i + 2] = textureData[i + 2];
+        output.data[i + 3] = 255;
+      }
+    }
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.putImageData(output, 0, 0);
+    return canvas.toDataURL("image/png");
+  } catch (_) {
+    return null;
+  }
+}
+
+export const bookColorLayer = (ctx, page) => {
+  if (ctx.session.bookId !== "book-niji" || !page?.image) return "";
+  const mission = ctx.session.runMissions.find((m) => m.missionId === "nm1");
+  const photo = mission?.vehicleSourceUrl || mission?.photoUrl;
+  if (!photo) return "";
+  return `<img class="book-color-art" data-book-color-art
+    data-book-color-source="${ctx.repo.assetUrl(page.image)}"
+    data-book-color-photo="${esc(photo)}"
+    data-book-color-scale="${Number(mission.vehicleTextureScale) || 1}"
+    src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="">`;
+};
+
+export const vehicleColorLayer = (ctx, page) => {
+  const mission = page.vehicleColorFrom ? ctx.session.runMissions.find((m) => m.missionId === page.vehicleColorFrom) : null;
+  if ((!mission?.vehicleColor && !mission?.vehicleSourceUrl && !mission?.photoUrl) || !page.vehicleRegion || !page.image) return "";
+  const fallbackPhoto = mission.vehicleSourceUrl || mission.photoUrl || "";
+  return `<img class="vehicle-color-art" data-vehicle-art
+    data-vehicle-color="${esc(mission.vehicleColor || "")}"
+    data-vehicle-photo="${esc(fallbackPhoto)}"
+    data-vehicle-region='${esc(JSON.stringify(page.vehicleRegion))}'
+    data-vehicle-tone="${esc(page.vehicleTone || "dark")}"
+    data-vehicle-source="${ctx.repo.assetUrl(page.image)}"
+    src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="">`;
+};
+
 // ミッションの背景イラストと、こどもが撮った写真を1枚の画像にまとめる。
 // DOM上で重ねるだけではなくcanvasからData URLを作るため、プレビューだけでなく
 // 日記・おもいでにも同じ合成済み画像を残せる。
@@ -341,7 +552,12 @@ export async function composeMissionPhoto(backgroundUrl, photoUrl, frame, placem
     let subjectWidth = photo.naturalWidth;
     let subjectHeight = photo.naturalHeight;
     let isCharacter = hasTransparency(photo);
-    if (!isCharacter) {
+    // 普通の风景照片には白い部分が本来含まれるため、白背景の自动去除は
+    // プレビューで明示的に選んだときだけ行う。既存の呼び出し（placementなし）は
+    // 従来どおり自动判定を維持する。
+    const removeBackground = placement.removeBackground === undefined
+      ? true : placement.removeBackground === true;
+    if (!isCharacter && removeBackground) {
       const cutout = cutOutUniformBackground(photo);
       if (cutout) {
         subject = cutout;

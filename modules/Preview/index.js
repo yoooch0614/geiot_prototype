@@ -1,4 +1,4 @@
-import { stage, composeMissionPhoto } from "../shared/utils.js";
+import { stage, composeMissionPhoto, extractPhotoColor } from "../shared/utils.js";
 
 export const PreviewScreen = {
   render(ctx, { page, dataUrl }) {
@@ -17,6 +17,11 @@ export const PreviewScreen = {
           <button type="button" class="zoom-button" data-zoom-in aria-label="おおきくする">＋</button>
           <output data-zoom-value>100%</output>
         </div>
+        <label class="photo-convert">
+          <input type="checkbox" data-convert>
+          <span>白い背景を透明にする</span>
+        </label>
+        <p class="convert-hint">白い紙や白い壁の写真のときだけチェックしてね</p>
         <div class="preview-actions">
           <button class="retry" data-retry>もういちど</button>
           <button class="mission-shoot" data-keep>✓ これにする</button>
@@ -32,6 +37,7 @@ export const PreviewScreen = {
     let drag = null;
     const zoomInput = root.querySelector("[data-zoom]");
     const zoomValue = root.querySelector("[data-zoom-value]");
+    const convertInput = root.querySelector("[data-convert]");
     const clampZoom = (value) => Math.max(0.6, Math.min(2, Number(value) || 1));
     const clampOffset = () => {
       const rect = positioner.getBoundingClientRect();
@@ -42,8 +48,8 @@ export const PreviewScreen = {
     };
     const draw = () => {
       photo.style.transform = `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px)) scale(${zoom})`;
-      zoomInput.value = String(zoom);
-      zoomValue.textContent = `${Math.round(zoom * 100)}%`;
+      if (zoomInput) zoomInput.value = String(zoom);
+      if (zoomValue) zoomValue.textContent = `${Math.round(zoom * 100)}%`;
     };
     const setZoom = (value) => {
       zoom = clampZoom(value);
@@ -51,9 +57,11 @@ export const PreviewScreen = {
       draw();
     };
 
-    zoomInput.addEventListener("input", () => setZoom(zoomInput.value));
-    root.querySelector("[data-zoom-out]").onclick = () => setZoom(zoom - 0.1);
-    root.querySelector("[data-zoom-in]").onclick = () => setZoom(zoom + 0.1);
+    if (zoomInput) {
+      zoomInput.addEventListener("input", () => setZoom(zoomInput.value));
+      root.querySelector("[data-zoom-out]").onclick = () => setZoom(zoom - 0.1);
+      root.querySelector("[data-zoom-in]").onclick = () => setZoom(zoom + 0.1);
+    }
 
     positioner.addEventListener("pointerdown", (event) => {
       event.preventDefault();
@@ -81,14 +89,23 @@ export const PreviewScreen = {
       button.disabled = true;
       button.textContent = "つくっているよ…";
       const rect = positioner.getBoundingClientRect();
+      const vehicleColor = await extractPhotoColor(dataUrl);
       const composedUrl = await composeMissionPhoto(
         ctx.repo.assetUrl(page.image), dataUrl, page.frame,
-        { dx: offsetX / rect.width, dy: offsetY / rect.height, scale: zoom },
+        {
+          dx: offsetX / rect.width,
+          dy: offsetY / rect.height,
+          scale: zoom,
+          removeBackground: convertInput.checked,
+        },
       );
       ctx.session.completeMission({
         missionId: page.id, missionText: page.prompt,
         caption: page.diaryCaption || page.prompt, photoUrl: composedUrl,
         missionImage: page.image,
+        vehicleColor,
+        vehicleSourceUrl: dataUrl,
+        vehicleTextureScale: zoom,
       });
       ctx.go("ACHIEVE", { page });
     };

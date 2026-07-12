@@ -88,8 +88,8 @@ export class Session {
   // photoUrl が null なら「タップ達成」（写真なし）
   // missionImage はそのミッションの挿絵（写真がないとき日記の代わり絵に使う）
   // missionCharacter は写真の上に重ねるキャラクター（おはなしページと同じ演出）
-  completeMission({ missionId, missionText, caption, photoUrl, missionImage, missionCharacter }) {
-    this.runMissions.push({ missionId, missionText, caption, photoUrl, missionImage, missionCharacter });
+  completeMission({ missionId, missionText, caption, photoUrl, missionImage, missionCharacter, vehicleColor, vehicleSourceUrl, vehicleTextureScale }) {
+    this.runMissions.push({ missionId, missionText, caption, photoUrl, missionImage, missionCharacter, vehicleColor, vehicleSourceUrl, vehicleTextureScale });
     this.activityDays.add(today()); // 外で活動した日として記録
     this._save();
     this._saveRun(); // 写真はすぐIndexedDBへ（リロードしても消えない）
