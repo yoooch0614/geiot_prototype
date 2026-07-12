@@ -168,6 +168,20 @@
 .shelf-emblem::before { top: 7px; }
 .shelf-emblem::after { top: 12px; }
 
+/* おもいで（isMemoryView）表示のときは、棚の飾りと屋根の色味を変える */
+.screen--select--memory .shelf-awning {
+  background: linear-gradient(180deg, #f9d5b1, #ffc897);
+}
+.screen--select--memory .shelf-awning::after {
+  background: radial-gradient(circle at 12px -1px, #ffc897 11px, rgba(0, 0, 0, 0) 12px);
+  background-size: 24px 13px;
+  background-repeat: repeat-x;
+}
+.screen--select--memory .shelf-deco--plant {
+  background: radial-gradient(circle at 30% 30%, #fff 18%, #ffc897 18%),
+              radial-gradient(circle at 70% 30%, #fff 16%, #f9d5b1 16%);
+}
+
 .shelf-deco { position: absolute; top: -16px; z-index: 2; }
 .shelf-deco--plant {
   left: 16px;
@@ -175,6 +189,11 @@
   background: radial-gradient(circle at 30% 30%, #fff 18%, #8dc57a 18%),
               radial-gradient(circle at 70% 30%, #fff 16%, #a8db94 16%);
   border-radius: 50%;
+}
+/* おもいで（isMemoryView）表示のときは、棚の飾りの色味を変える */
+.screen--select--memory .shelf-deco--plant {
+  background: radial-gradient(circle at 30% 30%, #fff 18%, #a6d4f2 18%),
+              radial-gradient(circle at 70% 30%, #fff 16%, #c3f6dd 16%);
 }
 .shelf-deco--books {
   right: 42px;
