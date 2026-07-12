@@ -1,4 +1,4 @@
-import { playAudio, esc, stage, characterLayer, layersMarkup, fillLayer, openCamera, createRepeatableSound } from "../shared/utils.js";
+import { playAudio, esc, stage, characterLayer, layersMarkup, fillLayer, openCamera, createRepeatableSound, composeMissionPhoto } from "../shared/utils.js";
 
 // 物語ページとミッションページを、いまのページを含む「1冊にできる範囲」で取り出す。
 // ・ end ページの手前で必ず区切る（達成の演出は別画面 COMPLETE が受け持つため）。
@@ -85,7 +85,13 @@ export const StoryScreen = {
 
     root.querySelectorAll("[data-shoot]").forEach((btn) => {
       const idx = Number(btn.dataset.shoot);
-      btn.onclick = () => openCamera(ctx, (dataUrl) => ctx.go("PREVIEW", { page: pages[idx], dataUrl }));
+      // 撮った写真はそのままでは大きすぎるので、ミッションの挿絵と1枚に合成してから
+      // プレビューへ渡す（Mission 画面・Preview の撮り直しと同じ扱い）。
+      btn.onclick = () => openCamera(ctx, async (dataUrl) => {
+        const page = pages[idx];
+        const composed = await composeMissionPhoto(ctx.repo.assetUrl(page.image), dataUrl, page.frame);
+        ctx.go("PREVIEW", { page, dataUrl: composed });
+      });
     });
     root.querySelector("[data-finish]")?.addEventListener("click", () => ctx.advance());
 

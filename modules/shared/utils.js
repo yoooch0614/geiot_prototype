@@ -171,7 +171,12 @@ export const layersMarkup = (ctx, layers) =>
 // ミッションの背景イラストと、こどもが撮った写真を1枚の画像にまとめる。
 // DOM上で重ねるだけではなくcanvasからData URLを作るため、プレビューだけでなく
 // 日記・おもいでにも同じ合成済み画像を残せる。
-export async function composeMissionPhoto(backgroundUrl, photoUrl) {
+// frame（省略可）は、そのミッションの元画像（実ピクセル座標）における
+// 「まだ色がついていない部分」（くるま・おうち・おはな等）の位置・大きさ。
+// 絵ごとに形も位置も違うため、指定がないと写真が絵の関係ない場所に大きく
+// 覆いかぶさってしまう（＝写真と背景がばらばらに見える）。無指定時は
+// 従来どおり中央固定の額縁にフォールバックする。
+export async function composeMissionPhoto(backgroundUrl, photoUrl, frame) {
   const roundedRect = (context, x, y, width, height, radius) => {
     const r = Math.min(radius, width / 2, height / 2);
     context.moveTo(x + r, y);
@@ -187,6 +192,126 @@ export async function composeMissionPhoto(backgroundUrl, photoUrl) {
     image.onerror = reject;
     image.src = src;
   });
+  // 背景が透明な画像（キャラクターの切り抜きPNGなど）かどうかを調べる。
+  // 縮小した状態でピクセルのアルファ値を見るだけなので軽い。
+  const hasTransparency = (image) => {
+    const sample = document.createElement("canvas");
+    sample.width = 64;
+    sample.height = 64;
+    const sampleContext = sample.getContext("2d");
+    sampleContext.drawImage(image, 0, 0, sample.width, sample.height);
+    const data = sampleContext.getImageData(0, 0, sample.width, sample.height).data;
+    for (let i = 3; i < data.length; i += 4) {
+      if (data[i] < 250) return true;
+    }
+    return false;
+  };
+  // 白背景など、ふちが一様な色の画像（切り抜き素材をJPEG等で保存したもの）から
+  // 背景を透明にして、キャラクターだけを切り出したcanvasを返す。
+  // ・四隅の色を「背景色」とみなし、ふちからつながっている同系色だけを消す
+  //   （キャラクター内部の白い毛などは、ふちとつながっていないので残る）。
+  // ・ふちの色がバラバラ（＝ふつうの風景写真）のときや、消える量が少なすぎ・
+  //   多すぎるときは切り抜き素材ではないと判断して null を返す。
+  const cutOutUniformBackground = (photo) => {
+    const MAX = 512;
+    const ratio = Math.min(1, MAX / Math.max(photo.naturalWidth, photo.naturalHeight));
+    const w = Math.max(1, Math.round(photo.naturalWidth * ratio));
+    const h = Math.max(1, Math.round(photo.naturalHeight * ratio));
+    const work = document.createElement("canvas");
+    work.width = w;
+    work.height = h;
+    const workContext = work.getContext("2d");
+    workContext.drawImage(photo, 0, 0, w, h);
+    const imageData = workContext.getImageData(0, 0, w, h);
+    const d = imageData.data;
+
+    // 背景色の候補は四隅と各辺の途中から取る。チェッカー柄（透過風）の背景は
+    // 2色が交互に並ぶため、四隅だけだと片方の色しか拾えないことがある。
+    const seeds = [];
+    const inset = 3;
+    const addSeed = (x, y) => {
+      const i = (y * w + x) * 4;
+      const color = [d[i], d[i + 1], d[i + 2]];
+      if (!seeds.some(([r, g, b]) =>
+        Math.abs(color[0] - r) <= 10 && Math.abs(color[1] - g) <= 10 && Math.abs(color[2] - b) <= 10)) {
+        seeds.push(color);
+      }
+    };
+    for (const t of [0, 0.18, 0.35, 0.5, 0.65, 0.82, 1]) {
+      const x = Math.min(w - 1 - inset, Math.max(inset, Math.round(t * (w - 1))));
+      const y = Math.min(h - 1 - inset, Math.max(inset, Math.round(t * (h - 1))));
+      addSeed(x, inset);
+      addSeed(x, h - 1 - inset);
+      addSeed(inset, y);
+      addSeed(w - 1 - inset, y);
+    }
+    // JPEG保存によるノイズは吸収しつつ、キャラクター本体の色（背景に近い灰色など）は
+    // 巻き込まないよう、許容差は控えめにする。
+    const TOLERANCE = 32;
+    const isBackgroundColor = (i) => seeds.some(([r, g, b]) =>
+      Math.abs(d[i] - r) <= TOLERANCE && Math.abs(d[i + 1] - g) <= TOLERANCE && Math.abs(d[i + 2] - b) <= TOLERANCE);
+
+    // ふちの大半が背景色でなければ、ふつうの写真と判断してやめる。
+    let borderHits = 0;
+    let borderTotal = 0;
+    for (let x = 0; x < w; x++) for (const y of [0, h - 1]) { borderTotal++; if (isBackgroundColor((y * w + x) * 4)) borderHits++; }
+    for (let y = 0; y < h; y++) for (const x of [0, w - 1]) { borderTotal++; if (isBackgroundColor((y * w + x) * 4)) borderHits++; }
+    if (borderHits / borderTotal < 0.6) return null;
+
+    // ふちから背景色をたどって塗りつぶす（内側の同色は残る）。
+    const isBackground = new Uint8Array(w * h);
+    const queue = [];
+    const visit = (x, y) => {
+      const p = y * w + x;
+      if (!isBackground[p] && isBackgroundColor(p * 4)) { isBackground[p] = 1; queue.push(p); }
+    };
+    for (let x = 0; x < w; x++) { visit(x, 0); visit(x, h - 1); }
+    for (let y = 0; y < h; y++) { visit(0, y); visit(w - 1, y); }
+    while (queue.length) {
+      const p = queue.pop();
+      const x = p % w;
+      const y = (p / w) | 0;
+      if (x > 0) visit(x - 1, y);
+      if (x < w - 1) visit(x + 1, y);
+      if (y > 0) visit(x, y - 1);
+      if (y < h - 1) visit(x, y + 1);
+    }
+    let removed = 0;
+    for (let p = 0; p < w * h; p++) removed += isBackground[p];
+    const removedRatio = removed / (w * h);
+    if (removedRatio < 0.1 || removedRatio > 0.97) return null;
+
+    // 背景を透明にし、キャラクターのふち1pxは半透明にして背景となじませる。
+    for (let p = 0; p < w * h; p++) if (isBackground[p]) d[p * 4 + 3] = 0;
+    for (let p = 0; p < w * h; p++) {
+      if (isBackground[p]) continue;
+      const x = p % w;
+      const y = (p / w) | 0;
+      if ((x > 0 && isBackground[p - 1]) || (x < w - 1 && isBackground[p + 1]) ||
+          (y > 0 && isBackground[p - w]) || (y < h - 1 && isBackground[p + w])) {
+        d[p * 4 + 3] = 120;
+      }
+    }
+
+    // 残ったキャラクターの範囲だけを切り出して返す（余白ごと縮小されて
+    // キャラクターが小さくなりすぎるのを防ぐ）。
+    let minX = w, minY = h, maxX = -1, maxY = -1;
+    for (let p = 0; p < w * h; p++) {
+      if (isBackground[p]) continue;
+      const x = p % w;
+      const y = (p / w) | 0;
+      if (x < minX) minX = x;
+      if (x > maxX) maxX = x;
+      if (y < minY) minY = y;
+      if (y > maxY) maxY = y;
+    }
+    if (maxX < 0) return null;
+    const out = document.createElement("canvas");
+    out.width = maxX - minX + 1;
+    out.height = maxY - minY + 1;
+    out.getContext("2d").putImageData(imageData, -minX, -minY);
+    return out;
+  };
 
   try {
     const [background, photo] = await Promise.all([
@@ -201,27 +326,68 @@ export async function composeMissionPhoto(backgroundUrl, photoUrl) {
     // 背景はページに表示されているイラストを全面に敷く。
     context.drawImage(background, 0, 0, canvas.width, canvas.height);
 
-    // 写真は背景が見える大きさの白いフォトフレームとして中央に配置する。
-    const frame = { x: 92, y: 72, width: 616, height: 420, radius: 24 };
-    context.save();
-    context.shadowColor = "rgba(30, 45, 35, .28)";
-    context.shadowBlur = 22;
-    context.shadowOffsetY = 10;
-    context.fillStyle = "#fff";
-    context.beginPath();
-    roundedRect(context, frame.x - 10, frame.y - 10, frame.width + 20, frame.height + 20, frame.radius + 8);
-    context.fill();
-    context.restore();
+    // frame は元画像の実ピクセル座標で指定されるため、キャンバスの縮尺に合わせて変換する。
+    const scaleX = canvas.width / background.naturalWidth;
+    const scaleY = canvas.height / background.naturalHeight;
+    const targetFrame = frame
+      ? {
+          x: frame.x * scaleX,
+          y: frame.y * scaleY,
+          width: frame.width * scaleX,
+          height: frame.height * scaleY,
+          radius: (frame.radius ?? 24) * Math.min(scaleX, scaleY),
+        }
+      // 指定がない絵本（汎用SVGの背景など）は、中央固定の額縁を使う。
+      // 背景がほとんど隠れてしまわないよう、キャンバス（800x600）の半分程度に留める。
+      : { x: 200, y: 150, width: 400, height: 300, radius: 24 };
+    // 元から透明な切り抜きPNGはそのまま、白背景などの素材画像は背景を消して
+    // キャラクターだけを取り出す。どちらでもなければ「ふつうの写真」扱い。
+    let subject = photo;
+    let subjectWidth = photo.naturalWidth;
+    let subjectHeight = photo.naturalHeight;
+    let isCharacter = hasTransparency(photo);
+    if (!isCharacter) {
+      const cutout = cutOutUniformBackground(photo);
+      if (cutout) {
+        subject = cutout;
+        subjectWidth = cutout.width;
+        subjectHeight = cutout.height;
+        isCharacter = true;
+      }
+    }
 
-    context.save();
-    context.beginPath();
-    roundedRect(context, frame.x, frame.y, frame.width, frame.height, frame.radius);
-    context.clip();
-    const scale = Math.max(frame.width / photo.naturalWidth, frame.height / photo.naturalHeight);
-    const width = photo.naturalWidth * scale;
-    const height = photo.naturalHeight * scale;
-    context.drawImage(photo, frame.x + (frame.width - width) / 2, frame.y + (frame.height - height) / 2, width, height);
-    context.restore();
+    // 写真の縦横比はそのまま、frame の範囲に収まる大きさまで縮小する（切り抜きも拡大もしない）。
+    const scale = Math.min(targetFrame.width / subjectWidth, targetFrame.height / subjectHeight);
+    const width = subjectWidth * scale;
+    const height = subjectHeight * scale;
+    const photoX = targetFrame.x + (targetFrame.width - width) / 2;
+
+    if (isCharacter) {
+      // キャラクターは白い額縁を付けずそのまま背景に立たせる。
+      // frame の下端に足をそろえる（＝地面に立っているように見える）。
+      const photoY = targetFrame.y + (targetFrame.height - height);
+      context.drawImage(subject, photoX, photoY, width, height);
+    } else {
+      // ふつうの写真（不透明）は、白いフチの「貼った写真」として背景の上に乗せる。
+      // 白いフチは frame 全体ではなく写真のまわりだけに付け、背景が隠れないようにする。
+      const photoY = targetFrame.y + (targetFrame.height - height) / 2;
+      context.save();
+      context.shadowColor = "rgba(30, 45, 35, .28)";
+      context.shadowBlur = 22;
+      context.shadowOffsetY = 10;
+      context.fillStyle = "#fff";
+      context.beginPath();
+      roundedRect(context, photoX - 10, photoY - 10, width + 20, height + 20, targetFrame.radius + 8);
+      context.fill();
+      context.restore();
+
+      context.save();
+      context.beginPath();
+      roundedRect(context, photoX, photoY, width, height, targetFrame.radius);
+      context.clip();
+      context.drawImage(photo, photoX, photoY, width, height);
+      context.restore();
+    }
 
     return canvas.toDataURL("image/jpeg", 0.9);
   } catch (error) {
