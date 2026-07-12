@@ -67,23 +67,30 @@
 }
 
 /* タイトルの白い表紙プレート */
-.title-plate {
-  background: rgba(255, 255, 255, .94);
-  border-radius: 26px;
-  padding: 22px 30px 24px;
-  box-shadow: 0 4px 0 rgba(107, 191, 89, .25), var(--shadow);
-  rotate: -1.2deg;
-  animation: plate-pop 520ms cubic-bezier(.34, 1.56, .64, 1) both;
+/* タイトルは icon.png（「えほえほ」のロゴ入り）そのもの。
+   ぽんと現れたあと、空にふわふわ浮かびつづける。 */
+.title-logo {
+  animation: logo-pop 560ms cubic-bezier(.34, 1.56, .64, 1) both;
 }
-.title-plate .brand { margin: 0; }
-.title-eyebrow {
+.title-icon {
   display: block;
-  font-size: 13px; font-weight: 700; letter-spacing: .14em;
-  color: var(--coral); margin-bottom: 6px;
+  width: clamp(160px, 42vw, 260px);
+  height: auto;
+  aspect-ratio: 1 / 1;        /* 正方形。まわりのレイアウトに縦横を歪められないように */
+  object-fit: contain;
+  /* icon.png は角まで白く塗られた正方形なので、絵の丸枠に合わせてここで角を落とす。
+     22% がアイコン自身の丸みとちょうど重なる。 */
+  border-radius: 22%;
+  box-shadow: 0 10px 18px rgba(58, 74, 63, .28);
+  animation: logo-float 3.6s ease-in-out 560ms infinite;
 }
-@keyframes plate-pop {
+@keyframes logo-pop {
   from { opacity: 0; scale: .82; }
   to   { opacity: 1; scale: 1; }
+}
+@keyframes logo-float {
+  0%, 100% { translate: 0 0;     rotate: -1.2deg; }
+  50%      { translate: 0 -12px; rotate: 1.2deg; }
 }
 
 .title-ask { font-size: 16px; font-weight: 700; color: #5d6c63; margin: 8px 0 0; }
@@ -96,5 +103,5 @@
 .title-screen .mode-card--parent:active { box-shadow: 0 2px 0 #4f7ba3, var(--shadow); }
 
 @media (prefers-reduced-motion: reduce) {
-  .sunny-sun, .sunny-cloud, .title-cat, .title-plate { animation: none; }
+  .sunny-sun, .sunny-cloud, .title-cat, .title-logo, .title-icon { animation: none; }
 }

@@ -131,7 +131,9 @@ export class Session {
       }
     }
     const memory = {
-      id: `mem-${Date.now()}`,
+      // 時刻だけだと、同じミリ秒に2つ作られたとき id がぶつかる。ぶつかると、おもいで一覧で
+      // 古いほうを開いたのに新しいほうが出る（＝上書きされたように見える）。乱数を足して防ぐ。
+      id: `mem-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       bookId: book.id,
       bookTitle: book.title,
       date: today(),
