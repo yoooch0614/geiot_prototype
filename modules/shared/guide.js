@@ -116,7 +116,7 @@ function gestureMarkup(step) {
     return `<span class="guide-gesture guide-gesture--tap">👆</span><span class="guide-target">${step.target ?? "えほん"}</span>`;
   }
   if (step.type === "swipe") {
-    return '<span class="guide-gesture guide-gesture--swipe">👉</span><span class="guide-swipe-arrow">→</span>';
+    return '<span class="guide-gesture guide-gesture--swipe">👆</span><span class="guide-swipe-trail" aria-hidden="true"></span><span class="guide-swipe-arrow">←</span>';
   }
   if (step.type === "camera") {
     return '<span class="guide-gesture guide-gesture--camera">📷</span>';

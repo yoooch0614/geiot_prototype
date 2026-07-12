@@ -15,7 +15,7 @@ const GUIDE_STEPS = [
     image: "assets/niji/p1.png",
     type: "swipe",
     title: "みぎへ スーッ！",
-    action: "ゆびで すべらせる！",
+    action: "ゆびを みぎへ すべらせる！",
     text: "ページが めくれるよ",
   },
   {
