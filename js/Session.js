@@ -108,6 +108,18 @@ export class Session {
   // 例）はっぱのぼうけん = 挿絵3枚 + しゃしん2枚 の5枚アルバム
   buildMemory(book) {
     const done = new Map(this.runMissions.map((m) => [m.missionId, m]));
+    const bookColorPhotos = book.id === "book-niji"
+      ? Object.fromEntries(["nm1", "nm2", "nm3"].map((id) => {
+          const mission = done.get(id);
+          return [id, mission?.vehicleSourceUrl || mission?.photoUrl || null];
+        }).filter(([, photo]) => photo))
+      : {};
+    const bookColorScales = book.id === "book-niji"
+      ? Object.fromEntries(["nm1", "nm2", "nm3"].map((id) => [id, Number(done.get(id)?.vehicleTextureScale) || 1]))
+      : {};
+    const bookColorValues = book.id === "book-niji"
+      ? Object.fromEntries(["nm1", "nm2", "nm3"].map((id) => [id, done.get(id)?.vehicleColor || null]).filter(([, color]) => color))
+      : {};
     const entries = [];
     for (const page of book.pages ?? []) {
       if (page.type === "story" && page.image) {
@@ -117,6 +129,7 @@ export class Session {
           kind: "story",
           image: page.image,
           fillPhoto: page.fillFrom ? (done.get(page.fillFrom)?.photoUrl ?? null) : null,
+          colorFills: page.colorFills ?? null,
         });
       } else if (page.type === "mission" && done.has(page.id)) {
         const m = done.get(page.id);
@@ -137,6 +150,9 @@ export class Session {
       bookId: book.id,
       bookTitle: book.title,
       date: today(),
+      bookColorPhotos,
+      bookColorScales,
+      bookColorValues,
       entries,
     };
     this.memories.unshift(memory);               // ギャラリー（写真つき）

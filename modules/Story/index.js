@@ -163,11 +163,11 @@ export const StoryScreen = {
 
     flip.loadFromHTML(bookEl.querySelectorAll(".flip-page"));
     root.querySelectorAll("[data-book-color-art]").forEach(async (overlay) => {
-      const filled = await fillArtworkHoles(
-        overlay.dataset.bookColorSource,
-        overlay.dataset.bookColorPhoto,
-        Number(overlay.dataset.bookColorScale) || 1,
-      );
+      const tone = overlay.dataset.bookColorTone || "transparent";
+      const region = JSON.parse(overlay.dataset.bookColorRegion);
+      const filled = tone === "dark"
+        ? await recolorVehicleImage(overlay.dataset.bookColorSource, overlay.dataset.bookColorValue || null, region, "dark")
+        : await fillArtworkHoles(overlay.dataset.bookColorSource, overlay.dataset.bookColorPhoto, Number(overlay.dataset.bookColorScale) || 1, region);
       if (filled) {
         overlay.src = filled;
         overlay.style.opacity = "1";

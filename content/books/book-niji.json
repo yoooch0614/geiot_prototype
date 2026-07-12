@@ -25,7 +25,10 @@
       "frame": { "x": 290, "y": 340, "width": 420, "height": 260, "radius": 20 },
       "vehicleColorFrom": "nm1",
       "vehicleRegion": { "x": 0.29, "y": 0.48, "width": 0.43, "height": 0.28 },
-      "vehicleTone": "transparent"
+      "vehicleTone": "transparent",
+      "colorFills": [
+        { "from": "nm1", "region": { "x": 0.27, "y": 0.45, "width": 0.47, "height": 0.33 } }
+      ]
     },
     {
       "id": "n2",
@@ -35,7 +38,10 @@
       "fillFrom": "nm1",
       "vehicleColorFrom": "nm1",
       "vehicleRegion": { "x": 0.27, "y": 0.45, "width": 0.47, "height": 0.33 },
-      "vehicleTone": "transparent"
+      "vehicleTone": "transparent",
+      "colorFills": [
+        { "from": "nm1", "region": { "x": 0.27, "y": 0.45, "width": 0.47, "height": 0.33 } }
+      ]
     },
     {
       "id": "n3",
@@ -44,8 +50,11 @@
       "image": "assets/niji/p4.png",
       "fillFrom": "nm1",
       "vehicleColorFrom": "nm1",
-      "vehicleRegion": { "x": 0.02, "y": 0.52, "width": 0.38, "height": 0.33 },
-      "vehicleTone": "transparent"
+      "vehicleRegion": { "x": 0.29, "y": 0.39, "width": 0.48, "height": 0.48 },
+      "vehicleTone": "transparent",
+      "colorFills": [
+        { "from": "nm1", "region": { "x": 0.29, "y": 0.39, "width": 0.48, "height": 0.37 } }
+      ]
     },
     {
       "id": "nm2",
@@ -63,6 +72,10 @@
       "vehicleColorFrom": "nm1",
       "vehicleRegion": { "x": 0.00, "y": 0.43, "width": 0.37, "height": 0.34 },
       "vehicleTone": "transparent",
+      "colorFills": [
+        { "from": "nm1", "region": { "x": 0.00, "y": 0.43, "width": 0.37, "height": 0.34 } },
+        { "from": "nm2", "region": { "x": 0.34, "y": 0.25, "width": 0.65, "height": 0.46 } }
+      ],
       "frame": { "x": 294, "y": 211, "width": 691, "height": 328, "radius": 20 }
     },
     {
@@ -70,7 +83,10 @@
       "type": "story",
       "text": "「わあ、すてきなおうち！ きみがつくってくれたおうちなら、すぐにみつけられるよ！」まちのひとたちはよろこびました。",
       "image": "assets/niji/p6.png",
-      "fillFrom": "nm2"
+      "fillFrom": "nm2",
+      "colorFills": [
+        { "from": "nm2", "region": { "x": 0.34, "y": 0.25, "width": 0.65, "height": 0.46 } }
+      ]
     },
     {
       "id": "n5",
@@ -79,8 +95,11 @@
       "image": "assets/niji/p7.png",
       "fillFrom": "nm1",
       "vehicleColorFrom": "nm1",
-      "vehicleRegion": { "x": 0.03, "y": 0.49, "width": 0.38, "height": 0.35 },
-      "vehicleTone": "transparent"
+      "vehicleRegion": { "x": 0.06, "y": 0.56, "width": 0.42, "height": 0.43 },
+      "vehicleTone": "transparent",
+      "colorFills": [
+        { "from": "nm1", "region": { "x": 0.06, "y": 0.56, "width": 0.42, "height": 0.32 } }
+      ]
     },
     {
       "id": "nm3",
@@ -94,7 +113,10 @@
         "自然"
       ],
       "image": "assets/niji/p8.png",
-      "frame": { "x": 40, "y": 500, "width": 820, "height": 220, "radius": 20 }
+      "frame": { "x": 40, "y": 500, "width": 820, "height": 220, "radius": 20 },
+      "colorFills": [
+        { "from": "nm3", "region": { "x": 0.00, "y": 0.56, "width": 1.00, "height": 0.44 } }
+      ]
     },
     {
       "id": "n6",
@@ -103,8 +125,12 @@
       "image": "assets/niji/p9.png",
       "fillFrom": "nm3",
       "vehicleColorFrom": "nm1",
-      "vehicleRegion": { "x": 0.49, "y": 0.46, "width": 0.42, "height": 0.35 },
-      "vehicleTone": "transparent"
+      "vehicleRegion": { "x": 0.48, "y": 0.485, "width": 0.31, "height": 0.31 },
+      "vehicleTone": "transparent",
+      "colorFills": [
+        { "from": "nm3", "region": { "x": 0.00, "y": 0.00, "width": 1.00, "height": 1.00 } },
+        { "from": "nm1", "region": { "x": 0.48, "y": 0.485, "width": 0.31, "height": 0.24 } }
+      ]
     },
     {
       "id": "nend",
