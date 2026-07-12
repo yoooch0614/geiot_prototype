@@ -21,7 +21,8 @@
         "色",
         "もよう"
       ],
-      "image": "assets/niji/p2.png"
+      "image": "assets/niji/p2.png",
+      "frame": { "x": 290, "y": 340, "width": 420, "height": 260, "radius": 20 }
     },
     {
       "id": "n2",
@@ -49,7 +50,8 @@
         "形"
       ],
       "image": "assets/niji/p5.png",
-      "fillFrom": "nm1"
+      "fillFrom": "nm1",
+      "frame": { "x": 294, "y": 211, "width": 691, "height": 328, "radius": 20 }
     },
     {
       "id": "n4",
@@ -76,7 +78,8 @@
         "色",
         "自然"
       ],
-      "image": "assets/niji/p8.png"
+      "image": "assets/niji/p8.png",
+      "frame": { "x": 40, "y": 500, "width": 820, "height": 220, "radius": 20 }
     },
     {
       "id": "n6",

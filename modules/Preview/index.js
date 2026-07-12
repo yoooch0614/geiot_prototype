@@ -30,7 +30,7 @@ export const PreviewScreen = {
         const reader = new FileReader();
         reader.onload = async () => {
           const originalDataUrl = reader.result;
-          const nextDataUrl = await composeMissionPhoto(ctx.repo.assetUrl(page.image), originalDataUrl);
+          const nextDataUrl = await composeMissionPhoto(ctx.repo.assetUrl(page.image), originalDataUrl, page.frame);
           ctx.go("PREVIEW", { page, dataUrl: nextDataUrl });
         };
         reader.readAsDataURL(file);

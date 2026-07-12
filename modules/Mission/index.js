@@ -29,7 +29,7 @@ export const MissionScreen = {
         const reader = new FileReader();
         reader.onload = async () => {
           const originalDataUrl = reader.result;
-          const dataUrl = await composeMissionPhoto(ctx.repo.assetUrl(page.image), originalDataUrl);
+          const dataUrl = await composeMissionPhoto(ctx.repo.assetUrl(page.image), originalDataUrl, page.frame);
           ctx.go("PREVIEW", { page, dataUrl });
         };
         reader.readAsDataURL(file);
