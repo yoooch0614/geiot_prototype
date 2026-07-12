@@ -34,18 +34,23 @@ def lan_ip() -> str:
     return ip
 
 
-# 中身が滅多に変わらない素材。これらまで no-store にすると、音を鳴らすたびに
-# mp3 を取り直すことになり、取得が間に合わず鳴らないことがある。
+# 音声・画像などの素材。no-store にすると鳴らすたびに mp3 を取り直すことになり、
+# 取得が間に合わず音が出ないことがあるので、端末に持たせておきたい。
 MEDIA_SUFFIXES = (".mp3", ".wav", ".m4a", ".ogg", ".png", ".jpg", ".jpeg", ".gif", ".svg")
 
 
 class Handler(http.server.SimpleHTTPRequestHandler):
     def end_headers(self):
-        # 編集しながら確認するので、JS/CSS/JSON は毎回取り直させる。
-        # 素材（音声・画像）はキャッシュさせて、鳴らしたい瞬間に手元にある状態にする。
+        # 編集しながら確認するので、JS/CSS/JSON は毎回取り直させる（no-store）。
+        #
+        # 素材は端末に持たせておくが、"no-cache" にする。名前がまぎらわしいが、これは
+        # 「使う前に毎回サーバーへ変わったか聞く」という意味で、変わっていなければ 304 が返り
+        # 手元のものをそのまま使う（＝再ダウンロードしない）。
+        # max-age で時間を決め打ちすると、mp3 や png を差し替えても端末が古いものを
+        # 使い続けてしまい、「編集が反映されない」ことになる。それを防ぐ。
         path = self.path.split("?", 1)[0].lower()
         if path.endswith(MEDIA_SUFFIXES):
-            self.send_header("Cache-Control", "public, max-age=3600")
+            self.send_header("Cache-Control", "no-cache")
         else:
             self.send_header("Cache-Control", "no-store")
         super().end_headers()
