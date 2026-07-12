@@ -1,8 +1,8 @@
 {
-  "id": "book-bear",
-  "title": "おやすみ、くまさん",
+  "id": "book-otupaja",
+  "title": "おつきさまのパジャマ",
   "ageRange": "3-5",
-  "cover": "assets/cover-bear.svg",
+  "cover": "assets/cover-otupaja.png",
   "pages": [
     {
       "id": "b1",

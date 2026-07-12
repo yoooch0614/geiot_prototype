@@ -1,6 +1,8 @@
 export const ModeScreen = {
   render(ctx) {
-    const cat = ctx.repo.assetUrl("assets/char-cat.gif");
+    // gifは背景（うすいクリーム色）を消せないので、透過つきの webp にした。
+    // gifのままだと丘の緑と混ぜて消すしかなく、きつねまで暗くなってしまう。
+    const cat = ctx.repo.assetUrl("assets/char-cat.webp");
     // タイトルはアイコンそのもの（「えほえほ」のロゴが絵に入っている）。
     // 白い看板は置かず、空にふわふわ浮かんでいるように見せる。
     // png(455KB)ではなく webp(46KB)を使う。重いと、Wi-Fi経由のiPadで

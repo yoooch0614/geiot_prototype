@@ -58,7 +58,9 @@
 .title-cat {
   position: absolute; bottom: 5dvh; right: 14%;
   height: min(15dvh, 110px);
-  mix-blend-mode: multiply; /* 白背景gifを丘になじませる（readerと同じ手法） */
+  /* 画像じたいが透過ずみなので mix-blend-mode: multiply は使わない。
+     multiplyだと丘の緑と掛け算されて、きつねがうすぐらくなる。 */
+  filter: drop-shadow(0 3px 3px rgba(60, 90, 40, .25)); /* 丘の上に立って見えるように */
   animation: cat-bob 2.6s ease-in-out infinite alternate;
 }
 @keyframes cat-bob {

@@ -1,8 +1,8 @@
 {
-  "id": "book-leaf",
-  "title": "はっぱのぼうけん",
+  "id": "book-tyouhana",
+  "title": "ちょうちょのはねをさがして",
   "ageRange": "3-6",
-  "cover": "assets/cover-leaf.svg",
+  "cover": "assets/cover-tyouhana.png",
   "pages": [
     {
       "id": "p1",

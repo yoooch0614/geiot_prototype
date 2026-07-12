@@ -6,9 +6,9 @@
   },
   "books": [
     "books/book-niji.json",
-    "books/book-leaf.json",
-    "books/book-town.json",
-    "books/book-bear.json",
+    "books/book-tyouhana.json",
+    "books/book-masiiro.json",
+    "books/book-otupaja.json",
     "books/book-star.json",
     "books/book-sun.json",
     "books/book-walk.json"

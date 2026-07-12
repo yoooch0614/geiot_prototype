@@ -1,8 +1,8 @@
 {
-  "id": "book-town",
-  "title": "まちのたからさがし",
+  "id": "book-masiiro",
+  "title": "まっしろまちのいろさがし",
   "ageRange": "4-6",
-  "cover": "assets/cover-town.svg",
+  "cover": "assets/cover-masiiro.png",
   "pages": [
     {
       "id": "t1",
