@@ -7,7 +7,15 @@
 import { ContentRepository } from "./ContentRepository.js";
 import { Session } from "./Session.js";
 import { Screens } from "./screens.js";
-import { unlockAudio, preloadAudio, playAudio, CELEBRATION_SOUNDS, CLICK_SOUND } from "../modules/shared/utils.js";
+import {
+  unlockAudio, preloadAudio, playAudio, playBgm, stopBgm,
+  CELEBRATION_SOUNDS, CLICK_SOUND, HOME_BGM,
+} from "../modules/shared/utils.js";
+
+// BGMを流す画面。トップ（MODE）・あそびえらび（HOME）・本だな（SELECT）の3つ。
+// 絵本を読みはじめたら止める（おはなしの音やページめくり音の邪魔になるため）。
+// 3画面とも同じ曲なので、この中を行き来しているあいだは鳴りっぱなしで途切れない。
+const BGM_SCREENS = new Set(["MODE", "HOME", "SELECT"]);
 
 const root = document.getElementById("app");
 const themeToggle = document.getElementById("theme-toggle");
@@ -110,6 +118,9 @@ function go(name, params = {}) {
   currentScreen = screen;
   root.scrollTop = 0;
   root.querySelector(".screen")?.scrollTo(0, 0);
+
+  if (BGM_SCREENS.has(name)) playBgm(repo.assetUrl(HOME_BGM));
+  else stopBgm();
 }
 
 // いまのページを種類に応じた画面へ振り分け（物語・ミッション/おわり）
@@ -155,7 +166,7 @@ async function boot() {
   }
   // 鳴らす場面で取得待ちにならないよう、いつでも鳴りうる音は先に読み込んでおく。
   preloadAudio(
-    [CLICK_SOUND, "assets/page_sound.mp3", ...CELEBRATION_SOUNDS].map((s) => repo.assetUrl(s))
+    [CLICK_SOUND, HOME_BGM, "assets/page_sound.mp3", ...CELEBRATION_SOUNDS].map((s) => repo.assetUrl(s))
   );
   go("MODE");
 }

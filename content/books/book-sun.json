@@ -1,8 +1,8 @@
 {
   "id": "book-sun",
-  "title": "おはよう、たいよう！",
+  "title": "よるのもりのおとどけもの",
   "ageRange": "3-5",
-  "cover": "assets/cover-sun.svg",
+  "cover": "assets/cover-yoru.png",
   "pages": [
     {
       "id": "u1",

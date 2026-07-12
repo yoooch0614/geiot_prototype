@@ -70,6 +70,7 @@ export const StoryScreen = {
         <button class="back" data-back>‹</button>
         <span class="progress" data-progress>${ctx.session.pageIndex + 1} / ${count}</span>
         <div class="flipbook"><div class="flip-book" data-flipbook>${body}</div></div>
+        <button class="page-prev" data-prev aria-label="まえのページ">‹ まえ</button>
       </div>`);
   },
   mount(ctx, _params, root) {
@@ -149,16 +150,25 @@ export const StoryScreen = {
       if (!isNext && flip.getCurrentPageIndex() > 0) flip.flipPrev(corner);
     });
 
+    // 「まえ」ボタン。スワイプやタップを知らないこどもでも、確実に前のページへ戻れるようにする。
+    // 最初のページでは押せない（押しても何も起きないと迷うので、見た目でも分かるようにする）。
+    const prevBtn = root.querySelector("[data-prev]");
+    const syncPrevBtn = (localIdx) => { prevBtn.disabled = localIdx <= 0; };
+    prevBtn.onclick = () => {
+      if (flip.getCurrentPageIndex() > 0) flip.flipPrev("bottom");
+    };
+
     // St.PageFlip は初期表示（loadFromHTML直後）にも内部的に "flip" を発火することがあるため、
     // めくり音は "init" が済んだあと＝実際にユーザーがめくった時だけ鳴らす。
     let initialized = false;
-    flip.on("init", (e) => { initialized = true; playPageAudio(e.data.page); });
+    flip.on("init", (e) => { initialized = true; playPageAudio(e.data.page); syncPrevBtn(e.data.page); });
     flip.on("flip", (e) => {
       const localIdx = e.data;
       ctx.session.goTo(start + localIdx);
       progressEl.textContent = `${start + localIdx + 1} / ${count}`;
       if (initialized) playPageTurnSound();
       playPageAudio(localIdx);
+      syncPrevBtn(localIdx);
     });
 
     flip.loadFromHTML(bookEl.querySelectorAll(".flip-page"));

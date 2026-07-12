@@ -1,8 +1,8 @@
 {
   "id": "book-walk",
-  "title": "いっしょに おさんぽ",
+  "title": "ノノとピピのそよかぜまつり",
   "ageRange": "3-6",
-  "cover": "assets/cover-walk.svg",
+  "cover": "assets/cover-nono.png",
   "pages": [
     {
       "id": "w1",

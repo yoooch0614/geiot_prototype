@@ -65,9 +65,15 @@ function start(buffer) {
 }
 
 // 最初のユーザー操作のときに呼ぶ。iOS はここで resume() しないと、以降どこでも鳴らない。
+// 起動直後のタイトル画面は「まだ一度も触っていない」状態なので、BGMもここで鳴りはじめる。
 export function unlockAudio() {
   const ac = context();
-  if (ac && ac.state === "suspended") ac.resume().catch(() => {});
+  if (!ac) return;
+  if (ac.state === "suspended") {
+    ac.resume().then(startBgmIfReady).catch(() => {});
+  } else {
+    startBgmIfReady();
+  }
 }
 
 // 起動時に呼んでおく。鳴らす場面で取得待ちが起きないようにする。
@@ -96,6 +102,67 @@ export function createRepeatableSound(url) {
   if (!url) return () => {};
   loadBuffer(url);
   return () => playAudio(url);
+}
+
+// ── BGM ────────────────────────────────────────────────────
+// 効果音と違って、ずっと繰り返し鳴りつづける音。
+// ・音量は効果音（＝そのままの大きさ＝1.0）より少し小さくして、ボタン音を邪魔しない。
+// ・同じ曲を指定しているあいだは鳴らしっぱなしにする。トップ→あそびえらび→本だなと
+//   画面を移っても、曲が頭から鳴り直したり途切れたりしない。
+// ・BGMを流さない画面（絵本を読んでいる最中など）に移ったら stopBgm() で止める。
+export const HOME_BGM = "assets/home-bgm.mp3";
+const BGM_VOLUME = 0.35;   // 効果音を 1.0 としたときの大きさ。ここを変えれば音量調整できる。
+const BGM_FADE = 0.4;      // 止めるときのフェードアウト（秒）。ぶつっと切れないように。
+
+let bgmUrl = null;         // いま鳴らしたいBGM（画面が決める）
+let bgmSource = null;
+let bgmGain = null;
+
+// 鳴らす条件（曲が読み込み済み・AudioContextが動いている）がそろっていたら鳴らしはじめる。
+// 起動直後はまだ一度も画面を触っていないので AudioContext が止まっている。その場合は
+// 何もせず、最初のタップ（unlockAudio）からもう一度ここに来る。
+function startBgmIfReady() {
+  const ac = context();
+  if (!ac || !bgmUrl || bgmSource) return;
+  if (ac.state === "suspended") return;
+  const buffer = buffers.get(bgmUrl);
+  if (!buffer) return;
+
+  bgmGain = ac.createGain();
+  bgmGain.gain.value = BGM_VOLUME;
+  bgmGain.connect(ac.destination);
+
+  bgmSource = ac.createBufferSource();
+  bgmSource.buffer = buffer;
+  bgmSource.loop = true;
+  bgmSource.connect(bgmGain);
+  bgmSource.start(0);
+}
+
+export function playBgm(url) {
+  if (!url || bgmUrl === url) return;   // 同じ曲ならそのまま鳴らしつづける
+  stopBgm();
+  bgmUrl = url;
+  // 読み込みが終わったら鳴らす。待っているあいだに別の画面へ移っていたら鳴らさない。
+  loadBuffer(url).then(() => { if (bgmUrl === url) startBgmIfReady(); });
+}
+
+export function stopBgm() {
+  bgmUrl = null;
+  if (!bgmSource) return;
+  const ac = context();
+  const source = bgmSource;
+  const gain = bgmGain;
+  bgmSource = null;
+  bgmGain = null;
+  try {
+    const now = ac.currentTime;
+    gain.gain.setValueAtTime(gain.gain.value, now);
+    gain.gain.linearRampToValueAtTime(0, now + BGM_FADE);
+    source.stop(now + BGM_FADE + 0.05);
+  } catch (_) {
+    try { source.stop(); } catch (_) {}
+  }
 }
 
 // ボタンを押したときの音。押した手ごたえとして、どの画面のボタンでも鳴る（登録は app.js）。

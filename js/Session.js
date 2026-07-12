@@ -63,9 +63,12 @@ export class Session {
   // ── 絵本プレイ ───────────────────────
   // 同じ本の「読みかけ」が保存されていれば、そこから再開する
   // （リロードや本棚に戻った後でも、撮った写真とページ位置が残る）。
-  startBook(bookId) {
+  // restart: true なら、読みかけがあっても最初のページからやり直す。
+  // そのプレイで撮った写真も捨てて、まっさらな状態で読みはじめる。
+  // つづきから始めるか最初からかは、本を選んだときに本人にたずねる（Select画面）。
+  startBook(bookId, { restart = false } = {}) {
     this.bookId = bookId;
-    if (this.hasResume(bookId)) {
+    if (!restart && this.hasResume(bookId)) {
       this.pageIndex = this._savedRun.pageIndex ?? 0;
       this.runMissions = this._savedRun.missions ?? [];
     } else {

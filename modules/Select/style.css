@@ -298,3 +298,32 @@
   padding: 5px 10px; border-radius: 999px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, .22);
 }
+
+/* 読みかけの本を選んだときの「つづきから / はじめから」 */
+.resume-ask {
+  position: fixed; inset: 0; z-index: 20;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  background: rgba(30, 40, 34, .45);
+  animation: resume-fade 180ms ease-out both;
+}
+.resume-card {
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  width: 100%; max-width: 360px;
+  padding: 24px 20px 16px;
+  background: #fff; border-radius: 26px; text-align: center;
+  box-shadow: 0 12px 34px rgba(30, 40, 34, .3);
+  animation: resume-pop 260ms cubic-bezier(.34, 1.56, .64, 1) both;
+}
+.resume-title { margin: 0; font-size: 19px; font-weight: 900; color: var(--ink); }
+.resume-sub { margin: 0; font-size: 17px; font-weight: 700; color: #5d6c63; }
+.resume-actions { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+.resume-actions .big-next,
+.resume-actions .retry { width: 100%; }
+.resume-note { margin: 0; font-size: 12px; color: #8a958d; line-height: 1.5; }
+
+@keyframes resume-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes resume-pop {
+  from { opacity: 0; scale: .88; translate: 0 10px; }
+  to   { opacity: 1; scale: 1; translate: 0 0; }
+}

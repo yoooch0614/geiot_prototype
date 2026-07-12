@@ -1,8 +1,8 @@
 {
   "id": "book-star",
-  "title": "きらきら ほしのよる",
+  "title": "ロロのおもちゃのびょういん",
   "ageRange": "3-5",
-  "cover": "assets/cover-star.svg",
+  "cover": "assets/cover-roro.png",
   "pages": [
     {
       "id": "s1",

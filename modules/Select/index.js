@@ -2,6 +2,37 @@ import { esc } from "../shared/utils.js";
 
 const BOOKS_PER_SHELF = 4; // 1つの棚 = 2段 x 2冊
 
+// 読みかけの本を選んだとき、「つづきから」か「はじめから」かをたずねる。
+// 黙って続きから始めると、読み直したいのに戻れない。逆に黙って最初からにすると、
+// せっかく撮った写真が消える。どちらも本人にしか決められないので、必ず聞く。
+function askResume(ctx, bookId, root) {
+  const title = ctx.repo.book(bookId)?.title ?? "";
+  const dialog = document.createElement("div");
+  dialog.className = "resume-ask";
+  dialog.innerHTML = `
+    <div class="resume-card">
+      <p class="resume-title">${esc(title)}</p>
+      <p class="resume-sub">よみかけが あるよ。<br>どうする？</p>
+      <div class="resume-actions">
+        <button class="big-next" data-resume>つづきから</button>
+        <button class="retry" data-restart>はじめから</button>
+      </div>
+      <p class="resume-note">「はじめから」に すると、この えほんで とった しゃしんは きえます</p>
+      <button class="tapdone" data-cancel>やめる</button>
+    </div>`;
+  root.appendChild(dialog);
+
+  const start = (restart) => {
+    ctx.session.startBook(bookId, { restart });
+    ctx.showPage();
+  };
+  dialog.querySelector("[data-resume]").onclick = () => start(false);
+  dialog.querySelector("[data-restart]").onclick = () => start(true);
+  dialog.querySelector("[data-cancel]").onclick = () => dialog.remove();
+  // 外側（黒い部分）をタップしても閉じる
+  dialog.onclick = (event) => { if (event.target === dialog) dialog.remove(); };
+}
+
 function chunk(arr, size) {
   const out = [];
   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
@@ -119,10 +150,13 @@ export const SelectScreen = {
     root.querySelectorAll("[data-book]").forEach((b) => {
       b.onclick = () => {
         const memory = ctx.session.memories.find((m) => m.bookId === b.dataset.book);
+        const bookId = b.dataset.book;
         if ((ctx.session.mode === "parent" || _p?.view === "memories") && memory) {
           ctx.go("DIARY", { memory, fromPlay: false, view: _p?.view });
+        } else if (ctx.session.hasResume(bookId)) {
+          askResume(ctx, bookId, root);   // 読みかけがある本は、つづきか最初かをたずねる
         } else {
-          ctx.session.startBook(b.dataset.book);
+          ctx.session.startBook(bookId);
           ctx.showPage();
         }
       };
