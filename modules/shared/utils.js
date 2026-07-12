@@ -3,8 +3,8 @@ export const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) =>
 );
 
 // ── 音まわり ────────────────────────────────────────────────
-// 「鳴るときと鳴らないときがある」を防ぐための仕組み。理由は2つあり、どちらも
-// 「URLごとにAudio要素を1つだけ作って持ち続ける」ことでまとめて対処している。
+// 「鳴るときと鳴らないときがある」を防ぐための仕組み。理由は3つあり、
+// 「音ごとにAudio要素を数個ずつ作って持ち続け、順番に使う」ことでまとめて対処している。
 //
 // 1) 鳴らすたびに new Audio() すると、play() の読み込みが終わる前に画面が切り替わった場合、
 //    その要素はどこからも参照されないまま捨てられ、音が出ずに終わる。
@@ -12,7 +12,12 @@ export const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) =>
 //    撮影 → 非同期の写真合成 → お祝い画面、のように操作から離れて鳴る音がこれに当たる。
 //    ただし「一度ユーザー操作の中で再生した要素」は、以降は操作の外からでも鳴らせる。
 //    そこで最初のタップで全要素を無音で1回鳴らしておき（unlockAudio）、許可を取っておく。
-const audioCache = new Map();
+// 3) 同じAudio要素を1つだけ使い回すと、端末によっては2回目以降の再生が効かないことがある
+//    （前の再生が終わりきる前の巻き戻しに弱い）。「最初の画面のボタンだけ鳴る」のがこれ。
+//    同じ音を数個ぶん用意して順ぐりに使えば、直前の1個が詰まっても次で確実に鳴る。
+const POOL_SIZE = 4;            // ひとつの音につき用意するAudio要素の数
+const audioPools = new Map();   // url → Audio[]
+const cursors = new Map();      // url → つぎに使う番号
 const primed = new WeakSet();   // 再生許可の取れた要素
 const wanted = new WeakSet();   // 「本当に鳴らして」と指示された要素
 let audioUnlocked = false;
@@ -37,39 +42,51 @@ function primeAudio(audio) {
     .catch(() => { audio.muted = false; });
 }
 
-function getAudio(url) {
-  let audio = audioCache.get(url);
-  if (!audio) {
-    audio = new Audio(url);
-    audio.preload = "auto";
-    audio.load();
-    audioCache.set(url, audio);
-    if (audioUnlocked) primeAudio(audio);
+function getPool(url) {
+  let pool = audioPools.get(url);
+  if (!pool) {
+    pool = Array.from({ length: POOL_SIZE }, () => {
+      const audio = new Audio(url);
+      audio.preload = "auto";
+      audio.load();
+      return audio;
+    });
+    audioPools.set(url, pool);
+    cursors.set(url, 0);
+    if (audioUnlocked) pool.forEach(primeAudio);
   }
-  return audio;
+  return pool;
 }
 
 // 最初のユーザー操作のときに呼ぶ（app.js から登録）。以降どの場面でも音を鳴らせるようになる。
 export function unlockAudio() {
   if (audioUnlocked) return;
   audioUnlocked = true;
-  audioCache.forEach(primeAudio);
+  audioPools.forEach((pool) => pool.forEach(primeAudio));
 }
 
 // あらかじめ読み込んでおきたい音を登録する。起動時に呼んでおくと、
 // 実際に鳴らす場面で取得待ちが発生しない。
 export function preloadAudio(urls) {
-  (urls ?? []).forEach((url) => { if (url) getAudio(url); });
+  (urls ?? []).forEach((url) => { if (url) getPool(url); });
 }
 
 export function playAudio(url) {
   if (!url) return;
-  const audio = getAudio(url);
+  const pool = getPool(url);
+  // 直前に使ったものを避けて、順ぐりに次の要素で鳴らす。
+  const index = cursors.get(url);
+  cursors.set(url, (index + 1) % pool.length);
+  const audio = pool[index];
+
   // ユーザー操作の中で鳴らせたなら、その要素の再生許可も取れたことになる。
   primed.add(audio);
   wanted.add(audio);
   audio.muted = false;
-  try { audio.currentTime = 0; } catch (_) {}
+  try {
+    audio.pause();
+    audio.currentTime = 0;
+  } catch (_) {}
   audio.play().catch((err) => {
     // 以前はここで握りつぶしていたため、ファイルが無いのか再生を拒否されたのか分からなかった。
     // AbortError は「鳴らし直しで前の再生が中断された」だけなので無視してよい。
@@ -79,10 +96,10 @@ export function playAudio(url) {
 }
 
 // 何度も短い間隔で鳴らす効果音（ページめくり音など）用。いまは playAudio 自体が
-// 要素を使い回すので、これは「先に読み込んでおく」ためのラッパー。
+// 要素を順ぐりに使い回すので、これは「先に読み込んでおく」ためのラッパー。
 export function createRepeatableSound(url) {
   if (!url) return () => {};
-  getAudio(url);
+  getPool(url);
   return () => playAudio(url);
 }
 

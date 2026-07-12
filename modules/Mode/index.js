@@ -1,6 +1,9 @@
 export const ModeScreen = {
   render(ctx) {
     const cat = ctx.repo.assetUrl("assets/char-cat.gif");
+    // タイトルは icon.png そのもの（「えほえほ」のロゴが絵に入っている）。
+    // 白い看板は置かず、空にふわふわ浮かんでいるように見せる。
+    const icon = ctx.repo.assetUrl("assets/icon.png");
     return `
       <div class="screen center title-screen screen--sunny">
         <div class="sunny-sky" aria-hidden="true">
@@ -13,9 +16,8 @@ export const ModeScreen = {
           <span class="title-hill title-hill--near"></span>
           ${cat ? `<img class="title-cat" src="${cat}" alt="">` : ""}
         </div>
-        <div class="title-plate">
-          <span class="title-eyebrow">そとが すきになる えほん</span>
-          <h1 class="brand">そとであそぼ！<br>えほん</h1>
+        <div class="title-logo">
+          <img class="title-icon" src="${icon}" alt="えほえほ" onerror="this.remove()">
         </div>
         <p class="title-ask">だれと はじめる？</p>
         <div class="mode-grid">
