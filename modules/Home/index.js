@@ -1,10 +1,16 @@
 export const HomeScreen = {
   render() {
     return `
-      <div class="screen center screen--sunny">
-        <div class="sunny-sky" aria-hidden="true">
-          <span class="sunny-sun"></span>
-          <span class="sunny-cloud sunny-cloud--1"></span>
+      <div class="screen center screen--sky">
+        <div class="sky-scene" aria-hidden="true">
+          <span class="sky-sun"></span>
+          <span class="sky-moon"></span>
+          <span class="sky-cloud sky-cloud--1"></span>
+          <span class="sky-cloud sky-cloud--2"></span>
+          <span class="sky-star sky-star--1"></span>
+          <span class="sky-star sky-star--2"></span>
+          <span class="sky-star sky-star--3"></span>
+          <span class="sky-star sky-star--4"></span>
         </div>
         <button class="back" data-back>‹</button>
         <h1 class="brand">なにして あそぶ？</h1>

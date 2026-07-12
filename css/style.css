@@ -10,6 +10,7 @@
 @import "../modules/Complete/style.css";
 @import "../modules/Select/style.css";
 @import "../modules/Analysis/style.css";
+@import "night.css";
 
 :root {
   --paper:  #f3f7ee;

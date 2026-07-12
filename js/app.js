@@ -10,8 +10,83 @@ import { Screens } from "./screens.js";
 import { unlockAudio, preloadAudio, playAudio, CELEBRATION_SOUNDS, CLICK_SOUND } from "../modules/shared/utils.js";
 
 const root = document.getElementById("app");
+const themeToggle = document.getElementById("theme-toggle");
+const themeMeta = document.querySelector('meta[name="theme-color"]');
 const repo = new ContentRepository();
 const session = new Session();
+
+// UI は端末のローカル時刻で切り替える。06:00〜17:59 は朝/昼、18:00〜05:59 は夜。
+const DAY_START_HOUR = 6;
+const NIGHT_START_HOUR = 18;
+let themeOverride = null; // テストボタンを押した間だけ "day" / "night"
+let themeTimer = null;
+
+function isNightTime(date = new Date()) {
+  const hour = date.getHours();
+  return hour < DAY_START_HOUR || hour >= NIGHT_START_HOUR;
+}
+
+function updateThemeToggle(isNight, mode) {
+  if (!themeToggle) return;
+  themeToggle.textContent = isNight ? "☀️ テスト：朝" : "🌙 テスト：夜";
+  themeToggle.dataset.themeMode = mode;
+  themeToggle.setAttribute(
+    "aria-label",
+    `${mode === "auto" ? "自動判定中。" : "テスト表示中。"} クリックで${isNight ? "朝" : "夜"}に切り替え`
+  );
+  themeToggle.title = mode === "auto"
+    ? `端末時刻で自動判定中（${isNight ? "夜" : "朝/昼"}）。クリックでテスト切替。`
+    : "テスト切替中。ページを更新すると端末時刻の自動判定に戻ります。";
+}
+
+function applyTheme(mode = "auto") {
+  const isNight = mode === "auto" ? isNightTime() : mode === "night";
+  document.body.classList.toggle("night-theme", isNight);
+  document.body.dataset.themeMode = mode;
+  themeMeta?.setAttribute("content", isNight ? "#101c36" : "#6bbf59");
+  updateThemeToggle(isNight, mode);
+}
+
+function scheduleThemeSync() {
+  if (themeTimer) window.clearTimeout(themeTimer);
+  if (themeOverride) return;
+
+  const now = new Date();
+  const next = new Date(now);
+  const hour = now.getHours();
+  if (hour < DAY_START_HOUR) {
+    next.setHours(DAY_START_HOUR, 0, 0, 0);
+  } else if (hour < NIGHT_START_HOUR) {
+    next.setHours(NIGHT_START_HOUR, 0, 0, 0);
+  } else {
+    next.setDate(next.getDate() + 1);
+    next.setHours(DAY_START_HOUR, 0, 0, 0);
+  }
+
+  // 页面一直开着时，也会在下一个切换时间自动更新，不需要重新加载。
+  themeTimer = window.setTimeout(() => {
+    if (themeOverride) return;
+    applyTheme("auto");
+    scheduleThemeSync();
+  }, Math.max(1000, next.getTime() - now.getTime() + 100));
+}
+
+// 先立即按设备时间渲染，避免等待内容加载时主题不正确。
+applyTheme("auto");
+scheduleThemeSync();
+themeToggle?.addEventListener("click", () => {
+  const nextMode = document.body.classList.contains("night-theme") ? "day" : "night";
+  themeOverride = nextMode;
+  if (themeTimer) window.clearTimeout(themeTimer);
+  themeTimer = null;
+  applyTheme(nextMode);
+});
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden && !themeOverride) {
+    applyTheme("auto");
+    scheduleThemeSync();
+  }
+});
 
 const ctx = {
   repo,

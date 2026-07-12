@@ -1,49 +1,53 @@
 /* タイトル画面 ── 絵本の表紙のように、空とおかの上にタイトルを置く。
-   .screen--sunny（空・太陽・雲）は HOME でも共用する。 */
+   .screen--sky は HOME でも共用し、夜間テーマ側で月と星に切り替える。 */
 
-.screen--sunny {
+.screen--sky {
   overflow: hidden;
   background: linear-gradient(180deg, #d9efff 0%, #ecf7ff 34%, rgba(236, 247, 255, 0) 62%);
 }
 /* .back は position:absolute のままにしたいので除外する */
-.screen--sunny > :not(.sunny-sky):not(.title-hills):not(.back) { position: relative; z-index: 2; }
+.screen--sky > :not(.sky-scene):not(.title-hills):not(.back) { position: relative; z-index: 2; }
 
-.sunny-sky { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
-.sunny-sun {
+.sky-scene { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+.sky-sun {
   position: absolute; top: 7%; right: 10%;
   width: 84px; height: 84px; border-radius: 50%;
   background: radial-gradient(circle at 36% 32%, #fff3b0 0%, var(--yellow) 65%);
   box-shadow: 0 0 0 14px rgba(255, 210, 63, .22), 0 0 0 30px rgba(255, 210, 63, .10);
-  animation: sunny-breathe 4.5s ease-in-out infinite alternate;
+  animation: sky-sun-breathe 4.5s ease-in-out infinite alternate;
 }
-@keyframes sunny-breathe {
+@keyframes sky-sun-breathe {
   from { box-shadow: 0 0 0 14px rgba(255, 210, 63, .22), 0 0 0 30px rgba(255, 210, 63, .10); }
   to   { box-shadow: 0 0 0 20px rgba(255, 210, 63, .26), 0 0 0 40px rgba(255, 210, 63, .12); }
 }
 
+/* 夜間主题在 night.css 中显示月和星；白天只显示太阳和云。 */
+.sky-moon,
+.sky-star { display: none; }
+
 /* 雲：白いだ円のかたまり。ゆっくり左右にただよう */
-.sunny-cloud {
+.sky-cloud {
   position: absolute;
   width: 110px; height: 34px; border-radius: 999px;
   background: rgba(255, 255, 255, .95);
   box-shadow: 0 4px 10px rgba(109, 157, 197, .18);
-  animation: sunny-drift 9s ease-in-out infinite alternate;
+  animation: sky-cloud-drift 9s ease-in-out infinite alternate;
 }
-.sunny-cloud::before,
-.sunny-cloud::after {
+.sky-cloud::before,
+.sky-cloud::after {
   content: ""; position: absolute; bottom: 8px;
   border-radius: 50%; background: inherit;
 }
-.sunny-cloud::before { left: 18px;  width: 44px; height: 44px; }
-.sunny-cloud::after  { right: 20px; width: 34px; height: 34px; }
-.sunny-cloud--1 { top: 12%; left: 6%; }
-.sunny-cloud--2 { top: 26%; right: -8px; transform: scale(.72); animation-delay: 2.4s; opacity: .9; }
-@keyframes sunny-drift {
+.sky-cloud::before { left: 18px;  width: 44px; height: 44px; }
+.sky-cloud::after  { right: 20px; width: 34px; height: 34px; }
+.sky-cloud--1 { top: 12%; left: 6%; }
+.sky-cloud--2 { top: 26%; right: -8px; transform: scale(.72); animation-delay: 2.4s; opacity: .9; }
+@keyframes sky-cloud-drift {
   from { translate: 0 0; }
   to   { translate: 18px 0; }
 }
 
-/* おか：画面の下に大小2つの緑の丘。ねこはその上を歩く */
+/* おか：画面の下に大小2つの緑の丘。夜間テーマ側で夜色に変わる */
 .title-hills { position: absolute; left: 0; right: 0; bottom: 0; height: 30dvh; pointer-events: none; z-index: 1; }
 .title-hill { position: absolute; border-radius: 50%; }
 .title-hill--far {
@@ -105,5 +109,5 @@
 .title-screen .mode-card--parent:active { box-shadow: 0 2px 0 #4f7ba3, var(--shadow); }
 
 @media (prefers-reduced-motion: reduce) {
-  .sunny-sun, .sunny-cloud, .title-cat, .title-logo, .title-icon { animation: none; }
+  .sky-sun, .sky-moon, .sky-cloud, .sky-star, .title-cat, .title-logo, .title-icon { animation: none; }
 }

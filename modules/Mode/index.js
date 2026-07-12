@@ -9,11 +9,16 @@ export const ModeScreen = {
     // 読み込み途中の「上半分だけ」が見えてしまうため。
     const icon = ctx.repo.assetUrl("assets/icon.webp");
     return `
-      <div class="screen center title-screen screen--sunny">
-        <div class="sunny-sky" aria-hidden="true">
-          <span class="sunny-sun"></span>
-          <span class="sunny-cloud sunny-cloud--1"></span>
-          <span class="sunny-cloud sunny-cloud--2"></span>
+      <div class="screen center title-screen screen--sky">
+        <div class="sky-scene" aria-hidden="true">
+          <span class="sky-sun"></span>
+          <span class="sky-moon"></span>
+          <span class="sky-cloud sky-cloud--1"></span>
+          <span class="sky-cloud sky-cloud--2"></span>
+          <span class="sky-star sky-star--1"></span>
+          <span class="sky-star sky-star--2"></span>
+          <span class="sky-star sky-star--3"></span>
+          <span class="sky-star sky-star--4"></span>
         </div>
         <div class="title-hills" aria-hidden="true">
           <span class="title-hill title-hill--far"></span>

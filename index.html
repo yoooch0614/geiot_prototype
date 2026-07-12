@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#6bbf59">
+  <meta name="theme-color" content="#101c36">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" href="content/assets/icon.png">
   <link rel="apple-touch-icon" href="content/assets/icon.png">
@@ -13,7 +13,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body class="night-theme">
   <!-- すべての画面はここに描画される（js/app.js が切り替える）-->
   <main id="app" class="app">
     <!-- 起動中スプラッシュ。最初の画面が描画されると自動的に消える（innerHTML差し替え）-->
@@ -24,6 +24,9 @@
       <span class="splash-dots"><i></i><i></i><i></i></span>
     </div>
   </main>
+
+  <!-- テスト用。クリックで一時的に昼/夜を反転する。ページを更新すると端末時刻の自動判定に戻る。 -->
+  <button id="theme-toggle" class="theme-toggle" type="button" aria-live="polite"></button>
 
   <!-- 写真撮影用の隠し入力。iOS/Androidでは端末のカメラが開く。
        ファイル入力なので http（同一Wi-Fi）でも動く（getUserMediaと違いHTTPS不要）-->
