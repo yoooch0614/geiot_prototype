@@ -8,8 +8,7 @@
       "id": "t1",
       "type": "story",
       "text": "まちには おもしろい かたちが いっぱい！",
-      "image": "assets/scene-town.svg",
-      "audio": "assets/t1.mp3"
+      "image": "assets/scene-town.svg"
     },
     {
       "id": "tm1",
@@ -22,15 +21,13 @@
         "形",
         "観察"
       ],
-      "image": "assets/scene-round.svg",
-      "audio": "assets/tm1.mp3"
+      "image": "assets/scene-round.svg"
     },
     {
       "id": "tend",
       "type": "end",
       "text": "まちの たからもの、たくさん みつけたね！",
-      "image": "assets/scene-town.svg",
-      "audio": "assets/tend.mp3"
+      "image": "assets/scene-town.svg"
     }
   ]
 }

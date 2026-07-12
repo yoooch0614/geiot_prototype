@@ -64,6 +64,16 @@
 }
 
 .diary-entry img { width: 100%; border-radius: 14px; display: block; }
+
+/* おはなしの挿絵は、こどもが撮った写真をうしろに敷いてから挿絵を重ねる。
+   透明にしてあるくるま・おうちの部分から写真がのぞく（おはなし画面の .scene と同じ重ね方）。 */
+.diary-scene { position: relative; border-radius: 14px; overflow: hidden; }
+.diary-scene .fill {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%; object-fit: cover;
+  border-radius: 0; z-index: 0;
+}
+.diary-scene .art { position: relative; z-index: 1; }
 .diary-caption { font-size: 18px; font-weight: 700; text-align: center; margin: 12px 0 4px; }
 
 /* 「しゃしんなし」の枠にも表紙を敷き、ラベルは白帯で読めるようにする */

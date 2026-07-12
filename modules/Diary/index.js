@@ -5,11 +5,16 @@ export const DiaryScreen = {
     // ページ背景にはその絵本の表紙をぼかして敷く
     const cover = ctx.repo.assetUrl(ctx.repo.book(memory.bookId)?.cover);
     const entries = memory.entries.map((e) => {
-      // おはなしの挿絵はそのまま1枚の絵として見せる（キャプションなし）
+      // おはなしの挿絵は1枚の絵として見せる（キャプションなし）。
+      // 挿絵に透明な部分（くるま・おうち）があるページは、おはなし画面と同じように
+      // こどもの写真をうしろに敷く。敷かないと、そこだけ色のない絵のままになる。
       if (e.kind === "story") {
         return `
       <div class="diary-entry">
-        <img src="${ctx.repo.assetUrl(e.image)}" alt="">
+        <div class="diary-scene">
+          ${e.fillPhoto ? `<img class="fill" src="${e.fillPhoto}" alt="">` : ""}
+          <img class="art" src="${ctx.repo.assetUrl(e.image)}" alt="">
+        </div>
       </div>`;
       }
       // 写真がないときは、そのミッションの挿絵（撮影画面に出ていた絵）を代わりに見せる

@@ -8,15 +8,13 @@
       "id": "p1",
       "type": "story",
       "text": "こんにちは！ぼくは かぜの ふぅ。",
-      "image": "assets/scene-sky.svg",
-      "audio": "assets/p1.mp3"
+      "image": "assets/scene-sky.svg"
     },
     {
       "id": "p2",
       "type": "story",
       "text": "きょうは そとに たからものが かくれてるよ。いっしょに さがしにいこう！",
-      "image": "assets/scene-meadow.svg",
-      "audio": "assets/p2.mp3"
+      "image": "assets/scene-meadow.svg"
     },
     {
       "id": "m1",
@@ -29,15 +27,13 @@
         "観察",
         "自然"
       ],
-      "image": "assets/scene-leaf.svg",
-      "audio": "assets/m1.mp3"
+      "image": "assets/scene-leaf.svg"
     },
     {
       "id": "p3",
       "type": "story",
       "text": "すごい！よく みつけたね。かぜが よろこんでるよ。",
-      "image": "assets/scene-cheer.svg",
-      "audio": "assets/p3.mp3"
+      "image": "assets/scene-cheer.svg"
     },
     {
       "id": "m2",
@@ -50,15 +46,13 @@
         "色",
         "観察"
       ],
-      "image": "assets/scene-red.svg",
-      "audio": "assets/m2.mp3"
+      "image": "assets/scene-red.svg"
     },
     {
       "id": "end",
       "type": "end",
       "text": "きょうは たくさん あそんだね。また あおうね！",
-      "image": "assets/scene-sunset.svg",
-      "audio": "assets/end.mp3"
+      "image": "assets/scene-sunset.svg"
     }
   ]
 }

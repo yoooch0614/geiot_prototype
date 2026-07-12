@@ -8,8 +8,7 @@
       "id": "w1",
       "type": "story",
       "text": "わんちゃんと いっしょに おさんぽに いこう！みちには なにが あるかな？",
-      "image": "assets/scene-town.svg",
-      "audio": "assets/w1.mp3"
+      "image": "assets/scene-town.svg"
     },
     {
       "id": "wm1",
@@ -22,15 +21,13 @@
         "観察",
         "自然"
       ],
-      "image": "assets/scene-red.svg",
-      "audio": "assets/wm1.mp3"
+      "image": "assets/scene-red.svg"
     },
     {
       "id": "wend",
       "type": "end",
       "text": "たのしい おさんぽ だったね！",
-      "image": "assets/scene-town.svg",
-      "audio": "assets/wend.mp3"
+      "image": "assets/scene-town.svg"
     }
   ]
 }

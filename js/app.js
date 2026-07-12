@@ -7,6 +7,7 @@
 import { ContentRepository } from "./ContentRepository.js";
 import { Session } from "./Session.js";
 import { Screens } from "./screens.js";
+import { unlockAudio, preloadAudio, playAudio, CELEBRATION_SOUNDS, CLICK_SOUND } from "../modules/shared/utils.js";
 
 const root = document.getElementById("app");
 const repo = new ContentRepository();
@@ -56,6 +57,18 @@ function advance() {
   }
 }
 
+// iOS/Safari は最初のユーザー操作より前の再生を拒否する。最初のタップで再生許可を取っておくと、
+// 撮影のあとのお祝い音のように「操作から離れて鳴る音」も確実に鳴るようになる。
+["pointerdown", "touchstart", "keydown"].forEach((type) =>
+  window.addEventListener(type, unlockAudio, { once: true, capture: true })
+);
+
+// ボタンを押した手ごたえのクリック音。画面ごとに書くと付け忘れるので、ここでまとめて拾う。
+// 指を離すのを待たず、押した瞬間（pointerdown）に鳴らしたほうが反応がよく感じられる。
+document.addEventListener("pointerdown", (e) => {
+  if (e.target.closest("button")) playAudio(repo.assetUrl(CLICK_SOUND));
+}, { capture: true });
+
 async function boot() {
   try {
     // コンテンツの読み込みと、保存済みデータ（思い出・読みかけの本）の復元を並行で待つ。
@@ -65,6 +78,10 @@ async function boot() {
     showServerHint();
     return;
   }
+  // 鳴らす場面で取得待ちにならないよう、いつでも鳴りうる音は先に読み込んでおく。
+  preloadAudio(
+    [CLICK_SOUND, "assets/page_sound.mp3", ...CELEBRATION_SOUNDS].map((s) => repo.assetUrl(s))
+  );
   go("MODE");
 }
 

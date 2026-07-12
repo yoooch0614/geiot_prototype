@@ -2,25 +2,92 @@ export const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) =>
   ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
 );
 
-export function playAudio(url) {
-  if (!url) return;
-  new Audio(url).play().catch(() => {});
+// ── 音まわり ────────────────────────────────────────────────
+// 「鳴るときと鳴らないときがある」を防ぐための仕組み。理由は2つあり、どちらも
+// 「URLごとにAudio要素を1つだけ作って持ち続ける」ことでまとめて対処している。
+//
+// 1) 鳴らすたびに new Audio() すると、play() の読み込みが終わる前に画面が切り替わった場合、
+//    その要素はどこからも参照されないまま捨てられ、音が出ずに終わる。
+// 2) iOS/Safari は「ユーザー操作から始まっていない再生」を拒否する（NotAllowedError）。
+//    撮影 → 非同期の写真合成 → お祝い画面、のように操作から離れて鳴る音がこれに当たる。
+//    ただし「一度ユーザー操作の中で再生した要素」は、以降は操作の外からでも鳴らせる。
+//    そこで最初のタップで全要素を無音で1回鳴らしておき（unlockAudio）、許可を取っておく。
+const audioCache = new Map();
+const primed = new WeakSet();   // 再生許可の取れた要素
+const wanted = new WeakSet();   // 「本当に鳴らして」と指示された要素
+let audioUnlocked = false;
+
+// 無音で一瞬だけ再生して即座に巻き戻す。これでこの要素の再生許可が取れる。
+function primeAudio(audio) {
+  if (primed.has(audio)) return;
+  primed.add(audio);
+  audio.muted = true;
+  audio.play()
+    .then(() => {
+      // 許可取りの最中に「本当に鳴らして」の指示が来ていたら（例：最初のタップのクリック音）、
+      // ここで止めると初回だけ無音になってしまう。そのまま鳴らし続ける。
+      if (wanted.has(audio)) {
+        audio.muted = false;
+        return;
+      }
+      audio.pause();
+      audio.currentTime = 0;
+      audio.muted = false;
+    })
+    .catch(() => { audio.muted = false; });
 }
 
-// 何度も短い間隔で鳴らす効果音（ページめくり音など）用に、Audio要素を1つだけ作って使い回す。
-// サーバーが no-store で配信しているため、毎回 new Audio() すると鳴らすたびに取れ直しになり、
-// めくりアニメーションの短さに読み込みが間に合わず鳴らないことがあった。あらかじめ読み込んで
-// おいた同じ要素を巻き戻して再生するだけにすることで、取得待ちなしで確実に鳴らす。
+function getAudio(url) {
+  let audio = audioCache.get(url);
+  if (!audio) {
+    audio = new Audio(url);
+    audio.preload = "auto";
+    audio.load();
+    audioCache.set(url, audio);
+    if (audioUnlocked) primeAudio(audio);
+  }
+  return audio;
+}
+
+// 最初のユーザー操作のときに呼ぶ（app.js から登録）。以降どの場面でも音を鳴らせるようになる。
+export function unlockAudio() {
+  if (audioUnlocked) return;
+  audioUnlocked = true;
+  audioCache.forEach(primeAudio);
+}
+
+// あらかじめ読み込んでおきたい音を登録する。起動時に呼んでおくと、
+// 実際に鳴らす場面で取得待ちが発生しない。
+export function preloadAudio(urls) {
+  (urls ?? []).forEach((url) => { if (url) getAudio(url); });
+}
+
+export function playAudio(url) {
+  if (!url) return;
+  const audio = getAudio(url);
+  // ユーザー操作の中で鳴らせたなら、その要素の再生許可も取れたことになる。
+  primed.add(audio);
+  wanted.add(audio);
+  audio.muted = false;
+  try { audio.currentTime = 0; } catch (_) {}
+  audio.play().catch((err) => {
+    // 以前はここで握りつぶしていたため、ファイルが無いのか再生を拒否されたのか分からなかった。
+    // AbortError は「鳴らし直しで前の再生が中断された」だけなので無視してよい。
+    if (err?.name === "AbortError") return;
+    console.warn(`[audio] 鳴らせませんでした: ${url}`, err?.name ?? err);
+  });
+}
+
+// 何度も短い間隔で鳴らす効果音（ページめくり音など）用。いまは playAudio 自体が
+// 要素を使い回すので、これは「先に読み込んでおく」ためのラッパー。
 export function createRepeatableSound(url) {
   if (!url) return () => {};
-  const audio = new Audio(url);
-  audio.preload = "auto";
-  audio.load();
-  return () => {
-    try { audio.currentTime = 0; } catch (_) {}
-    audio.play().catch(() => {});
-  };
+  getAudio(url);
+  return () => playAudio(url);
 }
+
+// ボタンを押したときの音。押した手ごたえとして、どの画面のボタンでも鳴る（登録は app.js）。
+export const CLICK_SOUND = "assets/button.mp3";
 
 // 達成の演出音。毎回同じだと飽きるので、このなかからランダムに1つ鳴らす。
 // ミッション達成（Achieve）でも絵本を読み終えたとき（Complete）でも同じものを使う。
