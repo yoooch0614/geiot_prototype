@@ -179,22 +179,28 @@ export const StoryScreen = {
       }
       touchStartX = null;
     }, { passive: true });
+    // 前のページへ戻す。St.PageFlip の flipPrev() は、この縦向き表示（usePortrait）では
+    // 角を指定してもしなくても何も起きない（実測。次へ進む flipNext は効く）。
+    // turnToPrevPage() なら確実に戻れるので、戻るときはこちらを使う。
+    // ※めくりアニメーションは付かないが、戻れないよりよい。
+    const goPrevPage = () => {
+      if (flip.getCurrentPageIndex() > 0) flip.turnToPrevPage();
+    };
+
     bookEl.addEventListener("click", (event) => {
       if (event.target.closest("button, a") || Date.now() < Number(bookEl.dataset.ignoreTapUntil || 0)) return;
       const rect = bookEl.getBoundingClientRect();
       const isNext = event.clientX - rect.left >= rect.width / 2;
       const corner = event.clientY - rect.top < rect.height / 2 ? "top" : "bottom";
       if (isNext && flip.getCurrentPageIndex() < flip.getPageCount() - 1) flip.flipNext(corner);
-      if (!isNext && flip.getCurrentPageIndex() > 0) flip.flipPrev(corner);
+      if (!isNext) goPrevPage();
     });
 
     // 「まえ」ボタン。スワイプやタップを知らないこどもでも、確実に前のページへ戻れるようにする。
     // 最初のページでは押せない（押しても何も起きないと迷うので、見た目でも分かるようにする）。
     const prevBtn = root.querySelector("[data-prev]");
     const syncPrevBtn = (localIdx) => { prevBtn.disabled = localIdx <= 0; };
-    prevBtn.onclick = () => {
-      if (flip.getCurrentPageIndex() > 0) flip.flipPrev("bottom");
-    };
+    prevBtn.onclick = goPrevPage;
 
     // St.PageFlip は初期表示（loadFromHTML直後）にも内部的に "flip" を発火することがあるため、
     // めくり音は "init" が済んだあと＝実際にユーザーがめくった時だけ鳴らす。
