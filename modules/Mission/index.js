@@ -1,4 +1,4 @@
-import { playAudio, esc, stage, characterLayer, composeMissionPhoto } from "../shared/utils.js";
+import { playAudio, esc, stage, characterLayer } from "../shared/utils.js";
 
 export const MissionScreen = {
   render(ctx, { page }) {
@@ -27,11 +27,7 @@ export const MissionScreen = {
         const file = input.files && input.files[0];
         if (!file) return;
         const reader = new FileReader();
-        reader.onload = async () => {
-          const originalDataUrl = reader.result;
-          const dataUrl = await composeMissionPhoto(ctx.repo.assetUrl(page.image), originalDataUrl, page.frame);
-          ctx.go("PREVIEW", { page, dataUrl });
-        };
+        reader.onload = () => ctx.go("PREVIEW", { page, dataUrl: reader.result });
         reader.readAsDataURL(file);
       };
       input.click();

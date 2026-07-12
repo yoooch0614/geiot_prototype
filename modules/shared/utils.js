@@ -159,7 +159,7 @@ export const layersMarkup = (ctx, layers) =>
 // 絵ごとに形も位置も違うため、指定がないと写真が絵の関係ない場所に大きく
 // 覆いかぶさってしまう（＝写真と背景がばらばらに見える）。無指定時は
 // 従来どおり中央固定の額縁にフォールバックする。
-export async function composeMissionPhoto(backgroundUrl, photoUrl, frame) {
+export async function composeMissionPhoto(backgroundUrl, photoUrl, frame, placement = {}) {
   const roundedRect = (context, x, y, width, height, radius) => {
     const r = Math.min(radius, width / 2, height / 2);
     context.moveTo(x + r, y);
@@ -343,17 +343,22 @@ export async function composeMissionPhoto(backgroundUrl, photoUrl, frame) {
     const scale = Math.min(targetFrame.width / subjectWidth, targetFrame.height / subjectHeight);
     const width = subjectWidth * scale;
     const height = subjectHeight * scale;
-    const photoX = targetFrame.x + (targetFrame.width - width) / 2;
+    const moveX = (Number(placement.dx) || 0) * canvas.width;
+    const moveY = (Number(placement.dy) || 0) * canvas.height;
+    const photoX = Math.max(0, Math.min(canvas.width - width,
+      targetFrame.x + (targetFrame.width - width) / 2 + moveX));
 
     if (isCharacter) {
       // キャラクターは白い額縁を付けずそのまま背景に立たせる。
       // frame の下端に足をそろえる（＝地面に立っているように見える）。
-      const photoY = targetFrame.y + (targetFrame.height - height);
+      const photoY = Math.max(0, Math.min(canvas.height - height,
+        targetFrame.y + (targetFrame.height - height) + moveY));
       context.drawImage(subject, photoX, photoY, width, height);
     } else {
       // ふつうの写真（不透明）は、白いフチの「貼った写真」として背景の上に乗せる。
       // 白いフチは frame 全体ではなく写真のまわりだけに付け、背景が隠れないようにする。
-      const photoY = targetFrame.y + (targetFrame.height - height) / 2;
+      const photoY = Math.max(0, Math.min(canvas.height - height,
+        targetFrame.y + (targetFrame.height - height) / 2 + moveY));
       context.save();
       context.shadowColor = "rgba(30, 45, 35, .28)";
       context.shadowBlur = 22;

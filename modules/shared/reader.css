@@ -37,6 +37,17 @@
 .scene { position: relative; border-radius: 20px; overflow: hidden; background: #eef4e7; aspect-ratio: 4/3; display: flex; flex-shrink: 0; }
 .scene img { width: 100%; height: 100%; object-fit: cover; }
 .scene.photo img { object-fit: contain; background: #eef4e7; }
+.photo-positioner { touch-action: none; cursor: grab; user-select: none; }
+.photo-positioner.is-dragging { cursor: grabbing; }
+.photo-positioner .photo-background { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.photo-positioner .photo-movable {
+  position: absolute; left: 50%; top: 50%; z-index: 1;
+  width: auto; height: auto; max-width: 50%; max-height: 50%; object-fit: contain;
+  transform: translate(-50%, -50%); pointer-events: none;
+  border: 7px solid #fff; border-radius: 10px; box-sizing: content-box;
+  filter: drop-shadow(0 8px 10px rgba(30, 45, 35, .25));
+}
+.drag-hint { margin: -10px 0 0; color: #6f806f; font-weight: 700; text-align: center; }
 /* 挿絵の透明な部分（＝まだ色のないくるま・おうち・おはな）から、こどもが撮った写真がのぞく。
    写真（.fill）を挿絵（.art）の下に敷くだけで、はめこみになる。 */
 .scene .fill { position: absolute; inset: 0; z-index: 0; }
