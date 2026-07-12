@@ -357,7 +357,9 @@ export async function composeMissionPhoto(backgroundUrl, photoUrl, frame, placem
     }
 
     // 写真の縦横比はそのまま、frame の範囲に収まる大きさまで縮小する（切り抜きも拡大もしない）。
-    const scale = Math.min(targetFrame.width / subjectWidth, targetFrame.height / subjectHeight);
+    const fitScale = Math.min(targetFrame.width / subjectWidth, targetFrame.height / subjectHeight);
+    const zoom = Math.max(0.6, Math.min(2, Number(placement.scale) || 1));
+    const scale = fitScale * zoom;
     const width = subjectWidth * scale;
     const height = subjectHeight * scale;
     const moveX = (Number(placement.dx) || 0) * canvas.width;

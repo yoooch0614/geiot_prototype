@@ -49,6 +49,18 @@
   filter: drop-shadow(0 8px 10px rgba(30, 45, 35, .25));
 }
 .drag-hint { margin: -10px 0 0; color: #6f806f; font-weight: 700; text-align: center; }
+.photo-zoom {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: min(92%, 360px); color: var(--ink); font-weight: 700;
+}
+.photo-zoom input[type="range"] { flex: 1; min-width: 100px; accent-color: var(--green); }
+.zoom-button {
+  width: 38px; height: 38px; border: 0; border-radius: 50%;
+  background: var(--yellow); color: var(--ink); font: 900 24px/1 inherit; cursor: pointer;
+  box-shadow: 0 3px 0 #e0b62f;
+}
+.zoom-button:active { transform: translateY(2px); box-shadow: 0 1px 0 #e0b62f; }
+.photo-zoom output { min-width: 48px; text-align: right; font-size: 14px; }
 /* 挿絵の透明な部分（＝まだ色のないくるま・おうち・おはな）から、こどもが撮った写真がのぞく。
    写真（.fill）を挿絵（.art）の下に敷くだけで、はめこみになる。 */
 .scene .fill { position: absolute; inset: 0; z-index: 0; }
