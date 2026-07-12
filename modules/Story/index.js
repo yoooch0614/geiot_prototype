@@ -1,20 +1,18 @@
-import { playAudio, esc, stage, characterLayer, layersMarkup, fillLayer, openCamera, createRepeatableSound, composeMissionPhoto } from "../shared/utils.js";
+import { playAudio, esc, stage, characterLayer, layersMarkup, fillLayer, openCamera, createRepeatableSound } from "../shared/utils.js";
 
 // 物語ページとミッションページを、いまのページを含む「1冊にできる範囲」で取り出す。
 // ・ end ページの手前で必ず区切る（達成の演出は別画面 COMPLETE が受け持つため）。
-// ・ 未達成のミッションページの先は、まだ含めない（そこから先はミッション達成待ち＝
-//   本の続きがまだ用意できていない）。達成すると、次にこの画面を開いたときに
-//   その先まで含めた新しい本が作られる。
+// ・ ミッション未達成でも、本の続きは先に読めるようにする。
+//   写真撮影は対応するミッションページで行い、達成後は fillFrom によって
+//   後続ページの絵に写真が反映される。
 function bookChapter(ctx) {
   const bookId = ctx.session.bookId;
   const count = ctx.repo.pageCount(bookId);
   const all = Array.from({ length: count }, (_, i) => ctx.repo.pageAt(bookId, i));
-  const canPassThrough = (page) => page.type !== "mission" || ctx.session.isMissionDone(page.id);
-
   let start = ctx.session.pageIndex;
   let end = ctx.session.pageIndex;
   while (start > 0 && all[start - 1].type !== "end") start--;
-  while (end < count - 1 && all[end + 1].type !== "end" && canPassThrough(all[end])) end++;
+  while (end < count - 1 && all[end + 1].type !== "end") end++;
   return { pages: all.slice(start, end + 1), start, count, all };
 }
 
@@ -85,23 +83,28 @@ export const StoryScreen = {
 
     root.querySelectorAll("[data-shoot]").forEach((btn) => {
       const idx = Number(btn.dataset.shoot);
-      // 撮った写真はそのままでは大きすぎるので、ミッションの挿絵と1枚に合成してから
-      // プレビューへ渡す（Mission 画面・Preview の撮り直しと同じ扱い）。
-      btn.onclick = () => openCamera(ctx, async (dataUrl) => {
+      // 写真はプレビューで位置を決めたあと、確定時に背景と合成する。
+      btn.onclick = () => openCamera(ctx, (dataUrl) => {
         const page = pages[idx];
-        const composed = await composeMissionPhoto(ctx.repo.assetUrl(page.image), dataUrl, page.frame);
-        ctx.go("PREVIEW", { page, dataUrl: composed });
+        ctx.go("PREVIEW", { page, dataUrl });
       });
     });
     root.querySelector("[data-finish]")?.addEventListener("click", () => ctx.advance());
 
-    // 物語もミッションも同じ1冊として読み込む。まだ達成していないミッションの先は
-    // 本に含まれていないので、そこから先はスワイプでもめくれない
-    // （＝ミッションを済ませないと物語が続かない）。
+    // 物語もミッションも同じ1冊として読み込む。ミッション未達成でも先のページを
+    // 読めるようにし、写真撮影は各ミッションページのボタンから行う。
+    const container = bookEl.parentElement;
+    const availableWidth = Math.max(360, container?.clientWidth || window.innerWidth);
+    const availableHeight = Math.max(520, container?.clientHeight || window.innerHeight);
     const flip = new St.PageFlip(bookEl, {
-      width: 380, height: 560,
+      width: availableWidth,
+      height: availableHeight,
       size: "stretch",
-      minWidth: 240, maxWidth: 460, minHeight: 340, maxHeight: 760,
+      usePortrait: true,
+      minWidth: availableWidth,
+      maxWidth: availableWidth,
+      minHeight: availableHeight,
+      maxHeight: availableHeight,
       startPage: offset,
       showCover: false,
       maxShadowOpacity: 0.3,
@@ -114,7 +117,33 @@ export const StoryScreen = {
       mobileScrollSupport: true,
       // 角をねらってつままなくても、ページのどこからでもスワイプ／タップでめくれるようにする
       // （子ども向けなので、角だけに限定すると難しすぎる）。
-      disableFlipByClick: false,
+      // 縦長表示時の St.PageFlip 内蔵クリック判定は、左右の向きを誤判定するため使わない。
+      disableFlipByClick: true,
+    });
+
+    // 縦長表示（スマートフォン幅）では、内蔵のクリック判定が常に「戻る」方向になる
+    // ため、ページ中央をタップしても次のページへ進めなかった。スワイプはライブラリに
+    // 任せつつ、タップだけ左右で明示的に処理する。
+    let touchStartX = null;
+    bookEl.addEventListener("touchstart", (event) => {
+      touchStartX = event.touches[0]?.clientX ?? null;
+    }, { passive: true });
+    bookEl.addEventListener("touchend", (event) => {
+      const endX = event.changedTouches[0]?.clientX ?? null;
+      if (touchStartX !== null && endX !== null && Math.abs(endX - touchStartX) > 30) {
+        touchStartX = null;
+        bookEl.dataset.ignoreTapUntil = String(Date.now() + 450);
+        return;
+      }
+      touchStartX = null;
+    }, { passive: true });
+    bookEl.addEventListener("click", (event) => {
+      if (event.target.closest("button, a") || Date.now() < Number(bookEl.dataset.ignoreTapUntil || 0)) return;
+      const rect = bookEl.getBoundingClientRect();
+      const isNext = event.clientX - rect.left >= rect.width / 2;
+      const corner = event.clientY - rect.top < rect.height / 2 ? "top" : "bottom";
+      if (isNext && flip.getCurrentPageIndex() < flip.getPageCount() - 1) flip.flipNext(corner);
+      if (!isNext && flip.getCurrentPageIndex() > 0) flip.flipPrev(corner);
     });
 
     // St.PageFlip は初期表示（loadFromHTML直後）にも内部的に "flip" を発火することがあるため、
