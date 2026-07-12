@@ -10,6 +10,54 @@
   color: var(--green);
   line-height: 1.6;
 }
+.analysis-export-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: -4px 0 0;
+}
+.analysis-export-button {
+  padding: 9px 16px;
+  border: 1px solid rgba(107, 191, 89, .3);
+  border-radius: 999px;
+  color: var(--ink);
+  background: var(--card);
+  font: 700 14px/1.2 var(--font);
+  box-shadow: 0 2px 8px rgba(58, 74, 63, .08);
+  cursor: pointer;
+}
+.analysis-export-button:active { transform: translateY(2px); }
+.analysis-export-note,
+.analysis-disclaimer {
+  margin: -8px 0 0;
+  color: #7a877e;
+  font-size: 12px;
+  text-align: center;
+  line-height: 1.5;
+}
+.analysis-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.analysis-history-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(107, 191, 89, .14);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .62);
+  font-size: 13px;
+}
+.analysis-history-list li > span { color: #8a958d; font-size: 12px; }
+.analysis-history-list li > b { flex: 1; }
+.analysis-history-list li > em { color: var(--green); font-style: normal; font-weight: 700; }
+.analysis-history-empty { justify-content: center; color: #a2ada4; }
 .analysis-list {
   margin: 0;
   padding-left: 18px;
@@ -174,4 +222,151 @@
   top: 4px; left: 8px; right: 4px; bottom: 4px;
   background: #fff;
   border-radius: 1px 4px 4px 1px;
+}
+
+@media print {
+  @page { size: A4 portrait; margin: 8mm; }
+  html, body { height: auto; background: #fff !important; }
+  body { color: #26352b !important; }
+  .app { height: auto !important; max-width: none !important; }
+  .analysis-screen {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-content: start;
+    column-gap: 8mm;
+    row-gap: 5px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    padding: 0 !important;
+  }
+  .analysis-screen > .parent-title,
+  .analysis-screen > .note,
+  .analysis-screen > .stat-row,
+  .analysis-screen > .analysis-next-card,
+  .analysis-screen > .analysis-history,
+  .analysis-screen > .analysis-disclaimer {
+    grid-column: 1 / -1;
+  }
+  .analysis-screen > .parent-title {
+    margin: 0 !important;
+    font-size: 24px !important;
+    line-height: 1.2 !important;
+    color: #26352b !important;
+  }
+  .analysis-screen > .note {
+    margin: 0 !important;
+    padding: 6px 10px !important;
+    font-size: 11px !important;
+    line-height: 1.35 !important;
+    color: #5c6d63 !important;
+    background: #f0f6ea !important;
+  }
+  .analysis-screen > .back,
+  .analysis-export-actions,
+  .analysis-export-note,
+  #theme-toggle,
+  #bgm-toggle {
+    display: none !important;
+  }
+  .analysis-screen > .stat-row {
+    gap: 6px !important;
+    margin: 0 !important;
+  }
+  .analysis-screen .stat {
+    padding: 8px 4px !important;
+  }
+  .analysis-screen .stat b { font-size: 28px !important; }
+  .analysis-screen .stat span {
+    color: #7a877e !important;
+    font-size: 11px !important;
+  }
+  .analysis-screen .analysis-card,
+  .analysis-screen .stat {
+    break-inside: avoid;
+    color: #26352b !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    border: 1px solid #d8e0d8;
+  }
+  .analysis-screen .analysis-card {
+    min-width: 0;
+    padding: 10px !important;
+    border-radius: 10px;
+  }
+  .analysis-screen .analysis-card .log-title {
+    margin: 0 0 5px !important;
+    font-size: 16px !important;
+    line-height: 1.2 !important;
+  }
+  .analysis-screen .analysis-chart-wrap {
+    width: 250px !important;
+    height: 250px !important;
+    margin: 4px auto 0 !important;
+  }
+  .analysis-screen .trait-list { gap: 6px !important; }
+  .analysis-screen .trait-row {
+    gap: 8px !important;
+    padding: 7px 8px !important;
+    border-radius: 7px;
+  }
+  .analysis-screen .trait-icon {
+    width: 24px;
+    height: 24px;
+    transform: scale(.82);
+    transform-origin: left center;
+    margin-right: -4px;
+  }
+  .analysis-screen .trait-label {
+    min-width: 78px;
+    color: #26352b !important;
+    font-size: 11px;
+  }
+  .analysis-screen .trait-value {
+    color: #5d6c63 !important;
+    font-size: 11px;
+    line-height: 1.3;
+  }
+  .analysis-screen .trait-icon--palette .d1 { background: #6d9dc5 !important; }
+  .analysis-screen .trait-icon--palette .d2 { background: #ffd23f !important; }
+  .analysis-screen .trait-icon--palette .d3 { background: #ff7a5c !important; }
+  .analysis-screen .trait-icon--smile { background: #ffd23f !important; }
+  .analysis-screen .trait-icon--smile .eye,
+  .analysis-screen .trait-icon--smile .mouth { background: #26352b !important; }
+  .analysis-screen .trait-icon--smile .mouth { border-bottom-color: #26352b !important; }
+  .analysis-screen .trait-icon--star {
+    background: linear-gradient(135deg, #ffd23f, #ff7a5c) !important;
+  }
+  .analysis-screen .trait-icon--book { background: #6bbf59 !important; }
+  .analysis-screen .trait-icon--book::before { background: rgba(0, 0, 0, .15) !important; }
+  .analysis-screen .analysis-next-card .analysis-lead {
+    margin: 0 !important;
+    color: #4f9a45 !important;
+    font-size: 11px !important;
+    line-height: 1.4 !important;
+  }
+  .analysis-screen .analysis-history-list li {
+    min-height: 0;
+    gap: 8px;
+    padding: 5px 8px !important;
+    background: #fff;
+    font-size: 11px;
+    line-height: 1.25;
+  }
+  .analysis-screen .analysis-history-list { gap: 2px !important; }
+  .analysis-screen .analysis-history-list li > span,
+  .analysis-screen .analysis-history-list li > em {
+    font-size: 10px;
+  }
+  .analysis-screen .analysis-history-list li > b {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .analysis-screen > .analysis-disclaimer {
+    display: block !important;
+    margin: 0 !important;
+    font-size: 9px !important;
+    line-height: 1.25 !important;
+  }
 }
