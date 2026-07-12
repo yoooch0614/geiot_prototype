@@ -3,103 +3,98 @@ export const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) =>
 );
 
 // ── 音まわり ────────────────────────────────────────────────
-// 「鳴るときと鳴らないときがある」を防ぐための仕組み。理由は3つあり、
-// 「音ごとにAudio要素を数個ずつ作って持ち続け、順番に使う」ことでまとめて対処している。
+// <audio>（HTMLAudioElement）で鳴らしていたころは、iOS/Safari で「鳴るときと鳴らないときが
+// ある」が消えなかった。要素ひとつひとつが「読み込み状態」「再生位置」「再生許可」を抱えるため、
+// 連打・巻き戻し・画面切り替えのどれかとぶつかると、その要素だけ黙ってしまう。
 //
-// 1) 鳴らすたびに new Audio() すると、play() の読み込みが終わる前に画面が切り替わった場合、
-//    その要素はどこからも参照されないまま捨てられ、音が出ずに終わる。
-// 2) iOS/Safari は「ユーザー操作から始まっていない再生」を拒否する（NotAllowedError）。
-//    撮影 → 非同期の写真合成 → お祝い画面、のように操作から離れて鳴る音がこれに当たる。
-//    ただし「一度ユーザー操作の中で再生した要素」は、以降は操作の外からでも鳴らせる。
-//    そこで最初のタップで全要素を無音で1回鳴らしておき（unlockAudio）、許可を取っておく。
-// 3) 同じAudio要素を1つだけ使い回すと、端末によっては2回目以降の再生が効かないことがある
-//    （前の再生が終わりきる前の巻き戻しに弱い）。「最初の画面のボタンだけ鳴る」のがこれ。
-//    同じ音を数個ぶん用意して順ぐりに使えば、直前の1個が詰まっても次で確実に鳴る。
-const POOL_SIZE = 4;            // ひとつの音につき用意するAudio要素の数
-const audioPools = new Map();   // url → Audio[]
-const cursors = new Map();      // url → つぎに使う番号
-const primed = new WeakSet();   // 再生許可の取れた要素
-const wanted = new WeakSet();   // 「本当に鳴らして」と指示された要素
-let audioUnlocked = false;
+// そこで Web Audio に切り替えた。音は起動時に一度だけ「デコード済みの音データ（AudioBuffer）」
+// として読み込み、鳴らすたびに使い捨ての再生ノードを作って流す。
+// ・状態を持つ要素が無いので、連打しても画面が切り替わっても詰まらない
+// ・同じ音が重なっても平気（前の音を止める必要がない）
+// ・鳴らす瞬間に読み込みは発生しない（＝取得待ちで無音になることがない）
+//
+// iOS では AudioContext が最初のユーザー操作まで停止(suspended)しているので、
+// 最初のタップで resume() する（unlockAudio。app.js から登録）。
+const AudioCtx = window.AudioContext ?? window.webkitAudioContext;
+let audioCtx = null;
+const buffers = new Map();   // url → AudioBuffer（デコード済み）
+const loading = new Map();   // url → 読み込み中のPromise（二重読み込み防止）
 
-// 無音で一瞬だけ再生して即座に巻き戻す。これでこの要素の再生許可が取れる。
-function primeAudio(audio) {
-  if (primed.has(audio)) return;
-  primed.add(audio);
-  audio.muted = true;
-  audio.play()
-    .then(() => {
-      // 許可取りの最中に「本当に鳴らして」の指示が来ていたら（例：最初のタップのクリック音）、
-      // ここで止めると初回だけ無音になってしまう。そのまま鳴らし続ける。
-      if (wanted.has(audio)) {
-        audio.muted = false;
-        return;
-      }
-      audio.pause();
-      audio.currentTime = 0;
-      audio.muted = false;
+function context() {
+  if (!audioCtx && AudioCtx) audioCtx = new AudioCtx();
+  return audioCtx;
+}
+
+// 音を取ってきてデコードしておく。デコードは重いので一度きり。
+function loadBuffer(url) {
+  if (buffers.has(url)) return Promise.resolve(buffers.get(url));
+  if (loading.has(url)) return loading.get(url);
+  const ac = context();
+  if (!ac) return Promise.resolve(null);
+
+  const task = fetch(url)
+    .then((res) => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.arrayBuffer();
     })
-    .catch(() => { audio.muted = false; });
-}
-
-function getPool(url) {
-  let pool = audioPools.get(url);
-  if (!pool) {
-    pool = Array.from({ length: POOL_SIZE }, () => {
-      const audio = new Audio(url);
-      audio.preload = "auto";
-      audio.load();
-      return audio;
+    .then((data) => ac.decodeAudioData(data))
+    .then((buffer) => {
+      buffers.set(url, buffer);
+      loading.delete(url);
+      return buffer;
+    })
+    .catch((err) => {
+      // ファイルが無いのか、形式が読めないのかが分かるように残す（以前は握りつぶしていた）。
+      loading.delete(url);
+      console.warn(`[audio] 読み込めませんでした: ${url}`, err?.message ?? err);
+      return null;
     });
-    audioPools.set(url, pool);
-    cursors.set(url, 0);
-    if (audioUnlocked) pool.forEach(primeAudio);
-  }
-  return pool;
+
+  loading.set(url, task);
+  return task;
 }
 
-// 最初のユーザー操作のときに呼ぶ（app.js から登録）。以降どの場面でも音を鳴らせるようになる。
+function start(buffer) {
+  const ac = context();
+  if (!ac || !buffer) return;
+  // 鳴らすたびに使い捨てのノードを作る。前の音が鳴っていても関係なく重ねられる。
+  const source = ac.createBufferSource();
+  source.buffer = buffer;
+  source.connect(ac.destination);
+  source.start(0);
+}
+
+// 最初のユーザー操作のときに呼ぶ。iOS はここで resume() しないと、以降どこでも鳴らない。
 export function unlockAudio() {
-  if (audioUnlocked) return;
-  audioUnlocked = true;
-  audioPools.forEach((pool) => pool.forEach(primeAudio));
+  const ac = context();
+  if (ac && ac.state === "suspended") ac.resume().catch(() => {});
 }
 
-// あらかじめ読み込んでおきたい音を登録する。起動時に呼んでおくと、
-// 実際に鳴らす場面で取得待ちが発生しない。
+// 起動時に呼んでおく。鳴らす場面で取得待ちが起きないようにする。
 export function preloadAudio(urls) {
-  (urls ?? []).forEach((url) => { if (url) getPool(url); });
+  (urls ?? []).forEach((url) => { if (url) loadBuffer(url); });
 }
 
 export function playAudio(url) {
   if (!url) return;
-  const pool = getPool(url);
-  // 直前に使ったものを避けて、順ぐりに次の要素で鳴らす。
-  const index = cursors.get(url);
-  cursors.set(url, (index + 1) % pool.length);
-  const audio = pool[index];
+  const ac = context();
+  if (!ac) return;
+  // タップの中から呼ばれるので、止まっていたらここでも動かしておく。
+  if (ac.state === "suspended") ac.resume().catch(() => {});
 
-  // ユーザー操作の中で鳴らせたなら、その要素の再生許可も取れたことになる。
-  primed.add(audio);
-  wanted.add(audio);
-  audio.muted = false;
-  try {
-    audio.pause();
-    audio.currentTime = 0;
-  } catch (_) {}
-  audio.play().catch((err) => {
-    // 以前はここで握りつぶしていたため、ファイルが無いのか再生を拒否されたのか分からなかった。
-    // AbortError は「鳴らし直しで前の再生が中断された」だけなので無視してよい。
-    if (err?.name === "AbortError") return;
-    console.warn(`[audio] 鳴らせませんでした: ${url}`, err?.name ?? err);
-  });
+  const buffer = buffers.get(url);
+  if (buffer) {
+    start(buffer);
+    return;
+  }
+  // まだ読み込めていない音（絵本ごとのナレーションなど）は、読み込み次第すぐ鳴らす。
+  loadBuffer(url).then(start);
 }
 
-// 何度も短い間隔で鳴らす効果音（ページめくり音など）用。いまは playAudio 自体が
-// 要素を順ぐりに使い回すので、これは「先に読み込んでおく」ためのラッパー。
+// 何度も短い間隔で鳴らす効果音（ページめくり音など）用。先に読み込んでおくためのラッパー。
 export function createRepeatableSound(url) {
   if (!url) return () => {};
-  getPool(url);
+  loadBuffer(url);
   return () => playAudio(url);
 }
 

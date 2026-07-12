@@ -54,10 +54,12 @@ html, body {
    index.html に静的に書いてあり、最初の画面が描画されると消える。
    白画面のまま待たせないためのもの。 */
 .splash { gap: 20px; }
-.splash-sun {
-  width: 76px; height: 76px; border-radius: 50%;
-  background: radial-gradient(circle at 36% 32%, #fff3b0 0%, var(--yellow) 65%);
-  box-shadow: 0 0 0 12px rgba(255, 210, 63, .22), 0 0 0 26px rgba(255, 210, 63, .10);
+/* 起動中のロゴ。タイトル画面と同じ icon.png を使い、見た目を揃える。 */
+.splash-icon {
+  width: clamp(140px, 34vw, 200px);
+  aspect-ratio: 1 / 1;
+  height: auto;
+  object-fit: contain;
   animation: splash-pop 600ms cubic-bezier(.34, 1.56, .64, 1) both;
 }
 .splash-dots { display: flex; gap: 8px; }
@@ -79,5 +81,5 @@ html, body {
 button { -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
 
 @media (prefers-reduced-motion: reduce) {
-  .splash-sun, .splash-dots i { animation: none; }
+  .splash-icon, .splash-dots i { animation: none; }
 }

@@ -1,6 +1,6 @@
 {
-  "name": "いっしょにあそぼ！えほん",
-  "short_name": "えほん",
+  "name": "えほえほ",
+  "short_name": "えほえほ",
   "start_url": "./index.html",
   "display": "standalone",
   "orientation": "any",
@@ -8,8 +8,8 @@
   "theme_color": "#6bbf59",
   "icons": [
     {
-      "src": "content/assets/%E3%82%A2%E3%82%A4%E3%82%B3%E3%83%B3.png",
-      "sizes": "1024x1024",
+      "src": "content/assets/icon.png",
+      "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     }
