@@ -1,3 +1,37 @@
+import { openGuide } from "../shared/guide.js";
+
+const WELCOME_STEPS = [
+  {
+    number: "1",
+    image: "assets/cover-nono.png",
+    type: "tap",
+    target: "こども",
+    title: "こどもで はじめる",
+    action: "「こども」を タッチ！",
+    text: "えほんを よんで、ミッションに ちょうせんするよ",
+    focus: '[data-go="child"]',
+  },
+  {
+    number: "2",
+    image: "assets/scene-cheer.svg",
+    type: "parent",
+    gesture: "🔒",
+    target: "おうちのひと",
+    title: "おうちのひと",
+    action: "「おうちのひと」を タッチ！",
+    text: "PINを 入れると、きろくや おもいでを みられるよ",
+    focus: '[data-go="parent"]',
+  },
+  {
+    number: "3",
+    image: "assets/char-cat.webp",
+    type: "camera",
+    title: "しゃしんミッション",
+    action: "ミッションで しゃしんを とろう！",
+    text: "「とってみよう！」で しゃしんを とって、えほんを つくるよ",
+  },
+];
+
 export const ModeScreen = {
   render(ctx) {
     const cat = ctx.repo.assetUrl("assets/char-cat.webp");
@@ -40,14 +74,26 @@ export const ModeScreen = {
             <span>おうちのひと</span>
           </button>
         </div>
+        <button class="guide-launch" type="button" data-guide-open>？ はじめてのかたへ</button>
+        <button class="settings-launch" data-settings type="button">⚙ せってい</button>
       </div>`;
   },
   mount(ctx, _p, root) {
+    const showWelcomeGuide = () => openGuide(ctx, root, {
+      steps: WELCOME_STEPS,
+      kicker: "はじめてのかたへ",
+      title: "つかいかた",
+      finalLabel: "はじめよう！",
+      onComplete: () => ctx.session.markWelcomeGuideSeen(),
+    });
     root.querySelector('[data-go="child"]').onclick = () => {
       ctx.session.setMode("child"); ctx.go("HOME");
     };
     root.querySelector('[data-go="parent"]').onclick = () => {
       ctx.session.setMode("parent"); ctx.go("PIN");
     };
+    root.querySelector("[data-guide-open]").onclick = showWelcomeGuide;
+    root.querySelector("[data-settings]").onclick = () => ctx.go("SETTINGS", { from: "MODE" });
+    if (!ctx.session.hasSeenWelcomeGuide()) showWelcomeGuide();
   },
 };

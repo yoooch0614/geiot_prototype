@@ -19,6 +19,7 @@ export const AchieveScreen = {
   },
   mount(ctx, _params, root) {
     playCelebrationSound(ctx);
+    ctx.notify?.("ミッション かんりょう！");
 
     const layer = root.querySelector("[data-confetti]");
     const shapes = ["circle", "square", "star"];

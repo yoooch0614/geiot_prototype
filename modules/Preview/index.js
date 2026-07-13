@@ -88,26 +88,34 @@ export const PreviewScreen = {
       const button = event.currentTarget;
       button.disabled = true;
       button.textContent = "つくっているよ…";
-      const rect = positioner.getBoundingClientRect();
-      const vehicleColor = await extractPhotoColor(dataUrl);
-      const composedUrl = await composeMissionPhoto(
-        ctx.repo.assetUrl(page.image), dataUrl, page.frame,
-        {
-          dx: offsetX / rect.width,
-          dy: offsetY / rect.height,
-          scale: zoom,
-          removeBackground: convertInput.checked,
-        },
-      );
-      ctx.session.completeMission({
-        missionId: page.id, missionText: page.prompt,
-        caption: page.diaryCaption || page.prompt, photoUrl: composedUrl,
-        missionImage: page.image,
-        vehicleColor,
-        vehicleSourceUrl: dataUrl,
-        vehicleTextureScale: zoom,
-      });
-      ctx.go("ACHIEVE", { page });
+      try {
+        const rect = positioner.getBoundingClientRect();
+        const vehicleColor = await extractPhotoColor(dataUrl);
+        const composedUrl = await composeMissionPhoto(
+          ctx.repo.assetUrl(page.image), dataUrl, page.frame,
+          {
+            dx: offsetX / rect.width,
+            dy: offsetY / rect.height,
+            scale: zoom,
+            removeBackground: convertInput.checked,
+          },
+        );
+        ctx.session.completeMission({
+          missionId: page.id, missionText: page.prompt,
+          caption: page.diaryCaption || page.prompt, photoUrl: composedUrl,
+          missionImage: page.image,
+          vehicleColor,
+          vehicleSourceUrl: dataUrl,
+          vehicleTextureScale: zoom,
+        });
+        ctx.notify?.("しゃしんを 保存したよ！");
+        ctx.go("ACHIEVE", { page });
+      } catch (error) {
+        console.warn("写真の保存に失敗しました", error);
+        button.disabled = false;
+        button.textContent = "✓ これにする";
+        ctx.notify?.("保存に しっぱいしました", "error");
+      }
     };
     root.querySelector("[data-retry]").onclick = () => {
       const input = ctx.els.camera;

@@ -6,10 +6,10 @@
  */
 import { ContentRepository } from "./ContentRepository.js";
 import { Session } from "./Session.js";
+import { Settings } from "./Settings.js";
 import { Screens } from "./screens.js";
 import {
   unlockAudio, preloadAudio, playAudio, playBgm, stopBgm,
-  isBgmEnabled, setBgmEnabled,
   CELEBRATION_SOUNDS, CLICK_SOUND, HOME_BGM, HOME_NIGHT_BGM,
 } from "../modules/shared/utils.js";
 
@@ -19,8 +19,6 @@ import {
 const BGM_SCREENS = new Set(["MODE", "HOME", "SELECT"]);
 
 const root = document.getElementById("app");
-const themeToggle = document.getElementById("theme-toggle");
-const bgmToggle = document.getElementById("bgm-toggle");
 const themeMeta = document.querySelector('meta[name="theme-color"]');
 const repo = new ContentRepository();
 const session = new Session();
@@ -28,27 +26,78 @@ const session = new Session();
 // UI は端末のローカル時刻で切り替える。06:00〜17:59 は朝/昼、18:00〜05:59 は夜。
 const DAY_START_HOUR = 6;
 const NIGHT_START_HOUR = 18;
-let themeOverride = null; // テストボタンを押した間だけ "day" / "night"
+const initialTheme = Settings.get("theme");
+let themeOverride = initialTheme === "auto" ? null : initialTheme;
 let themeTimer = null;
 let currentScreen = null;
 let currentScreenName = null;
+let parentSessionUnlocked = false;
+let parentIdleTimer = null;
+
+const PARENT_IDLE_MS = 5 * 60 * 1000;
+
+function clearParentIdleTimer() {
+  if (parentIdleTimer) {
+    window.clearTimeout(parentIdleTimer);
+    parentIdleTimer = null;
+  }
+}
+
+function armParentIdleTimer() {
+  clearParentIdleTimer();
+  if (!parentSessionUnlocked) return;
+  parentIdleTimer = window.setTimeout(() => {
+    parentSessionUnlocked = false;
+    session.setMode(null);
+    go("MODE");
+  }, PARENT_IDLE_MS);
+}
+
+function unlockParentSession() {
+  parentSessionUnlocked = true;
+  session.setMode("parent");
+  armParentIdleTimer();
+}
+
+function endParentSession() {
+  parentSessionUnlocked = false;
+  clearParentIdleTimer();
+  if (session.mode === "parent") session.setMode(null);
+}
+
+function lockParentSession() {
+  const shouldReturn = parentSessionUnlocked || session.mode === "parent";
+  endParentSession();
+  if (shouldReturn && currentScreenName !== "MODE") go("MODE");
+}
+
+function noteParentActivity() {
+  if (parentSessionUnlocked) armParentIdleTimer();
+}
+
+function showToast(message, type = "success") {
+  document.querySelector("[data-app-toast]")?.remove();
+  const toast = document.createElement("div");
+  toast.className = `app-toast app-toast--${type}`;
+  toast.dataset.appToast = "";
+  toast.setAttribute("role", "status");
+  toast.setAttribute("aria-live", "polite");
+  toast.textContent = message;
+  document.body.append(toast);
+  requestAnimationFrame(() => toast.classList.add("is-visible"));
+  window.setTimeout(() => {
+    toast.classList.remove("is-visible");
+    window.setTimeout(() => toast.remove(), 220);
+  }, 1800);
+}
+
+["pointerdown", "keydown", "touchstart", "scroll"].forEach((type) => {
+  document.addEventListener(type, noteParentActivity, { capture: true, passive: true });
+});
 
 function isNightTime(date = new Date()) {
   const hour = date.getHours();
   return hour < DAY_START_HOUR || hour >= NIGHT_START_HOUR;
-}
-
-function updateThemeToggle(isNight, mode) {
-  if (!themeToggle) return;
-  themeToggle.textContent = isNight ? "☀️ テスト：朝" : "🌙 テスト：夜";
-  themeToggle.dataset.themeMode = mode;
-  themeToggle.setAttribute(
-    "aria-label",
-    `${mode === "auto" ? "自動判定中。" : "テスト表示中。"} クリックで${isNight ? "朝" : "夜"}に切り替え`
-  );
-  themeToggle.title = mode === "auto"
-    ? `端末時刻で自動判定中（${isNight ? "夜" : "朝/昼"}）。クリックでテスト切替。`
-    : "テスト切替中。ページを更新すると端末時刻の自動判定に戻ります。";
 }
 
 function applyTheme(mode = "auto") {
@@ -56,7 +105,6 @@ function applyTheme(mode = "auto") {
   document.body.classList.toggle("night-theme", isNight);
   document.body.dataset.themeMode = mode;
   themeMeta?.setAttribute("content", isNight ? "#101c36" : "#6bbf59");
-  updateThemeToggle(isNight, mode);
   syncBgmForTheme();
 }
 
@@ -72,21 +120,27 @@ function syncBgmForTheme() {
   }
 }
 
-function updateThemeTestVisibility(screenName) {
-  if (themeToggle) themeToggle.hidden = screenName !== "MODE";
+function applyDisplaySettings() {
+  const fontSize = Settings.get("fontSize");
+  const animationsEnabled = Settings.get("animationsEnabled");
+  document.body.dataset.fontSize = fontSize;
+  document.body.dataset.animations = animationsEnabled ? "on" : "off";
+  document.documentElement.lang = Settings.get("language");
 }
 
-function updateBgmToggleVisibility(screenName) {
-  if (bgmToggle) bgmToggle.hidden = !BGM_SCREENS.has(screenName);
+function setFontSize(value) {
+  Settings.set("fontSize", value);
+  applyDisplaySettings();
 }
 
-function updateBgmToggle() {
-  if (!bgmToggle) return;
-  const enabled = isBgmEnabled();
-  bgmToggle.textContent = enabled ? "🔊 BGM" : "🔇 BGM";
-  bgmToggle.setAttribute("aria-pressed", String(enabled));
-  bgmToggle.setAttribute("aria-label", enabled ? "BGMをオフにする" : "BGMをオンにする");
-  bgmToggle.title = enabled ? "BGMをオフにする" : "BGMをオンにする";
+function setAnimationsEnabled(enabled) {
+  Settings.set("animationsEnabled", Boolean(enabled));
+  applyDisplaySettings();
+}
+
+function setLanguage(value) {
+  Settings.set("language", value);
+  applyDisplaySettings();
 }
 
 function scheduleThemeSync() {
@@ -113,21 +167,18 @@ function scheduleThemeSync() {
   }, Math.max(1000, next.getTime() - now.getTime() + 100));
 }
 
+function setThemeMode(mode = "auto") {
+  const safeMode = ["auto", "day", "night"].includes(mode) ? mode : "auto";
+  Settings.set("theme", safeMode);
+  themeOverride = safeMode === "auto" ? null : safeMode;
+  applyTheme(safeMode);
+  scheduleThemeSync();
+}
+
 // 先立即按设备时间渲染，避免等待内容加载时主题不正确。
-applyTheme("auto");
+applyDisplaySettings();
+applyTheme(initialTheme);
 scheduleThemeSync();
-themeToggle?.addEventListener("click", () => {
-  const nextMode = document.body.classList.contains("night-theme") ? "day" : "night";
-  themeOverride = nextMode;
-  if (themeTimer) window.clearTimeout(themeTimer);
-  themeTimer = null;
-  applyTheme(nextMode);
-});
-bgmToggle?.addEventListener("click", () => {
-  setBgmEnabled(!isBgmEnabled());
-  updateBgmToggle();
-});
-updateBgmToggle();
 document.addEventListener("visibilitychange", () => {
   if (!document.hidden && !themeOverride) {
     applyTheme("auto");
@@ -138,19 +189,27 @@ document.addEventListener("visibilitychange", () => {
 const ctx = {
   repo,
   session,
+  settings: Settings,
   els: { camera: document.getElementById("camera-input") },
   go,
   showPage,
   advance,
+  applyDisplaySettings,
+  setFontSize,
+  setAnimationsEnabled,
+  setLanguage,
+  setThemeMode,
+  unlockParent: unlockParentSession,
+  lockParent: lockParentSession,
+  notify: showToast,
 };
 
 // 画面を描画
 function go(name, params = {}) {
   const screen = Screens[name];
   if (!screen) return;
+  if (name === "MODE") endParentSession();
   currentScreenName = name;
-  updateThemeTestVisibility(name);
-  updateBgmToggleVisibility(name);
   currentScreen?.unmount?.(ctx);
   root.innerHTML = screen.render(ctx, params);
   root.querySelector(".screen")?.classList.add("page--in"); // 画面切り替えの入場アニメを全画面に統一
@@ -195,13 +254,23 @@ document.addEventListener("pointerdown", (e) => {
   if (e.target.closest("button")) playAudio(repo.assetUrl(CLICK_SOUND));
 }, { capture: true });
 
+function renderLoadingScreen() {
+  root.innerHTML = `
+    <div class="screen center splash" aria-live="polite">
+      <img class="splash-icon" src="content/assets/icon.webp" alt="えほえほ">
+      <span class="splash-dots"><i></i><i></i><i></i></span>
+      <p class="splash-label">じゅんび中…</p>
+    </div>`;
+}
+
 async function boot() {
+  renderLoadingScreen();
   try {
     // コンテンツの読み込みと、保存済みデータ（思い出・読みかけの本）の復元を並行で待つ。
     // session.restore() は失敗しても例外を出さない（保存が効かないだけで動く）。
     await Promise.all([repo.load(), session.restore()]);
   } catch (err) {
-    showServerHint();
+    showServerHint(err);
     return;
   }
   // 鳴らす場面で取得待ちにならないよう、いつでも鳴りうる音は先に読み込んでおく。
@@ -211,17 +280,20 @@ async function boot() {
   go("MODE");
 }
 
-// file:// で開いたとき用の案内（白画面を防ぐ）
-function showServerHint() {
+// file:// / 通信エラーのとき用の案内（白画面を防ぐ）
+function showServerHint(_error) {
   root.innerHTML = `
     <div class="screen center">
       <div class="hint">
-        <p class="lead">ローカルサーバーで ひらいてね</p>
+        <p class="lead">読み込みに しっぱいしました</p>
+        <p>ローカルサーバーと ネットワークを かくにんしてね。</p>
         <p>このフォルダで つぎを じっこう：</p>
         <code>python3 serve.py</code>
         <p>ひょうじされた <b>http://…:8000</b> を ブラウザで ひらく</p>
+        <button class="big-next" type="button" data-retry>もういちど</button>
       </div>
     </div>`;
+  root.querySelector("[data-retry]").onclick = boot;
 }
 
 boot();

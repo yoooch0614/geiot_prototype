@@ -7,6 +7,7 @@
 @import "../modules/Diary/style.css";
 @import "../modules/Gallery/style.css";
 @import "../modules/Bookmarks/style.css";
+@import "../modules/Settings/style.css";
 @import "../modules/Achieve/style.css";
 @import "../modules/Complete/style.css";
 @import "../modules/Select/style.css";
@@ -28,6 +29,7 @@
   --radius: 28px;
   --font: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", "Segoe UI Rounded",
           system-ui, sans-serif;
+  --font-scale: 1;
 }
 * { box-sizing: border-box; }
 html, body {
@@ -57,6 +59,62 @@ html, body {
 @media (prefers-reduced-motion: reduce) { .page--in, .sparkle, .sticker { animation: none; } }
 :focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; }
 
+.app-toast {
+  position: fixed;
+  left: 50%;
+  bottom: max(22px, env(safe-area-inset-bottom));
+  z-index: 500;
+  max-width: min(88vw, 360px);
+  padding: 11px 18px;
+  border-radius: 999px;
+  color: #fff;
+  background: #3a4a3f;
+  box-shadow: 0 8px 22px rgba(24, 42, 29, .24);
+  font-size: 14px;
+  font-weight: 900;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 12px);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+.app-toast.is-visible { opacity: 1; transform: translate(-50%, 0); }
+.app-toast--success { background: var(--green); }
+.app-toast--error { background: var(--coral); }
+
+/* 设置中心的字号和动画偏好。字号主要放大阅读与操作文字，避免破坏绘本画面的比例。 */
+body[data-font-size="small"] { --font-scale: .92; }
+body[data-font-size="large"] { --font-scale: 1.12; }
+body[data-font-size="large"] .lead { font-size: clamp(25px, 6.8vw, 35px); }
+body[data-font-size="small"] .lead { font-size: clamp(20px, 5.5vw, 27px); }
+body[data-font-size="large"] .prompt { font-size: clamp(18px, 4.8vw, 25px); }
+body[data-font-size="small"] .prompt { font-size: clamp(15px, 4vw, 20px); }
+body[data-font-size="large"] .big-next,
+body[data-font-size="large"] .mission-shoot,
+body[data-font-size="large"] .retry { font-size: 20px; }
+body[data-font-size="large"] .brand { font-size: clamp(36px, 10vw, 50px); }
+body[data-font-size="large"] .section-title,
+body[data-font-size="large"] .parent-title,
+body[data-font-size="large"] .settings-title { font-size: 29px; }
+body[data-font-size="large"] .book-title { font-size: 19px; }
+body[data-font-size="small"] .big-next,
+body[data-font-size="small"] .mission-shoot,
+body[data-font-size="small"] .retry { font-size: 16px; }
+body[data-font-size="small"] .brand { font-size: clamp(26px, 8vw, 36px); }
+body[data-font-size="small"] .section-title,
+body[data-font-size="small"] .parent-title,
+body[data-font-size="small"] .settings-title { font-size: 22px; }
+body[data-font-size="small"] .book-title { font-size: 15px; }
+
+body[data-animations="off"] *,
+body[data-animations="off"] *::before,
+body[data-animations="off"] *::after {
+  animation-duration: .001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: .001ms !important;
+  scroll-behavior: auto !important;
+}
+
 /* ── 起動スプラッシュ ─────────────────────
    index.html に静的に書いてあり、最初の画面が描画されると消える。
    白画面のまま待たせないためのもの。 */
@@ -77,6 +135,7 @@ html, body {
 }
 .splash-dots i:nth-child(2) { animation-delay: .15s; }
 .splash-dots i:nth-child(3) { animation-delay: .3s; }
+.splash-label { margin: 0; color: #7a877e; font-size: 14px; font-weight: 800; }
 @keyframes splash-pop { from { opacity: 0; scale: .5; } to { opacity: 1; scale: 1; } }
 @keyframes splash-bounce {
   0%, 100% { translate: 0 0; opacity: .4; }

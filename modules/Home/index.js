@@ -56,6 +56,7 @@ export const HomeScreen = {
           <span aria-hidden="true">☆</span> しおり <span class="bookmark-count">${ctx.session.bookmarks.length}</span>
         </button>
         <button class="guide-launch" type="button" data-guide-open>？ あそびかた</button>
+        <button class="settings-launch" data-settings type="button">⚙ せってい</button>
       </div>`;
   },
   mount(ctx, _p, root) {
@@ -68,6 +69,7 @@ export const HomeScreen = {
       onComplete: () => ctx.session.markGuideSeen(),
     });
     root.querySelector("[data-guide-open]").onclick = showGuide;
+    root.querySelector("[data-settings]").onclick = () => ctx.go("SETTINGS", { from: "HOME" });
     if (ctx.session.mode === "child" && !ctx.session.hasSeenGuide()) showGuide();
   },
 };

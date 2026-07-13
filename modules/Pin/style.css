@@ -32,6 +32,22 @@
   background: #eef8e9;
   transform: translateY(3px); box-shadow: 0 1px 0 #dcead3;
 }
+.key:disabled,
+.key:disabled:active {
+  color: #a2ada4;
+  background: #e8eee3;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+.pin-status {
+  min-height: 18px;
+  margin: -5px 0 0;
+  color: var(--coral);
+  font-size: 13px;
+  font-weight: 800;
+}
+.pin-status.is-locked { color: #b1783e; }
 .pin-hint { font-size: 13px; color: #a2ada4; margin: 0; }
 
 @media (prefers-reduced-motion: reduce) {

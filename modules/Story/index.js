@@ -1,4 +1,4 @@
-import { playAudio, esc, stage, characterLayer, layersMarkup, fillLayer, bookColorLayer, vehicleColorLayer, extractPhotoColor, fillArtworkHoles, recolorVehicleImage, openCamera, createRepeatableSound } from "../shared/utils.js";
+import { playNarration, speakNarration, stopNarration, esc, stage, characterLayer, layersMarkup, fillLayer, bookColorLayer, vehicleColorLayer, extractPhotoColor, fillArtworkHoles, recolorVehicleImage, openCamera, createRepeatableSound } from "../shared/utils.js";
 
 // 物語ページとミッションページを、いまのページを含む「1冊にできる範囲」で取り出す。
 // ・ end ページの手前で必ず区切る（達成の演出は別画面 COMPLETE が受け持つため）。
@@ -89,7 +89,15 @@ export const StoryScreen = {
     const offset = ctx.session.pageIndex - start;
     const bookEl = root.querySelector("[data-flipbook]");
     const progressEl = root.querySelector("[data-progress]");
-    const playPageAudio = (localIdx) => playAudio(ctx.repo.assetUrl(pages[localIdx].audio));
+    const playPageAudio = (localIdx) => {
+      const page = pages[localIdx];
+      const audioUrl = ctx.repo.assetUrl(page.audio);
+      if (audioUrl) {
+        playNarration(audioUrl);
+      } else {
+        speakNarration([page.text, page.prompt].filter(Boolean).join(" "));
+      }
+    };
     // 本を開いた時点で先読みしておき、めくるたびに巻き戻して再生するだけにする
     // （毎回 new Audio() だと取得が間に合わず鳴らないことがあったため）。
     const playPageTurnSound = createRepeatableSound(ctx.repo.assetUrl("assets/page_sound.mp3"));
@@ -255,5 +263,6 @@ export const StoryScreen = {
   unmount() {
     currentFlip?.destroy();
     currentFlip = null;
+    stopNarration();
   },
 };

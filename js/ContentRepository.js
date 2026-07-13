@@ -15,6 +15,7 @@ export class ContentRepository {
     this.contentDir = indexPath.slice(0, indexPath.lastIndexOf("/")); // "content"
     this.meta = {};
     this.books = [];
+    this.errors = [];
   }
 
   async load() {
@@ -26,6 +27,7 @@ export class ContentRepository {
 
     // 2) 索引に並んだ絵本ファイルを順番に読み込む
     const files = index.books ?? [];
+    this.errors = [];
     const results = await Promise.allSettled(
       files.map((f) => this._loadBook(f))
     );
@@ -34,7 +36,10 @@ export class ContentRepository {
     this.books = [];
     results.forEach((r, i) => {
       if (r.status === "fulfilled") this.books.push(r.value);
-      else console.warn(`絵本を読み込めませんでした: ${files[i]}`, r.reason);
+      else {
+        this.errors.push(files[i]);
+        console.warn(`絵本を読み込めませんでした: ${files[i]}`, r.reason);
+      }
     });
     return this.books;
   }

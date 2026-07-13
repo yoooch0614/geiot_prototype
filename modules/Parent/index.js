@@ -25,11 +25,13 @@ export const ParentScreen = {
         <p class="note">※ ストリークは「外で活動した日数」に付き、途切れても没収しません（健全設計）。</p>
         <h3 class="log-title">きろく</h3>
         <ul class="log">${logHtml}</ul>
+        <button class="settings-launch settings-launch--parent" data-settings type="button">⚙ せってい</button>
         <button class="ghost" data-reset>デモ用: きろくをリセット</button>
       </div>`;
   },
   mount(ctx, _p, root) {
     root.querySelector("[data-back]").onclick = () => ctx.go("SELECT");
+    root.querySelector("[data-settings]").onclick = () => ctx.go("SETTINGS", { from: "PARENT" });
     root.querySelector("[data-reset]").onclick = () => { ctx.session.reset(); ctx.go("PARENT"); };
   },
 };

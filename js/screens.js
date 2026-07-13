@@ -11,6 +11,7 @@ import { CompleteScreen } from "../modules/Complete/index.js";
 import { DiaryScreen } from "../modules/Diary/index.js";
 import { GalleryScreen } from "../modules/Gallery/index.js";
 import { BookmarksScreen } from "../modules/Bookmarks/index.js";
+import { SettingsScreen, PrivacyScreen } from "../modules/Settings/index.js";
 
 export const Screens = {
   MODE: ModeScreen,
@@ -26,4 +27,6 @@ export const Screens = {
   DIARY: DiaryScreen,
   GALLERY: GalleryScreen,
   BOOKMARKS: BookmarksScreen,
+  SETTINGS: SettingsScreen,
+  PRIVACY: PrivacyScreen,
 };

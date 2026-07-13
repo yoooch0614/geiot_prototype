@@ -1,3 +1,5 @@
+import { Settings } from "../../js/Settings.js";
+
 export const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) =>
   ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
 );
@@ -81,7 +83,7 @@ export function preloadAudio(urls) {
   (urls ?? []).forEach((url) => { if (url) loadBuffer(url); });
 }
 
-export function playAudio(url) {
+function playAudioNow(url) {
   if (!url) return;
   const ac = context();
   if (!ac) return;
@@ -95,6 +97,38 @@ export function playAudio(url) {
   }
   // まだ読み込めていない音（絵本ごとのナレーションなど）は、読み込み次第すぐ鳴らす。
   loadBuffer(url).then(start);
+}
+
+// 効果音（ボタン音・ページめくり・達成音）は設定でまとめて切り替える。
+export function playAudio(url) {
+  if (!isSoundEnabled()) return;
+  playAudioNow(url);
+}
+
+// 朗読は効果音とは別の設定にする。音を切っても、朗読だけは聞けるようにする。
+export function playNarration(url) {
+  if (!isNarrationEnabled()) return;
+  playAudioNow(url);
+}
+
+// まだ専用ナレーション音源がないページは、ブラウザ標準の読み上げを使う。
+// 専用音源がある場合は StoryScreen 側で playNarration() を優先する。
+export function speakNarration(text) {
+  if (!isNarrationEnabled() || !text || !window.speechSynthesis || !window.SpeechSynthesisUtterance) return;
+  stopNarration();
+  const utterance = new window.SpeechSynthesisUtterance(String(text));
+  utterance.lang = "ja-JP";
+  utterance.rate = 0.9;
+  utterance.pitch = 1.05;
+  utterance.onstart = () => { speaking = true; };
+  utterance.onend = () => { speaking = false; };
+  utterance.onerror = () => { speaking = false; };
+  window.speechSynthesis.speak(utterance);
+}
+
+export function stopNarration() {
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
+  speaking = false;
 }
 
 // 何度も短い間隔で鳴らす効果音（ページめくり音など）用。先に読み込んでおくためのラッパー。
@@ -118,7 +152,10 @@ const BGM_FADE = 0.4;      // 止めるときのフェードアウト（秒）�
 let bgmUrl = null;         // いま鳴らしたいBGM（画面が決める）
 let bgmSource = null;
 let bgmGain = null;
-let bgmEnabled = true;
+let bgmEnabled = Settings.get("bgmEnabled") !== false;
+let soundEnabled = Settings.get("soundEnabled") !== false;
+let narrationEnabled = Settings.get("narrationEnabled") !== false;
+let speaking = false;
 
 // 鳴らす条件（曲が読み込み済み・AudioContextが動いている）がそろっていたら鳴らしはじめる。
 // 起動直後はまだ一度も画面を触っていないので AudioContext が止まっている。その場合は
@@ -177,9 +214,31 @@ export function isBgmEnabled() {
 
 export function setBgmEnabled(enabled) {
   bgmEnabled = Boolean(enabled);
+  Settings.set("bgmEnabled", bgmEnabled);
   if (bgmEnabled) startBgmIfReady();
   else stopBgmPlayback();
   return bgmEnabled;
+}
+
+export function isSoundEnabled() {
+  return soundEnabled;
+}
+
+export function setSoundEnabled(enabled) {
+  soundEnabled = Boolean(enabled);
+  Settings.set("soundEnabled", soundEnabled);
+  return soundEnabled;
+}
+
+export function isNarrationEnabled() {
+  return narrationEnabled;
+}
+
+export function setNarrationEnabled(enabled) {
+  narrationEnabled = Boolean(enabled);
+  Settings.set("narrationEnabled", narrationEnabled);
+  if (!narrationEnabled) stopNarration();
+  return narrationEnabled;
 }
 
 // ボタンを押したときの音。押した手ごたえとして、どの画面のボタンでも鳴る（登録は app.js）。

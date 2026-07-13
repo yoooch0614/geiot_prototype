@@ -1,4 +1,4 @@
-import { playAudio, esc, stage, characterLayer } from "../shared/utils.js";
+import { playNarration, esc, stage, characterLayer } from "../shared/utils.js";
 
 export const MissionScreen = {
   render(ctx, { page }) {
@@ -17,7 +17,7 @@ export const MissionScreen = {
       </div>`);
   },
   mount(ctx, { page }, root) {
-    playAudio(ctx.repo.assetUrl(page.audio));
+    playNarration(ctx.repo.assetUrl(page.audio));
     root.querySelector("[data-back]").onclick = () => ctx.go("HOME");
 
     const input = ctx.els.camera;

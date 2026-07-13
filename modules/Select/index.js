@@ -147,6 +147,7 @@ export const SelectScreen = {
     const isMemoryView = params.view === "memories";
     const isParent = ctx.session.mode === "parent" || isMemoryView;
     const books = isParent ? parentBooks(ctx) : ctx.repo.books;
+    const hasContentError = !isParent && (ctx.repo.errors?.length ?? 0) > 0;
     const pages = books.length ? chunk(books, BOOKS_PER_SHELF) : [];
     const dots = pages
       .map((_, i) => `<button class="shelf-dot" data-dot="${i}" aria-label="${i + 1}ばんめの たな"></button>`)
@@ -157,10 +158,19 @@ export const SelectScreen = {
         <button class="select-action" data-go="ANALYSIS">子どもの特性分析</button>
         <button class="select-action" data-parent-guide>操作方法</button>
       </div>` : "";
-    const emptyState = isParent && books.length === 0 ? `
+    const emptyState = books.length === 0 ? `
       <div class="select-empty">
-        <p>まだ こどもが つくった えほんは ありません。</p>
-        <p>えほんを よんで できたら、ここに すぐ あらわれます。</p>
+        ${hasContentError
+          ? "<p>えほんを よみこめませんでした。</p><p>もういちど ためしてみてね。</p>"
+          : isParent
+            ? "<p>まだ こどもが つくった えほんは ありません。</p><p>えほんを よんで できたら、ここに すぐ あらわれます。</p>"
+            : "<p>まだ えほんが ありません。</p><p>読み込みが おわるまで まってみてね。</p>"}
+        ${hasContentError ? '<button class="select-action" type="button" data-retry-content>もういちど</button>' : ""}
+      </div>` : "";
+    const contentWarning = hasContentError && books.length > 0 ? `
+      <div class="select-error" role="alert">
+        <span>一部の えほんを よみこめませんでした。</span>
+        <button class="select-action" type="button" data-retry-content>もういちど</button>
       </div>` : "";
     const badgeType = isMemoryView ? "date" : "age";
     return `
@@ -176,12 +186,26 @@ export const SelectScreen = {
         <button class="back" data-back>‹ もどる</button>
         <h2 class="section-title select-title">${isParent ? "おもいで" : "どの えほんを よむ？"}</h2>
         ${parentActions}
+        ${contentWarning}
         ${emptyState || `<div class="shelf-pager" data-pager>${pages.map((p) => shelfPage(ctx, p, badgeType)).join("")}</div>${pages.length > 1 ? `<div class="shelf-dots" data-dots>${dots}</div>` : ""}`}
       </div>`;
   },
   mount(ctx, _p, root) {
     root.querySelector("[data-back]").onclick = () => ctx.go(ctx.session.mode === "parent" ? "MODE" : "HOME");
     root.querySelectorAll("[data-go]").forEach((b) => b.onclick = () => ctx.go(b.dataset.go));
+    root.querySelector("[data-retry-content]")?.addEventListener("click", async (event) => {
+      const button = event.currentTarget;
+      button.disabled = true;
+      button.textContent = "読み込み中…";
+      try {
+        await ctx.repo.load();
+        ctx.go("SELECT", _p);
+      } catch (_) {
+        button.disabled = false;
+        button.textContent = "もういちど";
+        ctx.notify?.("読み込みに しっぱいしました", "error");
+      }
+    });
     const showParentGuide = () => openGuide(ctx, root, {
       steps: PARENT_GUIDE_STEPS,
       kicker: "おうちのひとへ",

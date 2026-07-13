@@ -25,6 +25,8 @@ def lan_ip() -> str:
     """LAN 側の自分の IP を推定（外部に送信はしない）。"""
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
+        # 网络不可用时也要尽快回退到 127.0.0.1，不能让服务器一直卡在启动阶段。
+        s.settimeout(1.0)
         s.connect(("8.8.8.8", 80))
         ip = s.getsockname()[0]
     except Exception:

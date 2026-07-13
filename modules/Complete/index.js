@@ -26,6 +26,7 @@ export const CompleteScreen = {
 
     // 1さつ読み終えたお祝いの音。メダルの登場演出と合わせて鳴らす。
     playCelebrationSound(ctx);
+    ctx.notify?.("えほん日記を 保存したよ！");
 
     // 初期状態はCSS側で「すでに見えている」のがデフォルト。
     // ここでは登場演出用のクラスを1フレーム後に付与するだけ。

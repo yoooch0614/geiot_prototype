@@ -264,9 +264,7 @@
   }
   .analysis-screen > .back,
   .analysis-export-actions,
-  .analysis-export-note,
-  #theme-toggle,
-  #bgm-toggle {
+  .analysis-export-note {
     display: none !important;
   }
   .analysis-screen > .stat-row {

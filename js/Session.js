@@ -20,7 +20,9 @@ const STORAGE_KEY = "ehon.session.v2";
 const MEMORIES_KEY = "memories.v1"; // IndexedDB: 完成した絵本日記（写真つき）
 const RUN_KEY = "run.v1";           // IndexedDB: 読みかけの本（ページ位置＋達成ミッション）
 const MAX_MEMORIES = 30;            // 端末容量の保険。古い思い出から順に押し出す
-const DEFAULT_PIN = "0000";         // おうちのひとゲート（プロト用の固定PIN）
+const DEFAULT_PIN = "0000";         // おうちのひとゲートの初期PIN
+const PIN_MAX_FAILURES = 3;
+const PIN_LOCK_MS = 30 * 1000;
 
 function today() {
   return new Date().toISOString().slice(0, 10); // YYYY-MM-DD
@@ -35,6 +37,7 @@ export class Session {
     this.runMissions = [];    // 今回のプレイの達成 [{missionId, photoUrl, caption, missionText}]
     this.memories = [];       // 完成した絵本日記（写真つき・IndexedDBから復元される）
     this.bookmarks = [];      // お気に入りのページ／日記エントリー（軽いメタ情報だけ）
+    this.welcomeGuideSeen = false; // 最初のアプリ全体ガイドを見たか
     this.guideSeen = false;  // こども向けの初回「あそびかた」案内を見たか
     this.parentGuideSeen = false; // おうちのひと向けの初回「操作方法」案内を見たか
 
@@ -42,6 +45,8 @@ export class Session {
     this.activityDays = new Set(); // 外で活動した日
     this.memoryLog = [];           // [{id, bookTitle, date, count}] 親レポート用（写真なし）
     this.pin = DEFAULT_PIN;
+    this.pinFailedAttempts = 0;
+    this.pinLockedUntil = 0;
 
     // --- IndexedDBに保存中の「読みかけの本」 ---
     this._savedRun = null;    // {bookId, pageIndex, missions}
@@ -63,6 +68,39 @@ export class Session {
   // ── モード ─────────────────────────
   setMode(mode) { this.mode = mode; }
   checkPin(input) { return String(input) === String(this.pin); }
+  getPinLockRemaining() {
+    return Math.max(0, Number(this.pinLockedUntil) - Date.now());
+  }
+  isPinLocked() { return this.getPinLockRemaining() > 0; }
+  pinAttemptsLeft() {
+    if (this.isPinLocked()) return 0;
+    return Math.max(0, PIN_MAX_FAILURES - this.pinFailedAttempts);
+  }
+  recordPinFailure() {
+    if (this.isPinLocked()) return this.getPinLockRemaining();
+    this.pinFailedAttempts += 1;
+    if (this.pinFailedAttempts >= PIN_MAX_FAILURES) {
+      this.pinLockedUntil = Date.now() + PIN_LOCK_MS;
+      this.pinFailedAttempts = 0;
+    }
+    this._save();
+    return this.getPinLockRemaining();
+  }
+  resetPinFailures() {
+    if (!this.pinFailedAttempts && !this.pinLockedUntil) return;
+    this.pinFailedAttempts = 0;
+    this.pinLockedUntil = 0;
+    this._save();
+  }
+  setPin(input) {
+    const next = String(input ?? "");
+    if (!/^\d{4}$/.test(next)) return false;
+    this.pin = next;
+    this._save();
+    return true;
+  }
+  hasSeenWelcomeGuide() { return this.welcomeGuideSeen; }
+  markWelcomeGuideSeen() { this.welcomeGuideSeen = true; this._save(); }
   hasSeenGuide() { return this.guideSeen; }
   markGuideSeen() { this.guideSeen = true; this._save(); }
   hasSeenParentGuide() { return this.parentGuideSeen; }
@@ -259,6 +297,7 @@ export class Session {
     this.memoryLog = [];
     this.memories = [];
     this.bookmarks = [];
+    this.welcomeGuideSeen = false;
     this.guideSeen = false;
     this.parentGuideSeen = false;
     this.runMissions = [];
@@ -296,9 +335,12 @@ export class Session {
         activityDays: [...this.activityDays],
         memoryLog: this.memoryLog,
         bookmarks: this.bookmarks,
+        welcomeGuideSeen: this.welcomeGuideSeen,
         guideSeen: this.guideSeen,
         parentGuideSeen: this.parentGuideSeen,
         pin: this.pin,
+        pinFailedAttempts: this.pinFailedAttempts,
+        pinLockedUntil: this.pinLockedUntil,
       }));
     } catch (_) {}
   }
@@ -310,9 +352,13 @@ export class Session {
       this.activityDays = new Set(s.activityDays ?? []);
       this.memoryLog = s.memoryLog ?? [];
       this.bookmarks = Array.isArray(s.bookmarks) ? s.bookmarks : [];
+      this.welcomeGuideSeen = Boolean(s.welcomeGuideSeen);
       this.guideSeen = Boolean(s.guideSeen);
       this.parentGuideSeen = Boolean(s.parentGuideSeen);
       this.pin = s.pin ?? DEFAULT_PIN;
+      this.pinFailedAttempts = Math.max(0, Math.floor(Number(s.pinFailedAttempts) || 0));
+      this.pinLockedUntil = Math.max(0, Number(s.pinLockedUntil) || 0);
+      if (this.pinLockedUntil <= Date.now()) this.pinLockedUntil = 0;
     } catch (_) {}
   }
 }

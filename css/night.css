@@ -18,55 +18,6 @@ body.night-theme {
   color: var(--ink);
 }
 
-/* テスト用の昼夜切り替えボタン。通常は端末時刻で判定し、このボタンを押している間だけ強制切り替えを行う。 */
-.theme-toggle {
-  position: fixed;
-  top: max(10px, env(safe-area-inset-top));
-  right: 12px;
-  z-index: 100;
-  border: 1px solid rgba(58, 74, 63, .16);
-  border-radius: 999px;
-  padding: 7px 11px;
-  font: 700 12px/1.2 var(--font);
-  color: #405448;
-  background: rgba(255, 255, 255, .9);
-  box-shadow: 0 3px 10px rgba(58, 74, 63, .16);
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-.theme-toggle:active { transform: translateY(2px); }
-body.night-theme .theme-toggle {
-  color: #e9f1ff;
-  background: rgba(31, 52, 85, .94);
-  border-color: rgba(180, 205, 238, .18);
-  box-shadow: 0 3px 10px rgba(1, 8, 22, .3);
-}
-
-/* BGM切り替えボタン。BGMが流れる画面だけ表示する。 */
-.bgm-toggle {
-  position: fixed;
-  right: max(12px, env(safe-area-inset-right));
-  bottom: max(12px, env(safe-area-inset-bottom));
-  z-index: 100;
-  min-width: 86px;
-  border: 1px solid rgba(58, 74, 63, .16);
-  border-radius: 999px;
-  padding: 8px 12px;
-  font: 700 13px/1.2 var(--font);
-  color: #405448;
-  background: rgba(255, 255, 255, .92);
-  box-shadow: 0 3px 10px rgba(58, 74, 63, .16);
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-.bgm-toggle:active { transform: translateY(2px); }
-body.night-theme .bgm-toggle {
-  color: #e9f1ff;
-  background: rgba(31, 52, 85, .94);
-  border-color: rgba(180, 205, 238, .18);
-  box-shadow: 0 3px 10px rgba(1, 8, 22, .3);
-}
-
 /* 同じ空の要素をテーマに応じて表示する：昼は太陽・雲、夜は月・星。 */
 body.night-theme .screen--sky {
   background: linear-gradient(180deg, #101c36 0%, #17294a 42%, #223856 70%, #263e4d 100%);
@@ -192,6 +143,12 @@ body.night-theme .title-screen .mode-card--parent:active {
 body.night-theme .title-icon {
   box-shadow: 0 12px 24px rgba(1, 8, 22, .46);
 }
+body.night-theme .app-toast {
+  background: #2a4265;
+  box-shadow: 0 8px 22px rgba(1, 8, 22, .42);
+}
+body.night-theme .app-toast--success { background: #3d8d68; }
+body.night-theme .app-toast--error { background: #b85f60; }
 body.night-theme .bookmark-launch {
   color: #a9e8c0;
   background: rgba(24, 41, 67, .9);
@@ -221,6 +178,13 @@ body.night-theme .key:active {
   background: #2c496c;
   box-shadow: 0 1px 0 #14263f;
 }
+body.night-theme .key:disabled,
+body.night-theme .key:disabled:active {
+  color: #7185a4;
+  background: #1a2d49;
+  box-shadow: none;
+}
+body.night-theme .pin-status.is-locked { color: #f0c27d; }
 body.night-theme .note {
   color: #b9cbe2;
   background: #1b3542;
@@ -245,6 +209,10 @@ body.night-theme .select-empty {
   background: rgba(24, 41, 67, .94);
   border-color: rgba(120, 211, 155, .32);
   box-shadow: 0 4px 14px rgba(1, 8, 22, .2);
+}
+body.night-theme .select-error {
+  color: #f3cfaa;
+  background: #4a3440;
 }
 body.night-theme .book-card,
 body.night-theme .memory-card {
