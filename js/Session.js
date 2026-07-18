@@ -241,6 +241,26 @@ export class Session {
     // _save() は呼び出し元の buildMemory がまとめて行う
   }
 
+  // ── きろくの書き出し ─────────────────────
+  // 写真を含む思い出は IndexedDB に保存しているため、設定や軽い記録と
+  // ひとつの JSON にまとめて、端末の外へバックアップできるようにする。
+  // PIN や PIN の失敗回数など、書き出す必要のない保護情報は含めない。
+  exportData(settings = {}) {
+    return {
+      format: "ehon-backup",
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      memories: this.memories,
+      bookmarks: this.bookmarks,
+      activityDays: [...this.activityDays],
+      memoryLog: this.memoryLog,
+      dailyMission: { ...this.dailyMission },
+      missionDoneDays: { ...this.missionDoneDays },
+      resume: this._savedRun,
+      settings: { ...settings },
+    };
+  }
+
   // ── 絵本完了 → 絵本日記を生成 ──────────────
   // 日記には「おはなしの挿絵」と「ミッションのしゃしん」を絵本の順番どおりに収める。
   // 例）はっぱのぼうけん = 挿絵3枚 + しゃしん2枚 の5枚アルバム

@@ -191,6 +191,7 @@ export const SettingsScreen = {
     const fontSize = ctx.settings.get("fontSize");
     const theme = ctx.settings.get("theme");
     const language = ctx.settings.get("language");
+    const canExportRecords = ctx.session.mode === "parent";
     return `
       <div class="screen settings-screen">
         <button class="back" data-back>‹ もどる</button>
@@ -239,6 +240,11 @@ export const SettingsScreen = {
 
         <section class="settings-group settings-group--info" aria-labelledby="settings-data-title">
           <h3 id="settings-data-title">データとプライバシー</h3>
+          ${canExportRecords ? `
+          <button type="button" class="settings-link" data-export-records>
+            <span><strong>きろくを書き出す</strong><small>写真と思い出をバックアップ用ファイルに保存する</small></span>
+            <span aria-hidden="true">⇩</span>
+          </button>` : ""}
           <button type="button" class="settings-link" data-privacy>
             <span><strong>プライバシーについて</strong><small>写真や記録の保存場所を確認する</small></span>
             <span aria-hidden="true">›</span>
@@ -282,6 +288,30 @@ export const SettingsScreen = {
     root.querySelector('[data-setting-select="language"]').onchange = (event) => {
       ctx.setLanguage(event.target.value);
     };
+
+    const exportButton = root.querySelector("[data-export-records]");
+    exportButton?.addEventListener("click", async () => {
+      exportButton.disabled = true;
+      try {
+        const payload = ctx.session.exportData(ctx.settings.all());
+        const json = JSON.stringify(payload, null, 2);
+        const blob = new Blob([json], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        const date = new Date().toISOString().slice(0, 10);
+        link.href = url;
+        link.download = `ehon-backup-${date}.json`;
+        document.body.append(link);
+        link.click();
+        link.remove();
+        window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+        ctx.notify("きろくを書き出しました");
+      } catch (_) {
+        ctx.notify("書き出しに失敗しました", "error");
+      } finally {
+        exportButton.disabled = false;
+      }
+    });
 
     const syncThemeButtons = () => {
       const activeTheme = ctx.settings.get("theme");
@@ -332,7 +362,7 @@ export const PrivacyScreen = {
           <h3>このプロトタイプについて</h3>
           <p>撮った写真、絵本の進み具合、完成した思い出は、現在このブラウザの端末内に保存されます。</p>
           <p>現時点ではサーバーへ自動送信したり、公開したりする機能はありません。</p>
-          <p>ブラウザのデータを消去すると、写真や記録も消えることがあります。大切な記録は、今後追加予定の書き出し機能で保存してください。</p>
+          <p>ブラウザのデータを消去すると、写真や記録も消えることがあります。おうちのひとの設定画面から、定期的にバックアップを書き出してください。</p>
         </section>
         <section class="privacy-card">
           <h3>写真を撮るとき</h3>
