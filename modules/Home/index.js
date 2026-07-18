@@ -1,4 +1,6 @@
+import { esc } from "../shared/utils.js";
 import { openGuide } from "../shared/guide.js";
+import { askResume } from "../Select/index.js";
 
 const GUIDE_STEPS = [
   {
@@ -28,6 +30,29 @@ const GUIDE_STEPS = [
   },
 ];
 
+// きょうのミッション（1日1さつ）のカード。おうちのひとが対象の絵本を
+// 指定していればその表紙とタイトルを、未指定なら「えほんを1さつ」を出す。
+// クリアずみの日は緑のチェック表示に変わる（責めない・没収しない）。
+function dailyMissionCard(ctx) {
+  const mission = ctx.session.getDailyMission();
+  if (!mission.enabled) return "";
+  const book = mission.bookId ? ctx.repo.book(mission.bookId) : null;
+  const done = ctx.session.isDailyMissionDoneToday();
+  const label = book ? `『${esc(book.title)}』を よもう！` : "えほんを 1さつ よもう！";
+  const art = book?.cover
+    ? `<img class="daily-mission-cover" src="${ctx.repo.assetUrl(book.cover)}" alt="" draggable="false">`
+    : `<span class="daily-mission-icon" aria-hidden="true">📖</span>`;
+  return `
+    <button class="daily-mission${done ? " is-done" : ""}" type="button" data-daily-mission>
+      ${art}
+      <span class="daily-mission-copy">
+        <span class="daily-mission-kicker">きょうの ミッション</span>
+        <span class="daily-mission-label">${label}</span>
+      </span>
+      <span class="daily-mission-status">${done ? "✓ クリア！" : "やってみる ›"}</span>
+    </button>`;
+}
+
 export const HomeScreen = {
   render(ctx) {
     return `
@@ -44,6 +69,7 @@ export const HomeScreen = {
         </div>
         <button class="back" data-back>‹</button>
         <h1 class="brand">なにして あそぶ？</h1>
+        ${dailyMissionCard(ctx)}
         <div class="mode-grid">
           <button class="mode-card mode-card--child" data-go="SELECT">
             <span class="mode-icon mode-icon--book" aria-hidden="true"></span><span>えほん</span>
@@ -64,6 +90,22 @@ export const HomeScreen = {
     root.querySelectorAll("[data-go]").forEach((b) => {
       b.onclick = () => ctx.go(b.dataset.go, b.dataset.view ? { view: b.dataset.view } : {});
     });
+    // きょうのミッション：指定の絵本があればすぐ開く（読みかけがあれば本人にたずねる）。
+    // 「どの絵本でもOK」のときは本だなへ。クリアずみなら開かずにほめるだけ。
+    const missionButton = root.querySelector("[data-daily-mission]");
+    if (missionButton) {
+      missionButton.onclick = () => {
+        if (ctx.session.isDailyMissionDoneToday()) {
+          ctx.notify?.("きょうの ミッションは クリアしたよ！");
+          return;
+        }
+        const { bookId } = ctx.session.getDailyMission();
+        if (!bookId || !ctx.repo.book(bookId)) return ctx.go("SELECT");
+        if (ctx.session.hasResume(bookId)) return askResume(ctx, bookId, root);
+        ctx.session.startBook(bookId);
+        ctx.showPage();
+      };
+    }
     const showGuide = () => openGuide(ctx, root, {
       steps: GUIDE_STEPS,
       onComplete: () => ctx.session.markGuideSeen(),

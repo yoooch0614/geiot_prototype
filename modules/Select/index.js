@@ -39,7 +39,8 @@ const PARENT_GUIDE_STEPS = [
 // 読みかけの本を選んだとき、「つづきから」か「はじめから」かをたずねる。
 // 黙って続きから始めると、読み直したいのに戻れない。逆に黙って最初からにすると、
 // せっかく撮った写真が消える。どちらも本人にしか決められないので、必ず聞く。
-function askResume(ctx, bookId, root) {
+// （ホームの「きょうのミッション」から本を開くときも同じ理由で使う）
+export function askResume(ctx, bookId, root) {
   const title = ctx.repo.book(bookId)?.title ?? "";
   const dialog = document.createElement("div");
   dialog.className = "resume-ask";

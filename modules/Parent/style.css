@@ -8,6 +8,24 @@
 .stat b { display: block; font-size: 40px; color: var(--green); line-height: 1; }
 .stat span { font-size: 13px; color: #7a877e; }
 .note { font-size: 15px; color: #7a877e; background: #f0f6ea; border-radius: 14px; padding: 12px; margin: 0; }
+/* きょうのミッションの設定カード */
+.mission-setting {
+  display: flex; flex-direction: column; gap: 10px;
+  background: #fff; border-radius: 20px; padding: 16px;
+  box-shadow: 0 4px 14px rgba(58,74,63,.08);
+}
+.mission-setting-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.mission-setting-head h3 { margin: 0; font-size: 17px; }
+.mission-setting-desc { margin: 0; font-size: 13px; color: #7a877e; line-height: 1.6; }
+.mission-setting-row {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 14px; font-weight: 700;
+}
+.mission-setting-row .settings-select { flex: 1; min-width: 0; }
+.mission-setting-status { margin: 0; font-size: 13px; font-weight: 700; color: var(--green); }
+.mission-setting.is-off .mission-setting-row,
+.mission-setting.is-off .mission-setting-status { opacity: .45; }
+
 .log-title { font-size: 17px; margin: 4px 0; }
 .log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .log-row { display: flex; gap: 10px; align-items: center; background: #fff; border-radius: 14px; padding: 12px 14px; font-size: 14px; }

@@ -44,6 +44,10 @@ export class Session {
     // --- localStorage（メタのみ）---
     this.activityDays = new Set(); // 外で活動した日
     this.memoryLog = [];           // [{id, bookTitle, date, count}] 親レポート用（写真なし）
+    // きょうのミッション（1日1さつ）。おうちのひとが設定する。
+    // bookId が null なら「どの絵本でもOK」、指定があればその絵本だけがクリア対象。
+    this.dailyMission = { enabled: true, bookId: null };
+    this.missionDoneDays = {};     // { "YYYY-MM-DD": 読み終えた絵本のタイトル }
     this.pin = DEFAULT_PIN;
     this.pinFailedAttempts = 0;
     this.pinLockedUntil = 0;
@@ -216,6 +220,27 @@ export class Session {
     if (this.bookmarks.length !== before) this._save();
   }
 
+  // ── きょうのミッション ───────────────────
+  // 「1日1さつ よむ」のデイリーミッション。おうちのひとが対象の絵本を
+  // 指定でき（未指定ならどの絵本でもよい）、オン/オフも切り替えられる。
+  // クリア判定は絵本を最後まで読み終えたとき（buildMemory）に行う。
+  getDailyMission() { return { ...this.dailyMission }; }
+  setDailyMission({ enabled = this.dailyMission.enabled, bookId = this.dailyMission.bookId } = {}) {
+    this.dailyMission = { enabled: Boolean(enabled), bookId: bookId || null };
+    this._save();
+  }
+  isDailyMissionDoneToday() {
+    return Object.prototype.hasOwnProperty.call(this.missionDoneDays, today());
+  }
+  dailyMissionDoneCount() { return Object.keys(this.missionDoneDays).length; }
+  _recordDailyMission(book) {
+    if (!this.dailyMission.enabled) return;
+    if (this.dailyMission.bookId && this.dailyMission.bookId !== book.id) return;
+    if (this.isDailyMissionDoneToday()) return;
+    this.missionDoneDays[today()] = book.title;
+    // _save() は呼び出し元の buildMemory がまとめて行う
+  }
+
   // ── 絵本完了 → 絵本日記を生成 ──────────────
   // 日記には「おはなしの挿絵」と「ミッションのしゃしん」を絵本の順番どおりに収める。
   // 例）はっぱのぼうけん = 挿絵3枚 + しゃしん2枚 の5枚アルバム
@@ -276,6 +301,7 @@ export class Session {
       date: memory.date,
       count: this.runMissions.length,             // 親レポートは達成ミッション数のまま
     });
+    this._recordDailyMission(book);               // きょうのミッション（1日1さつ）の判定
     this._save();
     Storage.set(MEMORIES_KEY, this.memories);     // 思い出をIndexedDBへ
     this._clearRun();                             // 読み終えたので「つづき」は消す
@@ -295,6 +321,7 @@ export class Session {
   reset() {
     this.activityDays = new Set();
     this.memoryLog = [];
+    this.missionDoneDays = {}; // ミッションの設定（dailyMission）は親の意図なので残す
     this.memories = [];
     this.bookmarks = [];
     this.welcomeGuideSeen = false;
@@ -334,6 +361,8 @@ export class Session {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
         activityDays: [...this.activityDays],
         memoryLog: this.memoryLog,
+        dailyMission: this.dailyMission,
+        missionDoneDays: this.missionDoneDays,
         bookmarks: this.bookmarks,
         welcomeGuideSeen: this.welcomeGuideSeen,
         guideSeen: this.guideSeen,
@@ -351,6 +380,15 @@ export class Session {
       const s = JSON.parse(raw);
       this.activityDays = new Set(s.activityDays ?? []);
       this.memoryLog = s.memoryLog ?? [];
+      if (s.dailyMission && typeof s.dailyMission === "object") {
+        this.dailyMission = {
+          enabled: s.dailyMission.enabled !== false,
+          bookId: s.dailyMission.bookId || null,
+        };
+      }
+      if (s.missionDoneDays && typeof s.missionDoneDays === "object" && !Array.isArray(s.missionDoneDays)) {
+        this.missionDoneDays = s.missionDoneDays;
+      }
       this.bookmarks = Array.isArray(s.bookmarks) ? s.bookmarks : [];
       this.welcomeGuideSeen = Boolean(s.welcomeGuideSeen);
       this.guideSeen = Boolean(s.guideSeen);
