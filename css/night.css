@@ -379,6 +379,29 @@ body.night-theme .complete .rays {
 }
 body.night-theme .analysis-lead { color: #93e0ae; }
 body.night-theme .analysis-list { color: #bfd0e6; }
+body.night-theme .analysis-filter-card {
+  border-color: rgba(120, 211, 155, .18);
+  background: linear-gradient(135deg, #172e48 0%, #14263f 100%);
+}
+body.night-theme .analysis-filter-kicker,
+body.night-theme .analysis-filter-summary { color: #93e0ae; }
+body.night-theme .analysis-filter-choice {
+  border-color: rgba(180, 205, 238, .14);
+  background: #1d3452;
+}
+body.night-theme .analysis-filter-choice--day { border-color: rgba(139, 181, 224, .22); }
+body.night-theme .analysis-filter-choice.is-active { background: #1f483f; }
+body.night-theme .analysis-filter-choice--day.is-active { background: #263f62; }
+body.night-theme .analysis-filter-choice-copy strong { color: #edf4ff; }
+body.night-theme .analysis-filter-select { color: #aebfda; }
+body.night-theme .analysis-filter-select option { color: #edf4ff; background: #223957; }
+body.night-theme .analysis-filter-choice-copy small,
+body.night-theme .analysis-filter-help { color: #aebfda; }
+body.night-theme .analysis-filter-clear {
+  border-color: rgba(120, 211, 155, .28);
+  color: #a9e8c0;
+  background: #223957;
+}
 body.night-theme .analysis-ring,
 body.night-theme .analysis-axis { stroke: #465c7c; }
 body.night-theme .analysis-label { fill: #bfd0e6; }
