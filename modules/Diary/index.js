@@ -1,4 +1,5 @@
 import { esc, fillArtworkHoles, recolorVehicleImage } from "../shared/utils.js";
+import { avatarBuddy } from "../shared/avatars.js";
 
 export const DiaryScreen = {
   render(ctx, { memory, fromPlay }) {
@@ -49,6 +50,11 @@ export const DiaryScreen = {
         <div class="diary-cover">
           <span class="diary-date">${esc(memory.date)}</span>
           <h2>${esc(memory.bookTitle)} の きろく</h2>
+          ${memory.reader?.animal ? `
+          <div class="diary-reader">
+            ${avatarBuddy({ ...memory.reader, name: null })}
+            <span class="diary-reader-text">${memory.reader.name ? `${esc(memory.reader.name)}が よんだよ` : "いっしょに よんだよ"}</span>
+          </div>` : ""}
         </div>
         ${entries}
         <button class="big-next" data-close>本棚にもどる</button>

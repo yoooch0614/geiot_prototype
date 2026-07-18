@@ -19,3 +19,54 @@
 }
 .photo-scene { position: relative; overflow: hidden; border-radius: 14px; }
 .photo-scene > img:first-child { width: 100%; display: block; }
+
+/* ── じぶんアバターの「バディ」バッジ ─────────────
+   こどもが作ったオリジナルキャラクター（顔＋なまえ）を絵本の中に登場させる。
+   おはなし画面の右下、お祝い画面、絵本日記の表紙で共通に使う。 */
+.avatar-buddy {
+  display: inline-flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.avatar-buddy-face {
+  display: flex; align-items: center; justify-content: center;
+  width: 46px; height: 46px;
+  border: 2.5px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 3px 8px rgba(58, 74, 63, .2);
+  overflow: hidden;
+}
+.avatar-buddy-face .avatar-face { width: 38px; height: 38px; }
+.avatar-buddy-name {
+  padding: 1px 9px;
+  border-radius: 999px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, .9);
+  font-size: 11px; font-weight: 900;
+  box-shadow: 0 1px 4px rgba(58, 74, 63, .14);
+  white-space: nowrap;
+}
+
+/* おはなし画面：右下からいっしょに読む。操作の邪魔をしないよう押せない飾りにする */
+.avatar-buddy--reader {
+  position: absolute; right: 14px; bottom: 16px; z-index: 3;
+  pointer-events: none;
+  animation: buddy-bob 3.2s ease-in-out infinite;
+}
+@keyframes buddy-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+/* お祝い画面（ミッション達成・1さつ読了）：大きめの顔でとびはねる */
+.avatar-buddy--achieve { position: relative; z-index: 2; }
+.avatar-buddy--achieve .avatar-buddy-face { width: 64px; height: 64px; border-width: 3px; }
+.avatar-buddy--achieve .avatar-buddy-face .avatar-face { width: 54px; height: 54px; }
+.avatar-buddy--achieve .avatar-buddy-name { font-size: 13px; }
+.avatar-buddy--achieve { animation: buddy-cheer .8s ease-in-out infinite; }
+@keyframes buddy-cheer {
+  0%, 100% { transform: translateY(0) rotate(-4deg); }
+  50% { transform: translateY(-10px) rotate(4deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .avatar-buddy--reader, .avatar-buddy--achieve { animation: none; }
+}

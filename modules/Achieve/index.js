@@ -1,7 +1,9 @@
-import { playCelebrationSound } from "../shared/utils.js";
+import { playCelebrationSound, esc } from "../shared/utils.js";
+import { avatarBuddy } from "../shared/avatars.js";
 
 export const AchieveScreen = {
   render(ctx) {
+    const avatar = ctx.session.getAvatar();
     return `
       <div class="screen center achieve">
         <div class="confetti-layer" data-confetti></div>
@@ -14,7 +16,8 @@ export const AchieveScreen = {
           <span class="sparkle-shape s6"></span>
         </div>
         <div class="sticker" aria-hidden="true"></div>
-        <p class="lead">やったね！</p>
+        ${avatarBuddy(avatar, "avatar-buddy--achieve")}
+        <p class="lead">${avatar.name ? `${esc(avatar.name)}、` : ""}やったね！</p>
       </div>`;
   },
   mount(ctx, _params, root) {

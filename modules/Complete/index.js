@@ -1,7 +1,9 @@
 import { esc, playCelebrationSound } from "../shared/utils.js";
+import { avatarBuddy } from "../shared/avatars.js";
 
 export const CompleteScreen = {
-  render(_ctx, { page }) {
+  render(ctx, { page }) {
+    const avatar = ctx.session.getAvatar();
     return `
       <div class="screen center complete">
         <div class="rays"></div>
@@ -14,7 +16,8 @@ export const CompleteScreen = {
             <div class="medal-inner"></div>
           </div>
         </div>
-        <p class="lead">1さつ よめたね！</p>
+        ${avatarBuddy(avatar, "avatar-buddy--achieve")}
+        <p class="lead">${avatar.name ? `${esc(avatar.name)}、` : ""}1さつ よめたね！</p>
         <p class="sub">${esc(page?.text || "")}</p>
         <button class="next-btn" data-next>つぎへ ›</button>
       </div>`;

@@ -5,8 +5,8 @@
   overflow: hidden;
   background: linear-gradient(180deg, #d9efff 0%, #ecf7ff 34%, rgba(236, 247, 255, 0) 62%);
 }
-/* .back は position:absolute のままにしたいので除外する */
-.screen--sky > :not(.sky-scene):not(.title-hills):not(.back) { position: relative; z-index: 2; }
+/* .back と .avatar-launch は position:absolute のままにしたいので除外する */
+.screen--sky > :not(.sky-scene):not(.title-hills):not(.back):not(.avatar-launch) { position: relative; z-index: 2; }
 
 .sky-scene { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
 .sky-sun {

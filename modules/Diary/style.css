@@ -106,3 +106,19 @@
 @media (prefers-reduced-motion: reduce) {
   .diary-entry { animation: none; }
 }
+
+/* 表紙の「よんだひと」チップ。読んだ当時のアバターを日記に残す */
+.diary-reader {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin-top: 10px;
+}
+.diary-reader .avatar-buddy-face { width: 38px; height: 38px; }
+.diary-reader .avatar-buddy-face .avatar-face { width: 32px; height: 32px; }
+.diary-reader-text {
+  padding: 4px 12px;
+  border-radius: 999px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, .88);
+  font-size: 13px; font-weight: 900;
+  box-shadow: 0 1px 4px rgba(58, 74, 63, .14);
+}

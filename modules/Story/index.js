@@ -1,4 +1,5 @@
 import { playNarration, speakNarration, stopNarration, esc, stage, characterLayer, layersMarkup, fillLayer, bookColorLayer, vehicleColorLayer, extractPhotoColor, fillArtworkHoles, recolorVehicleImage, openCamera, createRepeatableSound } from "../shared/utils.js";
+import { avatarBuddy } from "../shared/avatars.js";
 
 // 物語ページとミッションページを、いまのページを含む「1冊にできる範囲」で取り出す。
 // ・ end ページの手前で必ず区切る（達成の演出は別画面 COMPLETE が受け持つため）。
@@ -82,6 +83,7 @@ export const StoryScreen = {
         <span class="progress" data-progress>${ctx.session.pageIndex + 1} / ${count}</span>
         <div class="flipbook"><div class="flip-book" data-flipbook>${body}</div></div>
         <button class="page-prev" data-prev aria-label="まえのページ">‹ まえ</button>
+        ${avatarBuddy(ctx.session.getAvatar(), "avatar-buddy--reader")}
       </div>`);
   },
   mount(ctx, _params, root) {

@@ -218,6 +218,75 @@ body.night-theme .mission-setting {
 body.night-theme .mission-setting-desc { color: #aebfda; }
 body.night-theme .mission-setting-status { color: #a9e8c0; }
 
+/* じぶんアバター：どうぶつの色はそのまま、枠とカードだけ夜色にする */
+body.night-theme .avatar-launch-face { border-color: #2c496c; }
+body.night-theme .avatar-launch-label {
+  color: #a9e8c0;
+  background: rgba(24, 41, 67, .9);
+}
+body.night-theme .avatar-modal { background: rgba(2, 10, 24, .6); }
+body.night-theme .avatar-card {
+  border-color: rgba(120, 211, 155, .2);
+  background: var(--card);
+}
+body.night-theme .avatar-kicker { color: #f5a98f; }
+body.night-theme .avatar-preview { border-color: #2c496c; }
+body.night-theme .avatar-choice {
+  border-color: rgba(180, 205, 238, .16);
+  color: #edf4ff;
+  background: #1d3452;
+}
+body.night-theme .avatar-choice.is-selected {
+  border-color: #78d39b;
+  background: #1f483f;
+}
+body.night-theme .avatar-color { border-color: rgba(180, 205, 238, .3); }
+body.night-theme .avatar-color.is-selected { border-color: #78d39b; }
+body.night-theme .avatar-color-label { color: #aebfda; }
+body.night-theme .avatar-parts {
+  border-color: rgba(120, 211, 155, .28);
+  background: #16283f;
+}
+body.night-theme .avatar-part-label { color: #aebfda; }
+body.night-theme .avatar-part-option {
+  border-color: rgba(180, 205, 238, .16);
+  background: #1d3452;
+}
+body.night-theme .avatar-part-option.is-selected {
+  border-color: #78d39b;
+  background: #1f483f;
+}
+body.night-theme .avatar-paint-stage {
+  border-color: rgba(120, 211, 155, .28);
+  background: #223957;
+}
+body.night-theme .avatar-paint-pencil { border-color: rgba(180, 205, 238, .3); }
+body.night-theme .avatar-paint-pencil.is-selected { border-color: #78d39b; }
+body.night-theme .avatar-paint-tool {
+  border-color: rgba(180, 205, 238, .24);
+  color: #edf4ff;
+  background: #1d3452;
+}
+body.night-theme .avatar-paint-tool.is-selected {
+  border-color: #78d39b;
+  background: #1f483f;
+}
+body.night-theme .avatar-name-field > span { color: #aebfda; }
+body.night-theme .avatar-name-field input {
+  border-color: rgba(180, 205, 238, .24);
+  color: #edf4ff;
+  background: #1d3452;
+}
+body.night-theme .avatar-name-field input:focus { border-color: #78d39b; }
+body.night-theme .avatar-name-field input::placeholder { color: #7185a4; }
+body.night-theme .avatar-name-note { color: #8fa2c0; }
+body.night-theme .avatar-buddy-face { border-color: #2c496c; }
+body.night-theme .avatar-buddy-name,
+body.night-theme .diary-reader-text {
+  color: #edf4ff;
+  background: rgba(24, 41, 67, .92);
+}
+
 /* 本棚：棚を夜の本屋の雰囲気に変更し、表紙自体はそのままにする。 */
 body.night-theme .screen--select {
   background: linear-gradient(180deg, rgba(33, 57, 94, .72) 0%, rgba(13, 24, 48, 0) 48%);

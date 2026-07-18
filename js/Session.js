@@ -48,6 +48,11 @@ export class Session {
     // bookId が null なら「どの絵本でもOK」、指定があればその絵本だけがクリア対象。
     this.dailyMission = { enabled: true, bookId: null };
     this.missionDoneDays = {};     // { "YYYY-MM-DD": 読み終えた絵本のタイトル }
+    // こどもの「じぶんアバター」（オリジナルキャラクター）。
+    // animal は modules/shared/avatars.js のID（"custom" ならパーツ組み立て）。
+    // parts はカスタム時のパーツ選択、paint はいろぬり（PNGデータURL）、
+    // name はこどもがつけた なまえ。
+    this.avatar = { animal: null, color: "green", name: null, parts: null, paint: null };
     this.pin = DEFAULT_PIN;
     this.pinFailedAttempts = 0;
     this.pinLockedUntil = 0;
@@ -241,6 +246,42 @@ export class Session {
     // _save() は呼び出し元の buildMemory がまとめて行う
   }
 
+  // ── じぶんアバター ─────────────────────
+  // どうぶつと色の組み合わせ。妥当性チェックは呼び出し側（avatars.js）が
+  // 選択肢を出す時点で済んでいるので、ここでは形だけ整えて保存する。
+  getAvatar() {
+    return { ...this.avatar, parts: this.avatar.parts ? { ...this.avatar.parts } : null };
+  }
+  setAvatar({ animal = this.avatar.animal, color = this.avatar.color, name = this.avatar.name, parts = this.avatar.parts, paint = this.avatar.paint } = {}) {
+    const safeName = String(name ?? "").trim().slice(0, 8);
+    this.avatar = {
+      animal: animal || null,
+      color: String(color || "green").slice(0, 24), // プリセットID か #rrggbb（じぶんの色）
+      name: safeName || null,
+      parts: Session._sanitizeParts(parts),
+      paint: Session._sanitizePaint(paint),
+    };
+    this._save();
+  }
+  // いろぬりは canvas の PNG データURL だけを受け付ける（他の形式やURLは保存しない）。
+  // localStorage を圧迫しないよう、長さにも上限を置く。
+  static _sanitizePaint(paint) {
+    return typeof paint === "string" &&
+      paint.length <= 200000 &&
+      /^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(paint)
+      ? paint : null;
+  }
+  // パーツは「文字列IDの浅いオブジェクト」だけを受け付ける。
+  // 知らないIDが混ざっても描画側（avatars.js）が既定パーツに倒すので、ここでは形だけ守る。
+  static _sanitizeParts(parts) {
+    if (!parts || typeof parts !== "object" || Array.isArray(parts)) return null;
+    const out = {};
+    for (const key of ["skin", "ears", "eyes", "mouth", "acc"]) {
+      if (typeof parts[key] === "string") out[key] = parts[key].slice(0, 24);
+    }
+    return Object.keys(out).length ? out : null;
+  }
+
   // ── きろくの書き出し ─────────────────────
   // 写真を含む思い出は IndexedDB に保存しているため、設定や軽い記録と
   // ひとつの JSON にまとめて、端末の外へバックアップできるようにする。
@@ -256,6 +297,7 @@ export class Session {
       memoryLog: this.memoryLog,
       dailyMission: { ...this.dailyMission },
       missionDoneDays: { ...this.missionDoneDays },
+      avatar: { ...this.avatar },
       resume: this._savedRun,
       settings: { ...settings },
     };
@@ -311,6 +353,10 @@ export class Session {
       bookColorPhotos,
       bookColorScales,
       bookColorValues,
+      // 読んだときのアバターをそのまま残す（あとで作りなおしても日記は当時のまま）
+      reader: this.avatar.animal
+        ? { ...this.avatar, parts: this.avatar.parts ? { ...this.avatar.parts } : null }
+        : null,
       entries,
     };
     this.memories.unshift(memory);               // ギャラリー（写真つき）
@@ -342,6 +388,7 @@ export class Session {
     this.activityDays = new Set();
     this.memoryLog = [];
     this.missionDoneDays = {}; // ミッションの設定（dailyMission）は親の意図なので残す
+    this.avatar = { animal: null, color: "green", name: null, parts: null, paint: null };
     this.memories = [];
     this.bookmarks = [];
     this.welcomeGuideSeen = false;
@@ -383,6 +430,7 @@ export class Session {
         memoryLog: this.memoryLog,
         dailyMission: this.dailyMission,
         missionDoneDays: this.missionDoneDays,
+        avatar: this.avatar,
         bookmarks: this.bookmarks,
         welcomeGuideSeen: this.welcomeGuideSeen,
         guideSeen: this.guideSeen,
@@ -408,6 +456,16 @@ export class Session {
       }
       if (s.missionDoneDays && typeof s.missionDoneDays === "object" && !Array.isArray(s.missionDoneDays)) {
         this.missionDoneDays = s.missionDoneDays;
+      }
+      if (s.avatar && typeof s.avatar === "object") {
+        const savedName = String(s.avatar.name ?? "").trim().slice(0, 8);
+        this.avatar = {
+          animal: s.avatar.animal || null,
+          color: s.avatar.color || "green",
+          name: savedName || null,
+          parts: Session._sanitizeParts(s.avatar.parts),
+          paint: Session._sanitizePaint(s.avatar.paint),
+        };
       }
       this.bookmarks = Array.isArray(s.bookmarks) ? s.bookmarks : [];
       this.welcomeGuideSeen = Boolean(s.welcomeGuideSeen);

@@ -1,6 +1,7 @@
 import { esc } from "../shared/utils.js";
 import { openGuide } from "../shared/guide.js";
 import { askResume } from "../Select/index.js";
+import { avatarSvg, avatarColorValue, openAvatarPicker } from "../shared/avatars.js";
 
 const GUIDE_STEPS = [
   {
@@ -53,6 +54,20 @@ function dailyMissionCard(ctx) {
     </button>`;
 }
 
+// 右上の「じぶん」ボタン。えらんだアバターの顔を出し、まだなら「？」を出す。
+// タップでアバターづくりのモーダルが開く（何度でも作りなおせる）。
+function avatarLaunch(ctx) {
+  const avatar = ctx.session.getAvatar();
+  const face = avatar.animal
+    ? avatarSvg(avatar)
+    : `<span class="avatar-launch-empty" aria-hidden="true">？</span>`;
+  return `
+    <button class="avatar-launch" type="button" data-avatar aria-label="じぶんの アバターを つくる">
+      <span class="avatar-launch-face" style="background:${avatarColorValue(avatar.color)}">${face}</span>
+      <span class="avatar-launch-label">${esc(avatar.name || "じぶん")}</span>
+    </button>`;
+}
+
 export const HomeScreen = {
   render(ctx) {
     return `
@@ -68,6 +83,7 @@ export const HomeScreen = {
           <span class="sky-star sky-star--4"></span>
         </div>
         <button class="back" data-back>‹</button>
+        ${avatarLaunch(ctx)}
         <h1 class="brand">なにして あそぶ？</h1>
         ${dailyMissionCard(ctx)}
         <div class="mode-grid">
@@ -90,6 +106,9 @@ export const HomeScreen = {
     root.querySelectorAll("[data-go]").forEach((b) => {
       b.onclick = () => ctx.go(b.dataset.go, b.dataset.view ? { view: b.dataset.view } : {});
     });
+    // じぶんアバター：つくり終えたら HOME を描き直して右上の顔を更新する
+    root.querySelector("[data-avatar]").onclick = () =>
+      openAvatarPicker(ctx, root, { onChange: () => ctx.go("HOME") });
     // きょうのミッション：指定の絵本があればすぐ開く（読みかけがあれば本人にたずねる）。
     // 「どの絵本でもOK」のときは本だなへ。クリアずみなら開かずにほめるだけ。
     const missionButton = root.querySelector("[data-daily-mission]");
