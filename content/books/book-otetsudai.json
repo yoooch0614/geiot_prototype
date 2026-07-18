@@ -1,0 +1,35 @@
+{
+  "id": "book-otetsudai",
+  "title": "おてつだい",
+  "ageRange": "3-6",
+  "cover": "assets/cover-otetsudai.png",
+  "pages": [
+    {
+      "id": "ot1",
+      "type": "story",
+      "text": "きょうは おうちのひとを おてつだいしてみよう！",
+      "image": "assets/page-otetsudai-thinking.png"
+    },
+    {
+      "id": "otm1",
+      "type": "mission",
+      "text": "おてつだい できるかな？",
+      "prompt": "えを かいたり、おかあさんと ごはんを つくったり、おさらを あらったりしてみよう。おうちのひとと いっしょに しゃしんを とってね。",
+      "doneLabel": "とってみよう！",
+      "diaryCaption": "おてつだい、できたよ！",
+      "developmentDomains": [
+        "表現",
+        "生活習慣",
+        "協力",
+        "自立"
+      ],
+      "image": "assets/mission-otetsudai.png"
+    },
+    {
+      "id": "otend",
+      "type": "end",
+      "text": "おてつだい ありがとう！ いっしょに できて うれしいね。",
+      "image": "assets/scene-cheer.svg"
+    }
+  ]
+}
