@@ -347,10 +347,18 @@
   const soundToggle = document.querySelector("[data-sound-toggle]");
   const soundLabel = document.querySelector("[data-sound-label]");
   const audio = document.querySelector("[data-site-audio]");
+  const demoFrame = document.querySelector("[data-demo-frame]");
   const year = document.querySelector("[data-year]");
 
   let language = localStorage.getItem("pictupath-language") === "en" ? "en" : "ja";
   let soundOn = false;
+
+  const syncDemoSound = (enabled) => {
+    demoFrame?.contentWindow?.postMessage({
+      type: "pictupath-site-sound",
+      enabled: Boolean(enabled),
+    }, window.location.origin);
+  };
 
   const applyLanguage = (nextLanguage) => {
     language = nextLanguage === "en" ? "en" : "ja";
@@ -377,6 +385,7 @@
 
   const applySoundState = (enabled) => {
     soundOn = Boolean(enabled);
+    syncDemoSound(soundOn);
     if (!audio || !soundToggle || !soundLabel) return;
     audio.muted = !soundOn;
     if (!soundOn) {
@@ -433,6 +442,7 @@
   mobileMenu?.querySelectorAll("a").forEach((link) => link.addEventListener("click", closeMenu));
   languageToggle?.addEventListener("click", () => applyLanguage(language === "ja" ? "en" : "ja"));
   soundToggle?.addEventListener("click", toggleSound);
+  demoFrame?.addEventListener("load", () => syncDemoSound(soundOn));
   window.addEventListener("scroll", updateScrollState, { passive: true });
   window.addEventListener("resize", updateScrollState, { passive: true });
   window.addEventListener("pagehide", () => audio?.pause());

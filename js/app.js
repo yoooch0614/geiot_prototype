@@ -10,6 +10,7 @@ import { Settings } from "./Settings.js";
 import { Screens } from "./screens.js";
 import {
   unlockAudio, preloadAudio, playAudio, playBgm, stopBgm,
+  setEmbeddedAudioEnabled,
   CELEBRATION_SOUNDS, CLICK_SOUND, HOME_BGM, HOME_NIGHT_BGM,
 } from "../modules/shared/utils.js";
 import { loadWorkStyles } from "../modules/Analysis/workStyles.js";
@@ -272,6 +273,14 @@ function advance() {
 ["pointerdown", "touchstart", "keydown"].forEach((type) =>
   window.addEventListener(type, unlockAudio, { once: true, capture: true })
 );
+
+// company website の speaker と、埋め込みアプリ側の音声を同期する。
+window.addEventListener("message", (event) => {
+  if (event.origin !== window.location.origin || event.source !== window.parent) return;
+  if (event.data?.type !== "pictupath-site-sound") return;
+  const enabled = setEmbeddedAudioEnabled(event.data.enabled);
+  if (enabled) unlockAudio();
+});
 
 // ボタンを押した手ごたえのクリック音。画面ごとに書くと付け忘れるので、ここでまとめて拾う。
 // 指を離すのを待たず、押した瞬間（pointerdown）に鳴らしたほうが反応がよく感じられる。
