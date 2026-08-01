@@ -338,6 +338,33 @@
     }
   };
 
+  Object.assign(translations.ja, {
+    heroExplain: "絵本を読み、遊び、活動を記録しながら、子どもの興味や個性を見つけるアプリです。",
+    heroAudienceLabel: "対象",
+    heroAudience: "子どもと保護者",
+    heroTimeLabel: "体験時間",
+    heroTime: "約3〜5分",
+    heroPrivacyLabel: "写真",
+    heroPrivacy: "端末内で管理",
+    heroQrTitle: "QRコードで体験する",
+    heroQrText: "読み取るだけで、その場で試せます。",
+    gallerySample: "サンプル表示",
+    demoPrivacy: "撮影した写真や活動記録は、この端末内で管理されます。",
+  });
+  Object.assign(translations.en, {
+    heroExplain: "An app for discovering children's interests and individuality through reading, play, and activity records.",
+    heroAudienceLabel: "FOR",
+    heroAudience: "Children + parents",
+    heroTimeLabel: "TRY TIME",
+    heroTime: "About 3–5 min",
+    heroPrivacyLabel: "PHOTOS",
+    heroPrivacy: "Stored on device",
+    heroQrTitle: "Try it from the QR code",
+    heroQrText: "Scan it and experience Eho Eho on the spot.",
+    gallerySample: "SAMPLE VIEW",
+    demoPrivacy: "Photos and activity records are kept on this device.",
+  });
+
   const header = document.querySelector("[data-header]");
   const progress = document.querySelector("[data-scroll-progress]");
   const menuToggle = document.querySelector("[data-menu-toggle]");
