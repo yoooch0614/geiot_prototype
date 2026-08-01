@@ -320,7 +320,7 @@
       qrOpen: "website link <span aria-hidden=\"true\">↗</span>",
       qrAlt: "QR code for the PictuPath website",
       memberAndrew: "Andrew Wong Wey Chee",
-      memberAndrewKana: "（アンドリューウンウェーチー）",
+      memberAndrewKana: "",
       memberIhara: "Ihara Misaki",
       memberKawasaki: "Kawasaki Kotaro",
       memberTatsuta: "Tatsuta Yoshihisa",
