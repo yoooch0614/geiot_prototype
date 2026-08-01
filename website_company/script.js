@@ -346,7 +346,6 @@
   const languageCurrent = document.querySelector("[data-language-current]");
   const soundToggle = document.querySelector("[data-sound-toggle]");
   const soundLabel = document.querySelector("[data-sound-label]");
-  const audio = document.querySelector("[data-site-audio]");
   const demoFrame = document.querySelector("[data-demo-frame]");
   const year = document.querySelector("[data-year]");
 
@@ -386,12 +385,7 @@
   const applySoundState = (enabled) => {
     soundOn = Boolean(enabled);
     syncDemoSound(soundOn);
-    if (!audio || !soundToggle || !soundLabel) return;
-    audio.muted = !soundOn;
-    if (!soundOn) {
-      audio.pause();
-      audio.currentTime = 0;
-    }
+    if (!soundToggle || !soundLabel) return;
     soundToggle.classList.toggle("is-on", soundOn);
     soundToggle.setAttribute("aria-pressed", String(soundOn));
     soundLabel.textContent = soundOn ? (language === "ja" ? "音あり" : "Sound on") : (language === "ja" ? "音なし" : "Sound off");
@@ -399,22 +393,7 @@
   };
 
   const toggleSound = () => {
-    if (!audio) return;
-    if (soundOn) {
-      audio.pause();
-      audio.currentTime = 0;
-      audio.muted = true;
-      applySoundState(false);
-      return;
-    }
-    audio.muted = false;
-    audio.volume = .22;
-    const playRequest = audio.play();
-    if (playRequest?.then) {
-      playRequest.then(() => applySoundState(true)).catch(() => applySoundState(false));
-    } else {
-      applySoundState(true);
-    }
+    applySoundState(!soundOn);
   };
 
   const updateScrollState = () => {
@@ -445,7 +424,6 @@
   demoFrame?.addEventListener("load", () => syncDemoSound(soundOn));
   window.addEventListener("scroll", updateScrollState, { passive: true });
   window.addEventListener("resize", updateScrollState, { passive: true });
-  window.addEventListener("pagehide", () => audio?.pause());
 
   applyLanguage(language);
   applySoundState(false);

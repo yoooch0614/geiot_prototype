@@ -161,11 +161,12 @@ const storedAudioSettings = {
   narration: Settings.get("narrationEnabled") !== false,
 };
 let embeddedAudioBackup = {
+  bgm: storedAudioSettings.bgm,
   sound: storedAudioSettings.sound,
   narration: storedAudioSettings.narration,
 };
-// company page では外側の <audio> が BGM を担当し、iframe は二重再生しない。
-let bgmEnabled = !isCompanyEmbed && embeddedAudioEnabled && storedAudioSettings.bgm;
+// company website の speaker が iframe product の BGM・効果音・朗読をまとめて制御する。
+let bgmEnabled = embeddedAudioEnabled && storedAudioSettings.bgm;
 let soundEnabled = embeddedAudioEnabled && storedAudioSettings.sound;
 let narrationEnabled = embeddedAudioEnabled && storedAudioSettings.narration;
 let speaking = false;
@@ -226,7 +227,7 @@ export function isBgmEnabled() {
 }
 
 export function setBgmEnabled(enabled) {
-  bgmEnabled = isCompanyEmbed ? false : embeddedAudioEnabled && Boolean(enabled);
+  bgmEnabled = embeddedAudioEnabled && Boolean(enabled);
   if (!isCompanyEmbed) Settings.set("bgmEnabled", bgmEnabled);
   if (bgmEnabled) startBgmIfReady();
   else stopBgmPlayback();
@@ -264,13 +265,14 @@ export function setEmbeddedAudioEnabled(enabled) {
 
   if (!next) {
     embeddedAudioBackup = {
+      bgm: bgmEnabled,
       sound: soundEnabled,
       narration: narrationEnabled,
     };
   }
 
   embeddedAudioEnabled = next;
-  bgmEnabled = false;
+  bgmEnabled = next && embeddedAudioBackup.bgm;
   soundEnabled = next && embeddedAudioBackup.sound;
   narrationEnabled = next && embeddedAudioBackup.narration;
 
