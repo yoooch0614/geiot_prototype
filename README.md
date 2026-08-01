@@ -45,6 +45,7 @@ python3 serve.py
 | HEXACO 6因子職業データの更新 | `tools/build_big5_scores.py` → `content/occupation-big5.json` | Python / JSON |
 | 職業名の日本語表示名更新 | `tools/translate_work_style_titles.py` → `content/work-style-titles-ja.json` | Python / JSON |
 | サーバー起動 | `serve.py` | Python |
+| チーム・プロダクト紹介サイト | `website_company/index.html` | HTML / CSS / JS |
 
 `js/ContentRepository.js` / `js/Session.js` はロジック層。基本さわらなくていい。
 
