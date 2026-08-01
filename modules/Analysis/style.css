@@ -369,6 +369,66 @@
   flex: 1 1 auto;
 }
 
+/* ---------- 仕事のスタイル 参考候補 ---------- */
+.analysis-work-style-source,
+.analysis-work-style-note,
+.analysis-work-style-empty {
+  margin: 4px 0 10px;
+  color: #7a877e;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.analysis-work-style-note {
+  margin: 10px 0 0;
+  font-size: 11px;
+}
+.analysis-work-style-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.analysis-work-style-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border: 1px solid rgba(107, 191, 89, .14);
+  border-radius: 13px;
+  background: #f7fbf4;
+}
+.analysis-work-style-rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  padding: 5px 7px;
+  border-radius: 999px;
+  color: #fff;
+  background: var(--green);
+  font-size: 12px;
+  font-weight: 900;
+}
+.analysis-work-style-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+.analysis-work-style-copy b {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.analysis-work-style-copy small {
+  color: #8a958d;
+  font-size: 10px;
+}
+
 /* アイコン共通の土台 */
 .trait-icon {
   position: relative;
@@ -463,6 +523,7 @@
   .analysis-screen > .note,
   .analysis-screen > .analysis-filter-card,
   .analysis-screen > .stat-row,
+  .analysis-screen > .analysis-work-style-card,
   .analysis-screen > .analysis-next-card,
   .analysis-screen > .analysis-history,
   .analysis-screen > .analysis-disclaimer {
@@ -555,6 +616,27 @@
     font-size: 11px;
     line-height: 1.3;
   }
+  .analysis-screen .analysis-work-style-source,
+  .analysis-screen .analysis-work-style-note,
+  .analysis-screen .analysis-work-style-empty {
+    margin: 3px 0 6px;
+    font-size: 10px;
+    line-height: 1.3;
+  }
+  .analysis-screen .analysis-work-style-note { margin: 6px 0 0; }
+  .analysis-screen .analysis-work-style-list { gap: 4px; }
+  .analysis-screen .analysis-work-style-list li {
+    gap: 7px;
+    padding: 5px 7px !important;
+    border-radius: 7px;
+  }
+  .analysis-screen .analysis-work-style-rank {
+    min-width: 40px;
+    padding: 4px 5px;
+    font-size: 10px;
+  }
+  .analysis-screen .analysis-work-style-copy b { font-size: 10px; }
+  .analysis-screen .analysis-work-style-copy small { font-size: 9px; }
   .analysis-screen .trait-icon--palette .d1 { background: #6d9dc5 !important; }
   .analysis-screen .trait-icon--palette .d2 { background: #ffd23f !important; }
   .analysis-screen .trait-icon--palette .d3 { background: #ff7a5c !important; }

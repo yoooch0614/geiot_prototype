@@ -335,6 +335,8 @@ export class Session {
         const m = done.get(page.id);
         entries.push({
           kind: "mission",
+          missionId: page.id,
+          developmentDomains: page.developmentDomains ?? [],
           photoUrl: m.photoUrl,
           caption: m.caption,
           missionText: m.missionText,

@@ -12,6 +12,7 @@ import {
   unlockAudio, preloadAudio, playAudio, playBgm, stopBgm,
   CELEBRATION_SOUNDS, CLICK_SOUND, HOME_BGM, HOME_NIGHT_BGM,
 } from "../modules/shared/utils.js";
+import { loadWorkStyles } from "../modules/Analysis/workStyles.js";
 
 // BGMを流す画面。トップ（MODE）・あそびえらび（HOME）・本だな（SELECT）の3つ。
 // 絵本を読みはじめたら止める（おはなしの音やページめくり音の邪魔になるため）。
@@ -189,6 +190,7 @@ document.addEventListener("visibilitychange", () => {
 const ctx = {
   repo,
   session,
+  workStyles: null,
   settings: Settings,
   els: { camera: document.getElementById("camera-input") },
   go,
@@ -268,7 +270,16 @@ async function boot() {
   try {
     // コンテンツの読み込みと、保存済みデータ（思い出・読みかけの本）の復元を並行で待つ。
     // session.restore() は失敗しても例外を出さない（保存が効かないだけで動く）。
-    await Promise.all([repo.load(), session.restore()]);
+    const workStylesPromise = loadWorkStyles().catch((error) => {
+      console.warn("Work Styles の参照データを読み込めませんでした", error);
+      return null;
+    });
+    const [, , loadedWorkStyles] = await Promise.all([
+      repo.load(),
+      session.restore(),
+      workStylesPromise,
+    ]);
+    ctx.workStyles = loadedWorkStyles;
   } catch (err) {
     showServerHint(err);
     return;

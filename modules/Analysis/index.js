@@ -1,12 +1,5 @@
 import { esc } from "../shared/utils.js";
-
-const ANALYSIS_AXES = [
-  { label: "戦術", value: 78, color: "#e5484d" },
-  { label: "冒険", value: 64, color: "#ec4899" },
-  { label: "職人", value: 82, color: "#f5b301" },
-  { label: "芸術", value: 73, color: "#4caf50" },
-  { label: "協調", value: 88, color: "#3b82f6" },
-];
+import { buildWorkStyleAnalysis } from "./workStyles.js";
 
 const ANALYSIS_TRAITS = [
   { icon: "palette", label: "好きな色", value: "みずいろ・きいろ" },
@@ -124,7 +117,7 @@ function svgLines(value, x, y, maxChars, lineHeight, className, anchor = "start"
     .join("");
 }
 
-function buildExportSvg(report) {
+function buildExportSvg(report, analysis) {
   const width = 1600;
   const padding = 80;
   const chartCard = { x: padding, y: 390, width: 720, height: 650 };
@@ -133,10 +126,11 @@ function buildExportSvg(report) {
   const historyY = 1080;
   const historyHeight = 110 + historyRows.length * 58;
   const height = historyY + historyHeight + 100;
+  const axes5 = analysis.axes;
   const center = { x: 440, y: 710 };
   const radius = 190;
-  const angles = ANALYSIS_AXES.map((_, i) => (Math.PI * 2 * i) / ANALYSIS_AXES.length - Math.PI / 2);
-  const points = ANALYSIS_AXES.map((axis, i) => ({
+  const angles = axes5.map((_, i) => (Math.PI * 2 * i) / axes5.length - Math.PI / 2);
+  const points = axes5.map((axis, i) => ({
     ...axis,
     x: center.x + Math.cos(angles[i]) * radius * axis.value / 100,
     y: center.y + Math.sin(angles[i]) * radius * axis.value / 100,
@@ -145,12 +139,12 @@ function buildExportSvg(report) {
   const rings = [0.2, 0.4, 0.6, 0.8, 1].map((scale) =>
     `<circle cx="${center.x}" cy="${center.y}" r="${(radius * scale).toFixed(1)}" class="export-ring" />`
   ).join("");
-  const axes = ANALYSIS_AXES.map((axis, i) => {
+  const axes = axes5.map((axis, i) => {
     const x = center.x + Math.cos(angles[i]) * radius;
     const y = center.y + Math.sin(angles[i]) * radius;
     return `<line x1="${center.x}" y1="${center.y}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" class="export-axis" />`;
   }).join("");
-  const labels = ANALYSIS_AXES.map((axis, i) => {
+  const labels = axes5.map((axis, i) => {
     const x = center.x + Math.cos(angles[i]) * (radius + 58);
     const y = center.y + Math.sin(angles[i]) * (radius + 58);
     return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" class="export-axis-label" text-anchor="middle" fill="${axis.color}">${xmlEscape(axis.label)}</text>
@@ -213,7 +207,7 @@ function buildExportSvg(report) {
       <text x="1290" y="343" class="stat-label" text-anchor="middle">活動した日</text>
 
       <rect x="${chartCard.x}" y="${chartCard.y}" width="${chartCard.width}" height="${chartCard.height}" rx="24" fill="#ffffff" />
-      <text x="${chartCard.x + 32}" y="440" class="card-title">5つの ちから（デモ表示）</text>
+      <text x="${chartCard.x + 32}" y="440" class="card-title">5つの ちから（${analysis.source === "activity" ? "活動から集計" : "デモ表示"}）</text>
       ${rings}${axes}<polygon points="${polygon}" class="export-polygon" />${labels}
       <circle cx="${center.x}" cy="${center.y}" r="5" fill="#6c7b70" />
 
@@ -240,8 +234,8 @@ function downloadBlob(blob, filename) {
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-function exportPng(report) {
-  const svg = buildExportSvg(report);
+function exportPng(report, analysis) {
+  const svg = buildExportSvg(report, analysis);
   const svgUrl = URL.createObjectURL(new Blob([svg.markup], { type: "image/svg+xml;charset=utf-8" }));
   const image = new Image();
   image.onload = () => {
@@ -262,13 +256,13 @@ export const AnalysisScreen = {
     const s = ctx.session;
     const filters = normalizeFilters(params);
     const report = reportStats(s, filters);
+    const analysis = buildWorkStyleAnalysis(s, ctx.repo, ctx.workStyles);
     const months = monthChoices(s, filters.month);
     const days = recordDates(s);
     const { completedCount, missionCount, week: streak } = report;
 
-    // 軸ごとに色を持たせる（デモ用の固定値）。時計回りに配置され、
-    // conic-gradient の色停止位置ともここで揃えている。
-    const axes5 = ANALYSIS_AXES;
+    // 軸ごとに色を持たせる。時計回りに配置され、conic-gradient の色停止位置ともここで揃えている。
+    const axes5 = analysis.axes;
 
     const size = 300;
     const center = size / 2;
@@ -322,7 +316,7 @@ export const AnalysisScreen = {
       `;
     }).join("");
 
-    // デモ用の特性まとめ（固定データ）。アイコンは絵文字ではなくCSS図形で表現する
+    // 特性まとめのアイコンは絵文字ではなくCSS図形で表現する
     const traits = ANALYSIS_TRAITS;
 
     const traitIconMarkup = (icon) => {
@@ -353,6 +347,17 @@ export const AnalysisScreen = {
         <span class="trait-label">${esc(t.label)}</span>
         <span class="trait-value">${esc(t.value)}</span>
       </div>`).join("");
+
+    const workStyleSource = analysis.source === "activity"
+      ? "えほんの達成記録から、今の活動傾向を集計しています。"
+      : "活動記録がまだないため、デモ値で計算しています。";
+    const workStyleMatches = analysis.matches.length
+      ? `<ol class="analysis-work-style-list">${analysis.matches.map((match) => `
+          <li>
+            <span class="analysis-work-style-rank">${match.score}%</span>
+            <span class="analysis-work-style-copy"><b>${esc(match.titleJa)}</b><small>${match.titleJa !== match.title ? `${esc(match.title)} · ` : ""}O*NET ${esc(match.code)}</small></span>
+          </li>`).join("")}</ol>`
+      : `<p class="analysis-work-style-empty">参照データを読み込めないため、候補を表示できません。</p>`;
 
     return `
       <div class="screen parent analysis-screen">
@@ -434,6 +439,12 @@ export const AnalysisScreen = {
           <h3 class="log-title">お子さまの とくちょう</h3>
           <div class="trait-list">${traitsMarkup}</div>
         </div>
+        <div class="analysis-card analysis-work-style-card">
+          <h3 class="log-title">仕事の スタイルとの つながり</h3>
+          <p class="analysis-work-style-source">${esc(workStyleSource)}</p>
+          ${workStyleMatches}
+          <p class="analysis-work-style-note">※ 将来の職業診断ではなく、遊びや体験と仕事の スタイルのつながりを見る参考表示です。</p>
+        </div>
         <div class="analysis-card analysis-next-card">
           <h3 class="log-title">おすすめの つぎの一歩</h3>
           <p class="analysis-lead">${streak > 0 ? "毎日 ちょっとずつ えほんを よむと、もっと たのしく つづけられます" : "はじめての えほんでも、ゆっくり すすめると きっと つながります"}</p>
@@ -444,13 +455,14 @@ export const AnalysisScreen = {
             ? report.log.map((item) => `<li><span>${esc(item.date)}</span><b>${esc(item.bookTitle)}</b><em>${item.count}こ たっせい</em></li>`).join("")
             : "<li class=\"analysis-history-empty\">まだ活動記録がありません。</li>"}</ul>
         </div>
-        <p class="analysis-disclaimer">※ 5つの ちからと特性メモは現在プロトタイプのデモ表示です。診断・評価ではありません。</p>
+        <p class="analysis-disclaimer">※ 5つの ちからと仕事の スタイル候補はプロトタイプの参考表示です。診断・評価ではありません。</p>
       </div>`;
   },
   mount(ctx, params = {}, root) {
     root.querySelector("[data-back]").onclick = () => ctx.go("SELECT");
     const report = reportStats(ctx.session, params);
-    root.querySelector("[data-export-png]").onclick = () => exportPng(report);
+    const analysis = buildWorkStyleAnalysis(ctx.session, ctx.repo, ctx.workStyles);
+    root.querySelector("[data-export-png]").onclick = () => exportPng(report, analysis);
     root.querySelector("[data-export-pdf]").onclick = () => {
       const cleanup = () => document.body.classList.remove("is-printing-analysis");
       document.body.classList.add("is-printing-analysis");
