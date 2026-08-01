@@ -42,7 +42,7 @@ python3 serve.py
 | 各画面の見た目・構成 | `js/screens.js` / `css/style.css` | JS / CSS |
 | 画面のつなぎ（ルーター） | `js/app.js` | JS |
 | コンテンツ検証 | `tools/validate_content.py` | Python |
-| Work Styles データの更新 | `tools/build_work_styles.py` → `content/work-styles.json` | Python / JSON |
+| HEXACO 6因子職業データの更新 | `tools/build_big5_scores.py` → `content/occupation-big5.json` | Python / JSON |
 | 職業名の日本語表示名更新 | `tools/translate_work_style_titles.py` → `content/work-style-titles-ja.json` | Python / JSON |
 | サーバー起動 | `serve.py` | Python |
 
@@ -59,24 +59,29 @@ python3 serve.py
 - ストリークは「外で活動した日数」に付き、途切れても没収しない（健全設計）。
 - ミッションには `developmentDomains`（発達領域タグ）を持たせてある（Stage 3 分析の布石）。
 
-### Work Styles 参考演算
+### HEXACO（ヘキサコ・6因子）参考演算
 
-`Work Styles.xlsx` は O*NET の職業 Work Styles 参照データ。起動時に読み込む
-`content/work-styles.json` は、次のコマンドで Excel から再生成できる。
+`occupation_big5_scores.xlsx` は全891職業の O/C/Ex/A/ES/H 参照データ。起動時にはブラウザ用に
+変換した `content/occupation-big5.json` を読み込む。Excel から再生成するには次を実行する。
 
 ```bash
-python3 tools/build_work_styles.py
+python3 tools/build_big5_scores.py
 ```
 
-職業名は `content/work-style-titles-ja.json` の日本語表示名を優先し、元の英語名も
-小さく併記する。職業リストが変わった場合は、必要に応じて次を実行する。
+表示軸は `O 開放性`、`C 誠実性`、`Ex 外向性`、`A 協調性`、`ES 情緒安定性`、
+`H 正直さ・謙虚さ` の6つ。Excel 本体に `H` の定義説明がないため、H は
+Honesty–Humility（正直さ・謙虚さ）として扱っている。厳密な心理検査ではなく、
+遊びや体験を振り返るためのプロトタイプ参考表示。
+職業名は `content/work-style-titles-ja.json` の日本語表示名を優先し、元の英語名も小さく併記する。
+職業リストが変わった場合は、必要に応じて次を実行する。
 
 ```bash
 python3 tools/translate_work_style_titles.py
 ```
 
-親モードの分析画面では、絵本ミッションの `developmentDomains` を5つの活動軸へ
-集計し、21個の Work Styles 軸との近さから参考候補を表示する。これは遊びや体験の
-振り返り用のプロトタイプで、診断・評価・将来の職業適性判定ではない。
+親モードの分析画面では、絵本ミッションの `developmentDomains` と、アップロード写真から
+抽出した `vehicleColor` を6軸へ集計し、全職業の6因子参照値との近さから参考候補を
+表示する。写真の色は色相ごとの参考重みで加算するが、ミッションタグより弱くしている。これは
+遊びや体験の振り返り用のプロトタイプで、診断・評価・将来の職業適性判定ではない。
 
 ---

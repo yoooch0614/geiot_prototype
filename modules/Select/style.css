@@ -89,7 +89,8 @@
   overflow-y: hidden;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
-  touch-action: pan-x;
+  /* 横スクロールは残しつつ、連続タップをブラウザの拡大操作にしない。 */
+  touch-action: manipulation;
   padding: 20px 26px 6px;
   margin: 0 -18px;
   scrollbar-width: none;

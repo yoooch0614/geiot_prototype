@@ -1,73 +1,73 @@
-// Work Styles の参照データを、アプリの活動タグから「探索のための参考候補」へ
-// 変換するロジック。職業適性や診断を行うものではなく、絵本で遊んだ内容と
-// O*NET の仕事スタイルをつなぐプロトタイプ用の軽いスコアリングです。
+// O/C/Ex/A/ES/H 6因子の参考スコアを、絵本の活動記録と
+// アップロード写真の色から作り、職業ごとの参照値と比較する。
+// 診断・評価・将来の職業適性判定ではなく、遊びや体験を振り返るための表示。
 
 const DEFAULT_AXES = [
-  { id: "tactical", label: "戦術", value: 78, color: "#e5484d" },
-  { id: "adventure", label: "冒険", value: 64, color: "#ec4899" },
-  { id: "craft", label: "職人", value: 82, color: "#f5b301" },
-  { id: "art", label: "芸術", value: 73, color: "#4caf50" },
-  { id: "cooperation", label: "協調", value: 88, color: "#3b82f6" },
+  { id: "openness", shortLabel: "O", label: "開放性", value: 72, color: "#e5484d" },
+  { id: "conscientiousness", shortLabel: "C", label: "誠実性", value: 78, color: "#f5b301" },
+  { id: "extraversion", shortLabel: "Ex", label: "外向性", value: 66, color: "#ec4899" },
+  { id: "agreeableness", shortLabel: "A", label: "協調性", value: 84, color: "#3b82f6" },
+  { id: "emotional_stability", shortLabel: "ES", label: "情緒安定性", value: 70, color: "#4caf50" },
+  { id: "honesty_humility", shortLabel: "H", label: "正直さ・謙虚さ", value: 70, color: "#8b5cf6" },
 ];
 
-// 絵本ミッションの developmentDomains → アプリ内の5軸。
-// タグが増えた場合は、ここに重みを追加するだけでよい。
-const DOMAIN_AXIS_WEIGHTS = {
-  "形": { tactical: 1, craft: 0.45 },
-  "観察": { tactical: 0.85, adventure: 0.3 },
-  "自然": { adventure: 1, tactical: 0.2 },
-  "感覚": { adventure: 0.55, art: 0.65 },
-  "色": { art: 1 },
-  "もよう": { art: 0.9, craft: 0.45, tactical: 0.2 },
-  "表現": { art: 1, cooperation: 0.2 },
-  "協力": { cooperation: 1 },
-  "生活習慣": { craft: 0.85, tactical: 0.35 },
-  "自立": { craft: 0.85, adventure: 0.3 },
+// H は Excel の列定義がないため、Honesty-Humility（正直さ・謙虚さ）として扱う。
+// 絵本ミッションの developmentDomains → 6因子の初期参考重み。
+// 研究用の確定対応表ではなく、後からレビューして調整できる仮説モデル。
+const DOMAIN_TRAIT_WEIGHTS = {
+  "形": { conscientiousness: 0.65, openness: 0.25, honesty_humility: 0.2 },
+  "観察": { openness: 0.55, conscientiousness: 0.4, honesty_humility: 0.15 },
+  "自然": { openness: 0.55, emotional_stability: 0.25, honesty_humility: 0.2 },
+  "感覚": { openness: 0.75, emotional_stability: 0.2, honesty_humility: 0.1 },
+  "色": { openness: 0.8, extraversion: 0.15, honesty_humility: 0.1 },
+  "もよう": { openness: 0.7, conscientiousness: 0.35, honesty_humility: 0.15 },
+  "表現": { openness: 0.65, extraversion: 0.55, honesty_humility: 0.1 },
+  "協力": { agreeableness: 1, extraversion: 0.25, honesty_humility: 0.45 },
+  "生活習慣": { conscientiousness: 0.85, emotional_stability: 0.25, honesty_humility: 0.55 },
+  "自立": { conscientiousness: 0.6, extraversion: 0.3, emotional_stability: 0.35, honesty_humility: 0.35 },
 };
 
-// O*NET の21軸を、アプリ内の5軸の組み合わせとして読むための初期モデル。
-// これは研究用の確定対応表ではなく、プロトタイプの仮説なので、後から
-// 保護者・専門家のレビューを受けて調整できるようデータとして分離している。
-const STYLE_AXIS_WEIGHTS = {
-  "Innovation": { art: 1, adventure: 0.4 },
-  "Achievement Orientation": { craft: 0.85, tactical: 0.2 },
-  "Intellectual Curiosity": { art: 0.75, adventure: 0.45, tactical: 0.2 },
-  "Tolerance for Ambiguity": { adventure: 0.9, art: 0.35 },
-  "Initiative": { adventure: 0.8, art: 0.35 },
-  "Adaptability": { adventure: 0.8, art: 0.5, cooperation: 0.15 },
-  "Self-Confidence": { adventure: 0.65, art: 0.3 },
-  "Perseverance": { craft: 0.9, adventure: 0.25 },
-  "Leadership Orientation": { tactical: 0.45, adventure: 0.4, cooperation: 0.2 },
-  "Humility": { cooperation: 0.55, craft: 0.2 },
-  "Sincerity": { cooperation: 0.8, craft: 0.2 },
-  "Empathy": { cooperation: 0.95 },
-  "Cooperation": { cooperation: 1 },
-  "Optimism": { adventure: 0.7, art: 0.3, cooperation: 0.2 },
-  "Social Orientation": { cooperation: 0.85, adventure: 0.2 },
-  "Cautiousness": { tactical: 0.75, craft: 0.3 },
-  "Attention to Detail": { tactical: 0.8, craft: 0.8, art: 0.2 },
-  "Dependability": { craft: 0.8, tactical: 0.4, cooperation: 0.2 },
-  "Integrity": { tactical: 0.4, cooperation: 0.3, craft: 0.3 },
-  "Stress Tolerance": { adventure: 0.8, tactical: 0.2 },
-  "Self-Control": { tactical: 0.7, craft: 0.35 },
+// 写真から得た色は、ミッションタグを補助する証拠として加える。
+// 1色の影響をタグ1個より少し弱くし、写真だけで結果が決まりすぎないようにする。
+const COLOR_EVIDENCE_WEIGHT = 0.8;
+const COLOR_TRAIT_WEIGHTS = {
+  red: { extraversion: 0.7, openness: 0.3, emotional_stability: 0.25, honesty_humility: 0.1 },
+  orange: { extraversion: 0.6, openness: 0.45, conscientiousness: 0.25, honesty_humility: 0.15 },
+  yellow: { openness: 0.65, extraversion: 0.45, conscientiousness: 0.2, honesty_humility: 0.2 },
+  green: { agreeableness: 0.7, emotional_stability: 0.35, openness: 0.3, honesty_humility: 0.45 },
+  cyan: { openness: 0.55, agreeableness: 0.5, emotional_stability: 0.25, honesty_humility: 0.35 },
+  blue: { agreeableness: 0.6, emotional_stability: 0.45, openness: 0.2, honesty_humility: 0.45 },
+  purple: { openness: 0.8, extraversion: 0.35, agreeableness: 0.2, honesty_humility: 0.15 },
+  pink: { agreeableness: 0.5, openness: 0.7, extraversion: 0.35, honesty_humility: 0.35 },
+};
+
+const NAMED_COLORS = {
+  red: [255, 0, 0],
+  orange: [255, 165, 0],
+  yellow: [255, 255, 0],
+  green: [0, 128, 0],
+  cyan: [0, 255, 255],
+  blue: [0, 0, 255],
+  purple: [128, 0, 128],
+  pink: [255, 105, 180],
 };
 
 let cachedWorkStyles = null;
 
 export async function loadWorkStyles(
-  path = "content/work-styles.json",
+  path = "content/occupation-big5.json",
   titlesPath = "content/work-style-titles-ja.json",
 ) {
   if (cachedWorkStyles) return cachedWorkStyles;
   const response = await fetch(path, { cache: "no-store" });
-  if (!response.ok) throw new Error(`Work Styles を読み込めません (${response.status})`);
+  if (!response.ok) throw new Error(`6因子の職業データを読み込めません (${response.status})`);
   const data = await response.json();
   let titleJa = {};
   try {
     const titleResponse = await fetch(titlesPath, { cache: "no-store" });
     if (titleResponse.ok) titleJa = (await titleResponse.json()).titles ?? {};
   } catch (error) {
-    console.warn("Work Styles の日本語表示名を読み込めませんでした", error);
+    console.warn("職業の日本語表示名を読み込めませんでした", error);
   }
   cachedWorkStyles = { ...data, titleJa };
   return cachedWorkStyles;
@@ -77,18 +77,102 @@ function clamp(value, min = 0, max = 100) {
   return Math.max(min, Math.min(max, value));
 }
 
-function axisMap() {
-  return Object.fromEntries(DEFAULT_AXES.map((axis) => [axis.id, axis]));
+function parseColor(value) {
+  if (typeof value !== "string") return null;
+  const source = value.trim().toLowerCase();
+  if (NAMED_COLORS[source]) return NAMED_COLORS[source];
+
+  const hex = source.match(/^#([0-9a-f]{3,8})$/i)?.[1];
+  if (hex) {
+    if (![3, 4, 6, 8].includes(hex.length)) return null;
+    const raw = hex.length <= 4
+      ? hex.slice(0, 3).split("").map((digit) => `${digit}${digit}`).join("")
+      : hex.slice(0, 6);
+    return [0, 2, 4].map((index) => Number.parseInt(raw.slice(index, index + 2), 16));
+  }
+
+  if (!/^rgba?\(/.test(source)) return null;
+  const body = source.slice(source.indexOf("(") + 1, source.lastIndexOf(")"));
+  const channels = body.split(/[\s,\/]+/).filter(Boolean).slice(0, 3).map((channel) => {
+    const number = Number.parseFloat(channel);
+    if (!Number.isFinite(number)) return null;
+    return channel.endsWith("%") ? (number / 100) * 255 : number;
+  });
+  if (channels.length !== 3 || channels.some((channel) => channel == null)) return null;
+  return channels.map((channel) => Math.max(0, Math.min(255, channel)));
+}
+
+function colorProfile(value) {
+  const rgb = parseColor(value);
+  if (!rgb) return null;
+  const [red, green, blue] = rgb.map((channel) => channel / 255);
+  const max = Math.max(red, green, blue);
+  const min = Math.min(red, green, blue);
+  const delta = max - min;
+  const saturation = max ? delta / max : 0;
+  if (saturation < 0.1 || max < 0.12) return null;
+
+  let hue = 0;
+  if (delta) {
+    if (max === red) hue = 60 * (((green - blue) / delta) % 6);
+    else if (max === green) hue = 60 * ((blue - red) / delta + 2);
+    else hue = 60 * ((red - green) / delta + 4);
+  }
+  if (hue < 0) hue += 360;
+
+  const family = hue < 15 || hue >= 345
+    ? "red"
+    : hue < 45
+      ? "orange"
+      : hue < 75
+        ? "yellow"
+        : hue < 165
+          ? "green"
+          : hue < 195
+            ? "cyan"
+            : hue < 255
+              ? "blue"
+              : hue < 285
+                ? "purple"
+                : "pink";
+  return { family, weights: COLOR_TRAIT_WEIGHTS[family] };
+}
+
+function traitDefinitions(dataset) {
+  return Array.isArray(dataset?.traits) && dataset.traits.length === DEFAULT_AXES.length
+    ? dataset.traits
+    : DEFAULT_AXES;
+}
+
+function defaultValue(id) {
+  return DEFAULT_AXES.find((axis) => axis.id === id)?.value ?? 50;
+}
+
+function addWeightedEvidence(evidence, weights, amount = 1) {
+  if (!weights) return false;
+  evidence.total += amount;
+  Object.entries(weights).forEach(([trait, weight]) => {
+    evidence.traits[trait] = (evidence.traits[trait] || 0) + weight * amount;
+  });
+  return true;
 }
 
 function addDomainEvidence(evidence, domain) {
-  const weights = DOMAIN_AXIS_WEIGHTS[domain];
-  if (!weights) return false;
-  evidence.total += 1;
-  Object.entries(weights).forEach(([axis, weight]) => {
-    evidence.axes[axis] = (evidence.axes[axis] || 0) + weight;
-  });
-  return true;
+  evidence.domains[domain] = (evidence.domains[domain] || 0) + 1;
+  return addWeightedEvidence(evidence, DOMAIN_TRAIT_WEIGHTS[domain]);
+}
+
+function addColorEvidence(evidence, color) {
+  const profile = colorProfile(color);
+  if (!profile) return false;
+  evidence.colorSamples += 1;
+  evidence.colorFamilies[profile.family] = (evidence.colorFamilies[profile.family] || 0) + 1;
+  return addWeightedEvidence(evidence, profile.weights, COLOR_EVIDENCE_WEIGHT);
+}
+
+function addMissionEvidence(evidence, domains, color) {
+  domains.forEach((domain) => addDomainEvidence(evidence, domain));
+  addColorEvidence(evidence, color);
 }
 
 function missionPages(book) {
@@ -96,10 +180,16 @@ function missionPages(book) {
 }
 
 function collectEvidence(session, repo) {
-  const evidence = { total: 0, axes: {}, domains: {} };
+  const evidence = {
+    total: 0,
+    traits: {},
+    domains: {},
+    colorSamples: 0,
+    colorFamilies: {},
+  };
 
-  // 完成済みの日記には、現在のバージョンなら missionId とタグを保存する。
-  // 古い日記にはそれらがないため、絵本内の完了ミッション順で補完する。
+  // 完成済みの日記には、現在のバージョンなら missionId・タグ・色を保存する。
+  // 古い日記にはそれらがない場合があるため、絵本のミッション順と旧色マップで補完する。
   (session.memories ?? []).forEach((memory) => {
     const pages = missionPages(repo?.book(memory.bookId));
     let legacyIndex = 0;
@@ -110,82 +200,62 @@ function collectEvidence(session, repo) {
         : pages[legacyIndex];
       legacyIndex += 1;
       const domains = entry.developmentDomains ?? page?.developmentDomains ?? [];
-      domains.forEach((domain) => {
-        evidence.domains[domain] = (evidence.domains[domain] || 0) + 1;
-        addDomainEvidence(evidence, domain);
-      });
+      const color = entry.vehicleColor || memory.bookColorValues?.[entry.missionId || page?.id] || null;
+      addMissionEvidence(evidence, domains, color);
     });
   });
 
-  // 読みかけの本で今すぐ分析画面を開いた場合も、達成済みミッションを反映する。
+  // 読みかけの本で分析画面を開いた場合も、達成済みミッションを反映する。
   const currentPages = missionPages(repo?.book(session.bookId));
   (session.runMissions ?? []).forEach((mission) => {
     const page = currentPages.find((candidate) => candidate.id === mission.missionId);
-    (page?.developmentDomains ?? []).forEach((domain) => {
-      evidence.domains[domain] = (evidence.domains[domain] || 0) + 1;
-      addDomainEvidence(evidence, domain);
-    });
+    addMissionEvidence(evidence, page?.developmentDomains ?? [], mission.vehicleColor);
   });
 
   return evidence;
 }
 
-function activityAxes(session, repo) {
+function activityAxes(session, repo, dataset) {
   const evidence = collectEvidence(session, repo);
+  const definitions = traitDefinitions(dataset);
   if (!evidence.total) {
-    return { axes: DEFAULT_AXES.map((axis) => ({ ...axis })), evidence, source: "demo" };
+    return {
+      axes: definitions.map((axis) => ({ ...axis, value: defaultValue(axis.id) })),
+      evidence,
+      source: "demo",
+    };
   }
 
-  const axes = DEFAULT_AXES.map((axis) => {
-    const weightedEvidence = evidence.axes[axis.id] || 0;
-    // 36 は「未観測」を表す中立値。記録が増えるほど、ミッションタグから
-    // 見えた傾向が 36〜100 の範囲で反映される。
+  const axes = definitions.map((axis) => {
+    const weightedEvidence = evidence.traits[axis.id] || 0;
+    // 36 は未観測を表す中立値。記録が増えるほど、活動と色の傾向を36〜100へ反映する。
     const value = 36 + (weightedEvidence / evidence.total) * 64;
     return { ...axis, value: Math.round(clamp(value)) };
   });
   return { axes, evidence, source: "activity" };
 }
 
-function workStyleScores(axes, dataset) {
-  const axisValues = axisMap();
-  axes.forEach((axis) => { axisValues[axis.id] = axis; });
-  return (dataset?.dimensions ?? []).map((dimension) => {
-    const weights = STYLE_AXIS_WEIGHTS[dimension.name] ?? {};
-    const totalWeight = Object.values(weights).reduce((sum, weight) => sum + weight, 0);
-    if (!totalWeight) return 50;
-    const score = Object.entries(weights).reduce(
-      (sum, [axis, weight]) => sum + (axisValues[axis]?.value ?? 50) * weight,
-      0,
-    ) / totalWeight;
-    return Math.round(clamp(score));
-  });
-}
-
 function normalize(value, range) {
   if (value == null || !range) return null;
-  const [min, max] = range;
-  if (max <= min) return 50;
-  return clamp(((value - min) / (max - min)) * 100);
+  const min = Number(range.min);
+  const max = Number(range.max);
+  if (!Number.isFinite(min) || !Number.isFinite(max) || max <= min) return 50;
+  return clamp(((Number(value) - min) / (max - min)) * 100);
 }
 
-function occupationMatches(scores, dataset, limit = 3) {
+function occupationMatches(axes, dataset, limit = 3) {
   if (!dataset?.occupations?.length) return [];
+  const definitions = traitDefinitions(dataset);
+  const profile = Object.fromEntries(axes.map((axis) => [axis.id, axis.value]));
   const matches = dataset.occupations.map((occupation) => {
     let distance = 0;
     let dimensions = 0;
     const benchmark = [];
-    occupation.dr.forEach((dr, index) => {
-      const drScore = normalize(dr, dataset.ranges?.[index]?.dr);
-      const wiScore = normalize(occupation.wi[index], dataset.ranges?.[index]?.wi);
-      if (drScore == null && wiScore == null) return;
-      // DR is a stronger structural signal; WI adds the source's impact signal.
-      const value = drScore == null
-        ? wiScore
-        : wiScore == null
-          ? drScore
-          : drScore * 0.6 + wiScore * 0.4;
+    definitions.forEach((trait, index) => {
+      const value = normalize(occupation.scores?.[index], dataset.ranges?.[index]);
+      if (value == null) return;
       benchmark.push(value);
-      distance += Math.abs(scores[index] - value);
+      distance += Math.abs((profile[trait.id] ?? 50) - value);
       dimensions += 1;
     });
     const score = dimensions ? clamp(100 - distance / dimensions) : 0;
@@ -197,18 +267,19 @@ function occupationMatches(scores, dataset, limit = 3) {
       benchmark,
     };
   });
-  return matches.sort((a, b) => b.score - a.score || a.title.localeCompare(b.title)).slice(0, limit);
+  return matches
+    .sort((a, b) => b.score - a.score || a.title.localeCompare(b.title))
+    .slice(0, limit);
 }
 
 export function buildWorkStyleAnalysis(session, repo, dataset) {
-  const activity = activityAxes(session, repo);
-  const scores = workStyleScores(activity.axes, dataset);
+  const activity = activityAxes(session, repo, dataset);
   return {
     axes: activity.axes,
     evidence: activity.evidence,
     source: activity.source,
-    scores,
-    matches: occupationMatches(scores, dataset),
-    datasetAvailable: Boolean(dataset?.occupations?.length),
+    scores: activity.axes.map((axis) => axis.value),
+    matches: occupationMatches(activity.axes, dataset),
+    datasetAvailable: Boolean(dataset?.occupations?.length && dataset?.traits?.length === DEFAULT_AXES.length),
   };
 }

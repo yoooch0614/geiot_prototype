@@ -144,6 +144,29 @@ function setLanguage(value) {
   applyDisplaySettings();
 }
 
+// touch-action がない古いモバイルブラウザ向けの二重タップ拡大ガード。
+// 同じ場所への短時間の2回目だけを抑止し、通常のスクロール・スワイプ・
+// 離れた場所への連続タップはそのまま通す。CSS側で双指ズームは許可している。
+function installDoubleTapZoomGuard() {
+  let lastTap = null;
+  document.addEventListener("touchend", (event) => {
+    if (event.defaultPrevented || event.changedTouches.length !== 1) return;
+    const touch = event.changedTouches[0];
+    const now = Date.now();
+    const isDoubleTap = lastTap &&
+      now - lastTap.time < 320 &&
+      Math.hypot(touch.clientX - lastTap.x, touch.clientY - lastTap.y) < 32;
+    if (isDoubleTap) {
+      event.preventDefault();
+      lastTap = null;
+      return;
+    }
+    lastTap = { time: now, x: touch.clientX, y: touch.clientY };
+  }, { passive: false });
+}
+
+installDoubleTapZoomGuard();
+
 function scheduleThemeSync() {
   if (themeTimer) window.clearTimeout(themeTimer);
   if (themeOverride) return;
