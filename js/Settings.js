@@ -18,8 +18,7 @@ const ALLOWED = {
   fontSize: (value) => ["small", "standard", "large"].includes(value),
   animationsEnabled: (value) => typeof value === "boolean",
   theme: (value) => ["auto", "day", "night"].includes(value),
-  // 目前应用内容只有日语；其他语言保留入口，待翻译资源完成后开放。
-  language: (value) => value === "ja",
+  language: (value) => ["ja", "en", "zh-Hans"].includes(value),
 };
 
 function readSettings() {

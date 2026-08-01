@@ -82,7 +82,7 @@ export const ParentScreen = {
       ctx.session.setDailyMission({ enabled });
       missionToggle.classList.toggle("is-on", enabled);
       missionToggle.setAttribute("aria-checked", String(enabled));
-      missionToggle.textContent = enabled ? "オン" : "オフ";
+      missionToggle.textContent = enabled ? ctx.t("common.on") : ctx.t("common.off");
       missionCard.classList.toggle("is-off", !enabled);
       missionSelect.disabled = !enabled;
       ctx.notify?.(enabled ? "きょうのミッションを オンにしました" : "きょうのミッションを オフにしました");

@@ -1,5 +1,7 @@
 // 子ども向け／おうちのひと向けで共通して使う操作ガイド。
 // step は { number, image, type, title, action, text } の形で指定する。
+import { localizeText, localizeUi } from "./i18n.js";
+
 export function openGuide(ctx, root, {
   steps,
   kicker = "かんたん 3ステップ",
@@ -40,6 +42,7 @@ export function openGuide(ctx, root, {
       <button class="guide-later" type="button" data-guide-close>あとで</button>
     </div>`;
   root.appendChild(modal);
+  localizeUi(modal);
 
   const stepEls = [...modal.querySelectorAll("[data-guide-step]")];
   const dots = [...modal.querySelectorAll("[data-guide-dot]")];
@@ -92,7 +95,7 @@ export function openGuide(ctx, root, {
     });
     dots.forEach((dot, i) => dot.classList.toggle("is-active", i === index));
     prev.hidden = index === 0;
-    next.textContent = index === stepEls.length - 1 ? finalLabel : "つぎへ ›";
+    next.textContent = localizeText(index === stepEls.length - 1 ? finalLabel : "つぎへ ›");
     syncFocus();
   }
 

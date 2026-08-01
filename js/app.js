@@ -14,6 +14,7 @@ import {
   CELEBRATION_SOUNDS, CLICK_SOUND, HOME_BGM, HOME_NIGHT_BGM,
 } from "../modules/shared/utils.js";
 import { loadWorkStyles } from "../modules/Analysis/workStyles.js";
+import { localizeText, localizeUi, t } from "../modules/shared/i18n.js";
 
 // BGMを流す画面。トップ（MODE）・あそびえらび（HOME）・本だな（SELECT）の3つ。
 // 絵本を読みはじめたら止める（おはなしの音やページめくり音の邪魔になるため）。
@@ -84,7 +85,7 @@ function showToast(message, type = "success") {
   toast.dataset.appToast = "";
   toast.setAttribute("role", "status");
   toast.setAttribute("aria-live", "polite");
-  toast.textContent = message;
+  toast.textContent = localizeText(message);
   document.body.append(toast);
   requestAnimationFrame(() => toast.classList.add("is-visible"));
   window.setTimeout(() => {
@@ -141,8 +142,9 @@ function setAnimationsEnabled(enabled) {
 }
 
 function setLanguage(value) {
-  Settings.set("language", value);
+  const language = Settings.set("language", value);
   applyDisplaySettings();
+  return language;
 }
 
 // touch-action がない古いモバイルブラウザ向けの二重タップ拡大ガード。
@@ -224,6 +226,7 @@ const ctx = {
   setFontSize,
   setAnimationsEnabled,
   setLanguage,
+  t,
   setThemeMode,
   unlockParent: unlockParentSession,
   lockParent: lockParentSession,
@@ -241,6 +244,7 @@ function go(name, params = {}) {
   root.querySelector(".screen")?.classList.add("page--in"); // 画面切り替えの入場アニメを全画面に統一
   screen.mount?.(ctx, params, root);
   currentScreen = screen;
+  localizeUi(root);
   root.scrollTop = 0;
   root.querySelector(".screen")?.scrollTo(0, 0);
 
