@@ -223,10 +223,10 @@ export const SettingsScreen = {
 
         <section class="settings-group" aria-labelledby="settings-language-title">
           <h3 id="settings-language-title">ことば</h3>
-          ${selectMarkup("language", "画面の言語", "翻訳版は順次追加予定です", language, [
+          ${selectMarkup("language", "画面の言語", "English・中文はテスト中です", language, [
             { value: "ja", label: "日本語" },
-            { value: "zh-Hans", label: "中文（準備中）", disabled: true },
-            { value: "en", label: "English（準備中）", disabled: true },
+            { value: "en", label: "English（テスト中）", disabled: true },
+            { value: "zh-Hans", label: "中文（测试中）", disabled: true },
           ])}
         </section>
 
