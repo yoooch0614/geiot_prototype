@@ -2,7 +2,8 @@
   --paper: #f6f8f3;
   --paper-deep: #eaf0e8;
   --ink: #10251b;
-  --muted: #718178;
+  /* 4.97:1 on --paper, 4.60:1 on --paper-deep (WCAG AA for body text) */
+  --muted: #5f7066;
   --line: rgba(16, 37, 27, .12);
   --green: #78d39b;
   --green-deep: #1d6449;
@@ -23,10 +24,12 @@
 }
 
 * { box-sizing: border-box; }
-html { overflow-x: hidden; scroll-behavior: smooth; }
+/* overflow-x must be `clip`, not `hidden`: `hidden` turns the root into a
+   scroll container and kills `position: sticky` on .site-header. */
+html { overflow-x: clip; scroll-behavior: smooth; }
 body {
   margin: 0;
-  overflow-x: hidden;
+  overflow-x: clip;
   color: var(--ink);
   background: var(--paper);
   font-family: var(--font);
@@ -34,11 +37,18 @@ body {
   text-rendering: optimizeLegibility;
 }
 body.menu-open { overflow: hidden; }
+/* Safari < 16 / Firefox < 81 have no `overflow: clip`. Fall back to `hidden`
+   there so the decorative bleed still does not cause a horizontal scrollbar. */
+@supports not (overflow-x: clip) {
+  html, body { overflow-x: hidden; }
+}
 a { color: inherit; text-decoration: none; }
 button { font: inherit; }
 img { display: block; max-width: 100%; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 .section-wrap { width: min(calc(100% - 48px), var(--max)); margin-inline: auto; }
+/* keep anchored sections clear of the sticky header (14px offset + 68px tall) */
+main [id], main > section[id] { scroll-margin-top: 104px; }
 .scroll-progress { position: fixed; z-index: 100; top: 0; left: 0; width: 0; height: 3px; background: linear-gradient(90deg, var(--coral), var(--yellow), var(--green), var(--blue)); transition: width 100ms linear; }
 
 /* Navigation */
@@ -348,7 +358,8 @@ blockquote { position: relative; z-index: 1; margin: 0; color: var(--green-deep)
 .hexaco-point--es { fill: #4caf50; }
 .hexaco-point--h { fill: #8b5cf6; }
 .hexaco-axis-label { fill: var(--ink); font-family: var(--font); font-size: 11px; font-weight: 900; text-anchor: middle; }
-.hexaco-axis-label--o, .hexaco-axis-label--a { fill: #e5484d; }
+.hexaco-axis-label--o { fill: #e5484d; }
+.hexaco-axis-label--a { fill: #2563eb; }
 .hexaco-axis-label--c { fill: #a97700; text-anchor: start; }
 .hexaco-axis-label--ex { fill: #c52c79; text-anchor: start; }
 .hexaco-axis-label--es, .hexaco-axis-label--h { text-anchor: end; }
@@ -479,6 +490,10 @@ blockquote { position: relative; z-index: 1; margin: 0; color: var(--green-deep)
   .hero-copy { padding-left: 0; }
   .hero h1 { font-size: clamp(52px, 12vw, 80px); }
   .hero-visual { min-height: 620px; margin-top: 35px; }
+  /* pull the decorative orbits inside the viewport: rotate() grows their
+     bounding box, so right:2%/8% still overhangs at this width. */
+  .hero-orbit--one { right: 5%; }
+  .hero-orbit--two { right: 11%; }
   .tablet--hero { top: 190px; left: -3%; width: min(560px, 96vw); height: 365px; }
   .phone--hero { right: 25%; }
   .floating-card--color { left: 5%; }
@@ -514,7 +529,9 @@ blockquote { position: relative; z-index: 1; margin: 0; color: var(--green-deep)
   .hero-visual { min-height: 535px; margin-top: 24px; }
   .hero-orbit--one { top: 42px; right: -13%; width: 390px; height: 320px; }
   .hero-orbit--two { top: 76px; right: -8%; width: 330px; height: 410px; }
-  .tablet--hero { top: 185px; left: -7%; width: 430px; height: 276px; border-width: 8px; border-radius: 24px; transform: rotate(-4deg); }
+  /* narrow enough that the tablet's right edge tucks behind the phone instead
+     of reappearing as a detached sliver past the right edge of the screen. */
+  .tablet--hero { top: 185px; left: -3%; width: 300px; height: 193px; border-width: 8px; border-radius: 24px; transform: rotate(-4deg); }
   .tablet-screen { padding: 10px; border-radius: 15px; }
   .tablet-bar { height: 19px; margin-bottom: 6px; font-size: 6px; }
   .tablet-bar strong { font-size: 9px; }
@@ -522,7 +539,7 @@ blockquote { position: relative; z-index: 1; margin: 0; color: var(--green-deep)
   .tablet-bar i { width: 13px; height: 13px; }
   .tablet-app-grid { gap: 6px; height: calc(100% - 25px); }
   .tablet-app-panel { border-width: 2px; border-radius: 9px; }
-  .phone--hero { top: 25px; right: 15%; width: 230px; height: 465px; border-width: 7px; border-radius: 34px; transform: rotate(5deg); }
+  .phone--hero { top: 25px; right: 10%; width: 230px; height: 465px; border-width: 7px; border-radius: 34px; transform: rotate(5deg); }
   .phone-screen { border-radius: 27px; }
   .phone-speaker { top: 7px; width: 60px; height: 12px; }
   .mini-status { padding: 14px 13px 0; font-size: 7px; }
