@@ -227,8 +227,8 @@ export const SettingsScreen = {
           <h3 id="settings-language-title">ことば</h3>
           ${selectMarkup("language", "画面の言語", "日本語・English・中文に切り替えられます（テスト中）", language, [
             { value: "ja", label: "日本語" },
-            { value: "en", label: "English（テスト中）" },
-            { value: "zh-Hans", label: "中文（测试中）" },
+            { value: "en", label: "（テスト中）English" },
+            { value: "zh-Hans", label: "（测试中）中文" },
           ])}
         </section>
 
