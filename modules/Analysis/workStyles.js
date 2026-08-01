@@ -8,10 +8,10 @@ const DEFAULT_AXES = [
   { id: "extraversion", shortLabel: "Ex", label: "外向性", value: 66, color: "#ec4899" },
   { id: "agreeableness", shortLabel: "A", label: "協調性", value: 84, color: "#3b82f6" },
   { id: "emotional_stability", shortLabel: "ES", label: "情緒安定性", value: 70, color: "#4caf50" },
-  { id: "honesty_humility", shortLabel: "H", label: "正直さ・謙虚さ", value: 70, color: "#8b5cf6" },
+  { id: "honesty_humility", shortLabel: "H", label: "正直・謙虚", value: 70, color: "#8b5cf6" },
 ];
 
-// H は Excel の列定義がないため、Honesty-Humility（正直さ・謙虚さ）として扱う。
+// H は Excel の列定義がないため、Honesty-Humility（正直・謙虚）として扱う。
 // 絵本ミッションの developmentDomains → 6因子の初期参考重み。
 // 研究用の確定対応表ではなく、後からレビューして調整できる仮説モデル。
 const DOMAIN_TRAIT_WEIGHTS = {

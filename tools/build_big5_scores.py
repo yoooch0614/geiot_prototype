@@ -6,7 +6,7 @@ keeps ``occupation_big5_scores.xlsx`` as the source and emits the compact data
 used by the analysis screen.
 
 The workbook contains O, C, Ex, A, ES and H.  The application treats H as
-Honesty-Humility (正直さ・謙虚さ) and exposes all six columns to the UI.
+Honesty-Humility (正直・謙虚) and exposes all six columns to the UI.
 
 Usage:
     python3 tools/build_big5_scores.py
@@ -32,7 +32,7 @@ TRAITS = [
     {"id": "extraversion", "key": "Ex", "shortLabel": "Ex", "name": "Extraversion", "label": "外向性", "color": "#ec4899"},
     {"id": "agreeableness", "key": "A", "shortLabel": "A", "name": "Agreeableness", "label": "協調性", "color": "#3b82f6"},
     {"id": "emotional_stability", "key": "ES", "shortLabel": "ES", "name": "Emotional Stability", "label": "情緒安定性", "color": "#4caf50"},
-    {"id": "honesty_humility", "key": "H", "shortLabel": "H", "name": "Honesty-Humility", "label": "正直さ・謙虚さ", "color": "#8b5cf6"},
+    {"id": "honesty_humility", "key": "H", "shortLabel": "H", "name": "Honesty-Humility", "label": "正直・謙虚", "color": "#8b5cf6"},
 ]
 
 
@@ -125,7 +125,7 @@ def build_payload(path: Path) -> dict:
     return {
         "format": "six-factor-reference",
         "model": "O/C/Ex/A/ES/H",
-        "hAssumption": "H is treated as Honesty-Humility (正直さ・謙虚さ) because the workbook does not define the header.",
+        "hAssumption": "H is treated as Honesty-Humility (正直・謙虚) because the workbook does not define the header.",
         "source": path.name,
         "traits": TRAITS,
         "ranges": ranges,
