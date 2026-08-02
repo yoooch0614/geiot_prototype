@@ -443,8 +443,8 @@ blockquote { position: relative; z-index: 1; margin: 0; color: var(--green-deep)
 /* Members */
 .members-section { padding-top: 155px; padding-bottom: 122px; }
 .members-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-.member { display: grid; grid-template-columns: 24px 42px 1fr; align-items: center; gap: 11px; min-height: 92px; padding: 13px 15px; border-top: 1px solid var(--line); }
-.member-number { align-self: start; padding-top: 5px; color: #9ca9a2; font-size: 9px; }
+.member { display: grid; grid-template-columns: 24px 42px minmax(0, 1fr); align-items: center; gap: 11px; min-height: 92px; padding: 13px 15px; border-top: 1px solid var(--line); }
+.member-number { color: #9ca9a2; font-size: 9px; }
 .member-avatar { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 14px; color: #fff; font: 700 16px var(--latin); }
 .member-avatar--green { background: var(--green-deep); }
 .member-avatar--blue { color: #294864; background: var(--blue); }
