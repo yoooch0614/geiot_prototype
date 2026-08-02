@@ -483,7 +483,12 @@ blockquote { position: relative; z-index: 1; margin: 0; color: var(--green-deep)
 
 @media (max-width: 900px) {
   .desktop-nav, .header-cta { display: none; }
-  .header-tools { margin-left: auto; }
+  .site-header { gap: 12px; }
+  .brand-copy, .hero-copy, .section-heading > div, .guide-header > div,
+  .demo-header > div, .big-five-card-top > div, .activity-card-head > div,
+  .hero-share > div, .origin-note > div:last-child, .guide-step > div,
+  .guide-fact > div, .activity-line > div { min-width: 0; }
+  .header-tools { gap: 5px; margin-left: auto; }
   .menu-toggle { margin-left: 0; }
   .menu-toggle { display: block; }
   .mobile-menu { position: fixed; z-index: 15; top: 91px; right: 16px; left: 16px; display: flex; flex-direction: column; gap: 2px; padding: 10px; border: 1px solid rgba(255,255,255,.8); border-radius: 20px; background: rgba(255,255,255,.95); box-shadow: 0 22px 50px rgba(35,67,48,.16); opacity: 0; pointer-events: none; transform: translateY(-8px); transition: opacity 180ms ease, transform 180ms ease; }
@@ -496,6 +501,15 @@ blockquote { position: relative; z-index: 1; margin: 0; color: var(--green-deep)
   /* re-stated inside the media query: :root[lang] outranks a bare .hero h1,
      so the desktop EN rule would otherwise leak into every smaller width. */
   :root[lang="en"] .hero h1 { font-size: clamp(28px, 9.2vw, 72px); }
+  :root[lang="en"] .hero h1 em { white-space: normal; }
+  .hero h1, .section-heading h2, .guide-header h2, .demo-header h2,
+  .feature-copy h2, .insight-heading h2, .hearing-intro h2, .closing h2,
+  .section-heading > p, .guide-header > p, .demo-header > p { overflow-wrap: anywhere; }
+  .hero-meta { flex-wrap: wrap; row-gap: 8px; }
+  .hero-share { max-width: 100%; }
+  .section-heading, .demo-header { align-items: flex-start; flex-direction: column; gap: 17px; }
+  .section-heading { margin-bottom: 30px; }
+  .section-heading > p, .demo-header > p { text-align: left; }
   .hero-visual { min-height: 620px; margin-top: 35px; }
   /* pull the decorative orbits inside the viewport: rotate() grows their
      bounding box, so right:2%/8% still overhangs at this width. */
@@ -518,17 +532,24 @@ blockquote { position: relative; z-index: 1; margin: 0; color: var(--green-deep)
 
 @media (max-width: 580px) {
   .section-wrap { width: min(calc(100% - 34px), var(--max)); }
-  .site-header { top: 8px; width: calc(100% - 18px); margin-top: 8px; }
-  .language-toggle, .sound-toggle { min-width: 38px; padding: 0 8px; }
+  .site-header { top: 8px; gap: 8px; width: calc(100% - 18px); min-height: 58px; margin-top: 8px; padding: 7px 8px 7px 10px; }
+  .brand { gap: 7px; min-width: 0; }
+  .brand-mark { width: 36px; height: 36px; border-radius: 11px; }
+  .brand-copy strong { font-size: 13px; }
+  .brand-copy small { margin-top: 3px; font-size: 8px; letter-spacing: .1em; }
+  .header-tools { gap: 4px; }
+  .language-toggle, .sound-toggle { min-width: 34px; min-height: 34px; padding: 0 6px; }
   .sound-toggle > span:last-child { display: none; }
+  .menu-toggle { width: 36px; height: 36px; padding: 7px; border-radius: 11px; }
   .mobile-menu { top: 78px; right: 9px; left: 9px; }
   .hero { padding-top: 74px; padding-bottom: 54px; }
-  .hero h1 { margin-top: 22px; font-size: clamp(46px, 14vw, 68px); }
-  .hero-lead { font-size: 20px; }
+  .hero h1 { margin-top: 22px; font-size: clamp(40px, 13vw, 58px); line-height: 1.08; }
+  :root[lang="en"] .hero h1 { font-size: clamp(28px, 8.4vw, 48px); }
+  .hero-lead { font-size: clamp(18px, 5.8vw, 23px); line-height: 1.45; }
   .hero-text { font-size: 13px; line-height: 1.9; }
   .hero-explain { margin-top: -6px; font-size: 12px; }
   .hero-actions { align-items: flex-start; flex-direction: column; gap: 17px; }
-  .hero-meta { margin-top: 34px; }
+  .hero-meta { gap: 8px 18px; margin-top: 34px; }
   .hero-quick-facts { gap: 13px; margin-top: 21px; }
   .hero-quick-facts small { font-size: 10px; }
   .hero-share { margin-top: 18px; }
@@ -571,41 +592,46 @@ blockquote { position: relative; z-index: 1; margin: 0; color: var(--green-deep)
   .visual-caption { right: 7%; bottom: 10px; font-size: 7px; }
   .statement { padding: 80px 0 92px; }
   .statement-rule { height: 50px; margin-bottom: 27px; }
-  .statement h2, .insight-heading h2, .closing h2 { font-size: 43px; }
+  .statement h2, .insight-heading h2, .closing h2 { font-size: clamp(34px, 10.6vw, 43px); line-height: 1.14; overflow-wrap: anywhere; }
   /* same sentence as the hero: 43px splits "From one picture book," in two.
      vw-capped rather than fixed so it also holds at 360px / 320px. */
   :root[lang="en"] .statement h2, :root[lang="en"] .closing h2 { font-size: min(37px, 9.2vw); }
   .statement-text { font-size: 13px; text-align: left; }
   .product-section { padding-top: 52px; padding-bottom: 91px; }
   .section-heading { align-items: flex-start; flex-direction: column; gap: 15px; margin-bottom: 30px; }
-  .section-heading h2 { font-size: 42px; }
+  .section-heading h2 { font-size: clamp(34px, 10.6vw, 42px); line-height: 1.12; }
   .section-heading > p { margin: 0; font-size: 13px; text-align: left; }
   .product-grid { grid-template-columns: 1fr; gap: 12px; }
-  .product-card, .product-card--wide { grid-column: auto; min-height: 430px; }
-  .product-card-copy { margin-top: 45px; }
-  .product-card h3 { font-size: 36px; }
+  .product-card, .product-card--wide { grid-column: auto; min-height: 520px; }
+  .product-card-copy { max-width: 100%; margin-top: 32px; }
+  .product-card h3 { font-size: clamp(30px, 9vw, 36px); }
+  .product-card p { max-width: 100%; font-size: 12px; line-height: 1.75; overflow-wrap: anywhere; }
+  .card-visual { height: 190px; }
   .feature-band { gap: 23px; padding-top: 48px; padding-bottom: 96px; }
   .feature-image { min-height: 440px; }
   .feature-page { left: 8%; width: 78%; }
   .feature-note--top { right: 0; }
   .feature-note--bottom { right: 0; bottom: 7%; }
-  .feature-copy h2 { font-size: 43px; }
+  .feature-copy h2 { font-size: clamp(34px, 10.6vw, 43px); overflow-wrap: anywhere; }
   .feature-copy > p:not(.section-label) { font-size: 13px; }
-  .process-list { gap: 12px; }
+  .process-list { grid-template-columns: 1fr; gap: 12px; }
   .process-list small { font-size: 9px; }
   .guide-section { padding-top: 82px; padding-bottom: 96px; }
   .guide-header { margin-bottom: 30px; }
-  .guide-header h2 { font-size: 43px; }
+  .guide-header h2 { font-size: clamp(34px, 10.6vw, 43px); line-height: 1.12; }
   .guide-header > p { font-size: 13px; line-height: 1.8; }
   .guide-flow { padding: 14px 16px; border-radius: 22px; }
   .guide-flow-line { top: 49px; bottom: 49px; left: 49px; }
-  .guide-step { grid-template-columns: 36px 1fr 34px; gap: 10px; min-height: 82px; }
+  .guide-step { grid-template-columns: 36px minmax(0, 1fr) 34px; gap: 10px; min-height: 82px; }
   .guide-step-number { width: 30px; height: 30px; }
+  .guide-step h3, .guide-step p { overflow-wrap: anywhere; }
   .guide-step h3 { font-size: 13px; }
-  .guide-step p { font-size: 10px; }
+  .guide-step p { font-size: 10px; line-height: 1.6; }
   .guide-step-icon { width: 34px; height: 34px; border-radius: 11px; font-size: 15px; }
   .guide-facts { padding: 19px; border-radius: 22px; }
-  .guide-facts h3 { margin: 25px 0 25px; font-size: 31px; }
+  .guide-facts h3 { margin: 25px 0 25px; font-size: 31px; overflow-wrap: anywhere; }
+  .guide-fact { align-items: flex-start; }
+  .guide-fact b, .guide-fact small { overflow-wrap: anywhere; }
   .guide-gallery-heading { align-items: flex-start; flex-direction: column; gap: 11px; margin: 65px 0 23px; }
   .guide-gallery-heading h3 { font-size: 34px; }
   .guide-gallery { grid-template-columns: 1fr; gap: 12px; }
@@ -614,20 +640,25 @@ blockquote { position: relative; z-index: 1; margin: 0; color: var(--green-deep)
   .gallery-card-copy p { min-height: 0; }
   .insight-section { grid-template-columns: 1fr; gap: 15px; padding-top: 80px; padding-bottom: 96px; }
   .insight-copy { padding-top: 15px; }
-  .insight-copy > p { font-size: 13px; }
+  .insight-copy > p { font-size: 13px; overflow-wrap: anywhere; }
+  blockquote { font-size: clamp(26px, 8.4vw, 31px); overflow-wrap: anywhere; }
   .demo-wrap { padding-top: 84px; padding-bottom: 75px; }
-  .demo-header { align-items: flex-start; flex-direction: column; gap: 17px; margin-bottom: 27px; }
-  .demo-header h2 { font-size: 44px; }
+  .demo-header { gap: 17px; margin-bottom: 27px; }
+  .demo-header h2 { font-size: clamp(34px, 10.6vw, 44px); }
   .demo-header > p { margin: 0; font-size: 13px; text-align: left; }
   .demo-frame-wrap { border-radius: 20px; }
-  .demo-frame-top { gap: 9px; height: 45px; padding-inline: 13px; font-size: 8px; }
-  .demo-frame-top a { font-size: 9px; }
+  .demo-frame-top { display: grid; grid-template-columns: auto minmax(0, 1fr) minmax(0, 40%); align-items: center; gap: 8px; height: auto; min-height: 45px; padding: 9px 13px; font-size: 8px; }
+  .demo-frame-top > span:nth-child(2), .demo-frame-top a { min-width: 0; overflow-wrap: anywhere; line-height: 1.35; }
+  .demo-frame-top a { margin-left: 0; font-size: 8px; text-align: right; white-space: normal; }
   .demo-frame-wrap iframe { height: 650px; }
   .members-section { padding-top: 90px; padding-bottom: 70px; }
   .members-grid { grid-template-columns: 1fr; gap: 0; }
-  .member { min-height: 76px; }
+  .member { grid-template-columns: 20px 38px minmax(0, 1fr); gap: 9px; min-height: 72px; padding: 12px 11px; }
+  .member-avatar { width: 38px; height: 38px; border-radius: 12px; }
+  .member strong { font-size: 11px; }
+  .member-name small { font-size: 9px; }
   .closing { padding: 85px 0 100px; }
-  .closing h2 { font-size: 42px; }
+  .closing h2 { font-size: clamp(34px, 10.6vw, 42px); }
   .site-footer { grid-template-columns: 1fr; gap: 13px; text-align: center; }
   .site-footer > div, .site-footer p, .site-footer small { justify-content: center; text-align: center; }
 }
@@ -645,6 +676,11 @@ blockquote { position: relative; z-index: 1; margin: 0; color: var(--green-deep)
   .hearing-intro { padding-top: 0; }
 }
 
+@media (max-width: 720px) {
+  .big-five-chart-layout, .big-five-side { grid-template-columns: 1fr; }
+  .signal-grid { grid-template-columns: 1fr; }
+}
+
 @media (max-width: 580px) {
   .origin-note { align-items: flex-start; flex-direction: column; gap: 11px; margin-top: 31px; padding: 14px; }
   .origin-logo-wrap { flex-basis: auto; width: min(100%, 220px); }
@@ -659,16 +695,24 @@ blockquote { position: relative; z-index: 1; margin: 0; color: var(--green-deep)
   .big-five-chart-wrap { min-height: 0; padding: 5px 0; border-radius: 17px; }
   .big-five-chart { width: 100%; }
   .big-five-readout { padding: 14px; border-radius: 17px; }
+  .big-five-readout-head { align-items: flex-start; flex-wrap: wrap; }
+  .big-five-readout-head > span:nth-child(2) { min-width: 0; flex: 1; overflow-wrap: anywhere; line-height: 1.4; }
   .big-five-meter-list { gap: 11px; }
+  .big-five-meter > div { min-width: 0; }
+  .big-five-meter > div > span:first-child { min-width: 0; overflow-wrap: anywhere; }
   .big-five-side { grid-template-columns: 1fr; gap: 11px; }
   .signal-card, .activity-card { padding: 18px; border-radius: 22px; }
   .signal-card h3 { margin-top: 23px; font-size: 30px; }
   .signal-grid { margin-top: 24px; }
+  .signal-tile small { white-space: normal; overflow-wrap: anywhere; line-height: 1.5; }
+  .activity-card-head h3, .activity-line b, .activity-line small { overflow-wrap: anywhere; }
   .hearing-section { padding-top: 88px; padding-bottom: 95px; }
   .hearing-intro h2 { font-size: 43px; }
   .hearing-intro > p:not(.section-label) { font-size: 13px; }
   .hearing-form-shell { border-radius: 21px; }
-  .hearing-form-top { min-height: 48px; padding-inline: 13px; }
+  .hearing-form-top { align-items: flex-start; flex-wrap: wrap; min-height: 48px; padding: 10px 13px; row-gap: 7px; }
+  .hearing-form-top strong { min-width: 0; flex: 1 1 140px; overflow-wrap: anywhere; line-height: 1.4; }
+  .hearing-form-status { flex: 0 0 auto; margin-left: auto; padding-top: 2px; white-space: nowrap; }
   .hearing-form-top strong { font-size: 10px; }
   .hearing-form-status { font-size: 8px; }
   .hearing-form-copy { display: block; padding: 14px 14px 0; }
