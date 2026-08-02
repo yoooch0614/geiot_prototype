@@ -150,7 +150,7 @@
       qrOpen: "website link <span aria-hidden=\"true\">↗</span>",
       qrAlt: "PictuPath website のQRコード",
       memberAndrew: "Andrew Wong Wey Chee",
-      memberAndrewKana: "（アンドリューウンウェーチー）",
+      memberAndrewKana: "アンドリューウンウェーチー",
       memberIhara: "井原実咲",
       memberKawasaki: "川崎孝太郎",
       memberTatsuta: "龍田佳尚",
