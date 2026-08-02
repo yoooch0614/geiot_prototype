@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-"""Convert the occupation O/C/Ex/A/ES/H workbook into browser-friendly JSON.
+"""Convert the occupation O/C/Ex/A/ES workbook into browser-friendly JSON.
 
 The browser does not parse XLSX directly.  This small dependency-free converter
 keeps ``occupation_big5_scores.xlsx`` as the source and emits the compact data
 used by the analysis screen.
 
-The workbook contains O, C, Ex, A, ES and H.  The application treats H as
-Honesty-Humility (正直・謙虚) and exposes all six columns to the UI.
+The workbook contains the five Big Five reference columns O, C, Ex, A and ES.
+An optional H column may still be present in the source workbook; it is
+ignored because Honesty-Humility belongs to a six-factor model, not Big Five.
 
 Usage:
     python3 tools/build_big5_scores.py
@@ -32,7 +33,6 @@ TRAITS = [
     {"id": "extraversion", "key": "Ex", "shortLabel": "Ex", "name": "Extraversion", "label": "外向性", "color": "#ec4899"},
     {"id": "agreeableness", "key": "A", "shortLabel": "A", "name": "Agreeableness", "label": "協調性", "color": "#3b82f6"},
     {"id": "emotional_stability", "key": "ES", "shortLabel": "ES", "name": "Emotional Stability", "label": "情緒安定性", "color": "#4caf50"},
-    {"id": "honesty_humility", "key": "H", "shortLabel": "H", "name": "Honesty-Humility", "label": "正直・謙虚", "color": "#8b5cf6"},
 ]
 
 
@@ -114,7 +114,7 @@ def build_payload(path: Path) -> dict:
         seen_codes.add(code)
 
     if not occupations:
-        raise ValueError("No occupation rows with O/C/Ex/A/ES/H scores were found")
+        raise ValueError("No occupation rows with O/C/Ex/A/ES scores were found")
 
     ranges = []
     for index, trait in enumerate(TRAITS):
@@ -123,9 +123,9 @@ def build_payload(path: Path) -> dict:
 
     ignored_columns = [header for header in headers[2:] if header and header not in {trait["key"] for trait in TRAITS}]
     return {
-        "format": "six-factor-reference",
-        "model": "O/C/Ex/A/ES/H",
-        "hAssumption": "H is treated as Honesty-Humility (正直・謙虚) because the workbook does not define the header.",
+        "format": "big-five-reference",
+        "model": "O/C/Ex/A/ES",
+        "fifthFactorNote": "ES (Emotional Stability) is shown as the positive-direction counterpart of Big Five Neuroticism.",
         "source": path.name,
         "traits": TRAITS,
         "ranges": ranges,
@@ -146,7 +146,7 @@ def main() -> None:
     )
     print(
         f"Wrote {target} ({len(payload['occupations'])} occupations, "
-        f"{len(payload['traits'])} six-factor traits; ignored {payload['ignoredColumns']})"
+        f"{len(payload['traits'])} Big Five traits; ignored {payload['ignoredColumns']})"
     )
 
 

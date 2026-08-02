@@ -1,5 +1,5 @@
 import { esc } from "../shared/utils.js";
-import { buildWorkStyleAnalysis } from "./workStyles.js";
+import { buildBigFiveAnalysis } from "./workStyles.js";
 
 const ANALYSIS_TRAITS = [
   { icon: "palette", label: "好きな色", value: "写真の色を記録すると反映" },
@@ -233,18 +233,18 @@ function buildExportSvg(report, analysis) {
       <text x="1290" y="343" class="stat-label" text-anchor="middle">活動した日</text>
 
       <rect x="${chartCard.x}" y="${chartCard.y}" width="${chartCard.width}" height="${chartCard.height}" rx="24" fill="#ffffff" />
-      <text x="${chartCard.x + 32}" y="440" class="card-title">HEXACO（${analysis.source === "activity" ? "活動から集計" : "デモ表示"}）</text>
+      <text x="${chartCard.x + 32}" y="440" class="card-title">Big Five（${analysis.source === "activity" ? "活動から集計" : "デモ表示"}）</text>
       ${rings}${axisLines}<polygon points="${polygon}" class="export-polygon" />${labels}
       <circle cx="${center.x}" cy="${center.y}" r="5" fill="#6c7b70" />
 
       <rect x="${traitsCard.x}" y="${traitsCard.y}" width="${traitsCard.width}" height="${traitsCard.height}" rx="24" fill="#ffffff" />
-      <text x="${traitsCard.x + 32}" y="440" class="card-title">お子さまの HEXACO メモ</text>
+      <text x="${traitsCard.x + 32}" y="440" class="card-title">お子さまの Big Five メモ</text>
       ${traitRows}
 
       <rect x="${padding}" y="${historyY}" width="${width - padding * 2}" height="${historyHeight}" rx="24" fill="#ffffff" />
       <text x="${padding + 32}" y="${historyY + 58}" class="card-title">活動履歴（実際の記録）</text>
       ${historyMarkup}
-      <text x="${padding}" y="${height - 42}" class="footnote">※ HEXACO と職業候補は遊びや体験を振り返るための参考表示です。診断・評価ではありません。</text>
+      <text x="${padding}" y="${height - 42}" class="footnote">※ Big Five と職業候補は遊びや体験を振り返るための参考表示です。診断・評価ではありません。</text>
     </svg>`,
   };
 }
@@ -282,7 +282,7 @@ export const AnalysisScreen = {
     const s = ctx.session;
     const filters = normalizeFilters(params);
     const report = reportStats(s, filters);
-    const analysis = buildWorkStyleAnalysis(s, ctx.repo, ctx.workStyles);
+    const analysis = buildBigFiveAnalysis(s, ctx.repo, ctx.bigFiveData);
     const months = monthChoices(s, filters.month);
     const days = recordDates(s);
     const { completedCount, missionCount, week: streak } = report;
@@ -375,10 +375,10 @@ export const AnalysisScreen = {
       </div>`).join("");
 
     const uploadedColorSummary = colorSummary(analysis.evidence);
-    const workStyleSource = analysis.source === "activity"
+    const bigFiveSource = analysis.source === "activity"
       ? `えほんの達成記録${uploadedColorSummary ? `とアップロード写真の色（${uploadedColorSummary}）` : ""}から、今の活動傾向を集計しています。`
       : "活動記録がまだないため、デモ値で計算しています。写真をアップロードすると色も結果に反映されます。";
-    const workStyleMatches = analysis.matches.length
+    const occupationMatches = analysis.matches.length
       ? `<ol class="analysis-work-style-list">${analysis.matches.map((match) => `
           <li>
             <span class="analysis-work-style-rank">${match.score}%</span>
@@ -448,10 +448,10 @@ export const AnalysisScreen = {
           <div class="stat"><b>${report.activityDays}</b><span>活動した日</span></div>
         </div>
         <div class="analysis-card analysis-chart-card">
-            <h3 class="log-title">HEXACO（ヘキサコ・6因子）</h3>
+            <h3 class="log-title">Big Five（ビッグファイブ・5因子）</h3>
           <div class="analysis-chart-wrap" style="width:${size}px;height:${size}px;">
             <div class="analysis-chart-glow" style="clip-path: polygon(${clipPercent}); background: conic-gradient(from 0deg, ${gradientStops});"></div>
-            <svg viewBox="0 0 ${size} ${size}" class="analysis-chart" role="img" aria-label="子どもの HEXACO 6因子参考プロフィール">
+            <svg viewBox="0 0 ${size} ${size}" class="analysis-chart" role="img" aria-label="子どもの Big Five 5因子参考プロフィール">
               ${rings}
               ${axesLines}
               <polygon points="${polygonPoints}" class="analysis-polygon" />
@@ -467,9 +467,9 @@ export const AnalysisScreen = {
           <div class="trait-list">${traitsMarkup}</div>
         </div>
         <div class="analysis-card analysis-work-style-card">
-          <h3 class="log-title">HEXACO と職業の つながり</h3>
-          <p class="analysis-work-style-source">${esc(workStyleSource)}</p>
-          ${workStyleMatches}
+          <h3 class="log-title">Big Five と職業の つながり</h3>
+          <p class="analysis-work-style-source">${esc(bigFiveSource)}</p>
+          ${occupationMatches}
           <p class="analysis-work-style-note">※ 将来の職業診断ではなく、遊びや体験と仕事の スタイルのつながりを見る参考表示です。</p>
         </div>
         <div class="analysis-card analysis-next-card">
@@ -482,13 +482,13 @@ export const AnalysisScreen = {
             ? report.log.map((item) => `<li><span>${esc(item.date)}</span><b>${esc(item.bookTitle)}</b><em>${item.count}こ たっせい</em></li>`).join("")
             : "<li class=\"analysis-history-empty\">まだ活動記録がありません。</li>"}</ul>
         </div>
-        <p class="analysis-disclaimer">※ HEXACO と職業候補はプロトタイプの参考表示です。診断・評価ではありません。</p>
+        <p class="analysis-disclaimer">※ Big Five と職業候補はプロトタイプの参考表示です。診断・評価ではありません。</p>
       </div>`;
   },
   mount(ctx, params = {}, root) {
     root.querySelector("[data-back]").onclick = () => ctx.go("SELECT");
     const report = reportStats(ctx.session, params);
-    const analysis = buildWorkStyleAnalysis(ctx.session, ctx.repo, ctx.workStyles);
+    const analysis = buildBigFiveAnalysis(ctx.session, ctx.repo, ctx.bigFiveData);
     root.querySelector("[data-export-png]").onclick = () => exportPng(report, analysis);
     root.querySelector("[data-export-pdf]").onclick = () => {
       const cleanup = () => document.body.classList.remove("is-printing-analysis");

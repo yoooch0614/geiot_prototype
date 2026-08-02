@@ -13,7 +13,7 @@ import {
   setEmbeddedAudioEnabled,
   CELEBRATION_SOUNDS, CLICK_SOUND, HOME_BGM, HOME_NIGHT_BGM,
 } from "../modules/shared/utils.js";
-import { loadWorkStyles } from "../modules/Analysis/workStyles.js";
+import { loadBigFiveData } from "../modules/Analysis/workStyles.js";
 import { localizeText, localizeUi, t } from "../modules/shared/i18n.js";
 
 // BGMを流す画面。トップ（MODE）・あそびえらび（HOME）・本だな（SELECT）の3つ。
@@ -216,7 +216,7 @@ document.addEventListener("visibilitychange", () => {
 const ctx = {
   repo,
   session,
-  workStyles: null,
+  bigFiveData: null,
   settings: Settings,
   els: { camera: document.getElementById("camera-input") },
   go,
@@ -306,16 +306,16 @@ async function boot() {
   try {
     // コンテンツの読み込みと、保存済みデータ（思い出・読みかけの本）の復元を並行で待つ。
     // session.restore() は失敗しても例外を出さない（保存が効かないだけで動く）。
-    const workStylesPromise = loadWorkStyles().catch((error) => {
-      console.warn("Work Styles の参照データを読み込めませんでした", error);
+    const bigFiveDataPromise = loadBigFiveData().catch((error) => {
+      console.warn("Big Five の参照データを読み込めませんでした", error);
       return null;
     });
-    const [, , loadedWorkStyles] = await Promise.all([
+    const [, , loadedBigFiveData] = await Promise.all([
       repo.load(),
       session.restore(),
-      workStylesPromise,
+      bigFiveDataPromise,
     ]);
-    ctx.workStyles = loadedWorkStyles;
+    ctx.bigFiveData = loadedBigFiveData;
   } catch (err) {
     showServerHint(err);
     return;

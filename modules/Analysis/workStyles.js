@@ -1,4 +1,4 @@
-// O/C/Ex/A/ES/H 6因子の参考スコアを、絵本の活動記録と
+// Big Five (O/C/Ex/A/ES) の参考スコアを、絵本の活動記録と
 // アップロード写真の色から作り、職業ごとの参照値と比較する。
 // 診断・評価・将来の職業適性判定ではなく、遊びや体験を振り返るための表示。
 
@@ -8,37 +8,35 @@ const DEFAULT_AXES = [
   { id: "extraversion", shortLabel: "Ex", label: "外向性", value: 66, color: "#ec4899" },
   { id: "agreeableness", shortLabel: "A", label: "協調性", value: 84, color: "#3b82f6" },
   { id: "emotional_stability", shortLabel: "ES", label: "情緒安定性", value: 70, color: "#4caf50" },
-  { id: "honesty_humility", shortLabel: "H", label: "正直・謙虚", value: 70, color: "#8b5cf6" },
 ];
 
-// H は Excel の列定義がないため、Honesty-Humility（正直・謙虚）として扱う。
-// 絵本ミッションの developmentDomains → 6因子の初期参考重み。
+// 絵本ミッションの developmentDomains → Big Five の初期参考重み。
 // 研究用の確定対応表ではなく、後からレビューして調整できる仮説モデル。
 const DOMAIN_TRAIT_WEIGHTS = {
-  "形": { conscientiousness: 0.65, openness: 0.25, honesty_humility: 0.2 },
-  "観察": { openness: 0.55, conscientiousness: 0.4, honesty_humility: 0.15 },
-  "自然": { openness: 0.55, emotional_stability: 0.25, honesty_humility: 0.2 },
-  "感覚": { openness: 0.75, emotional_stability: 0.2, honesty_humility: 0.1 },
-  "色": { openness: 0.8, extraversion: 0.15, honesty_humility: 0.1 },
-  "もよう": { openness: 0.7, conscientiousness: 0.35, honesty_humility: 0.15 },
-  "表現": { openness: 0.65, extraversion: 0.55, honesty_humility: 0.1 },
-  "協力": { agreeableness: 1, extraversion: 0.25, honesty_humility: 0.45 },
-  "生活習慣": { conscientiousness: 0.85, emotional_stability: 0.25, honesty_humility: 0.55 },
-  "自立": { conscientiousness: 0.6, extraversion: 0.3, emotional_stability: 0.35, honesty_humility: 0.35 },
+  "形": { conscientiousness: 0.65, openness: 0.25 },
+  "観察": { openness: 0.55, conscientiousness: 0.4 },
+  "自然": { openness: 0.55, emotional_stability: 0.25 },
+  "感覚": { openness: 0.75, emotional_stability: 0.2 },
+  "色": { openness: 0.8, extraversion: 0.15 },
+  "もよう": { openness: 0.7, conscientiousness: 0.35 },
+  "表現": { openness: 0.65, extraversion: 0.55 },
+  "協力": { agreeableness: 1, extraversion: 0.25 },
+  "生活習慣": { conscientiousness: 0.85, emotional_stability: 0.25 },
+  "自立": { conscientiousness: 0.6, extraversion: 0.3, emotional_stability: 0.35 },
 };
 
 // 写真から得た色は、ミッションタグを補助する証拠として加える。
 // 1色の影響をタグ1個より少し弱くし、写真だけで結果が決まりすぎないようにする。
 const COLOR_EVIDENCE_WEIGHT = 0.8;
 const COLOR_TRAIT_WEIGHTS = {
-  red: { extraversion: 0.7, openness: 0.3, emotional_stability: 0.25, honesty_humility: 0.1 },
-  orange: { extraversion: 0.6, openness: 0.45, conscientiousness: 0.25, honesty_humility: 0.15 },
-  yellow: { openness: 0.65, extraversion: 0.45, conscientiousness: 0.2, honesty_humility: 0.2 },
-  green: { agreeableness: 0.7, emotional_stability: 0.35, openness: 0.3, honesty_humility: 0.45 },
-  cyan: { openness: 0.55, agreeableness: 0.5, emotional_stability: 0.25, honesty_humility: 0.35 },
-  blue: { agreeableness: 0.6, emotional_stability: 0.45, openness: 0.2, honesty_humility: 0.45 },
-  purple: { openness: 0.8, extraversion: 0.35, agreeableness: 0.2, honesty_humility: 0.15 },
-  pink: { agreeableness: 0.5, openness: 0.7, extraversion: 0.35, honesty_humility: 0.35 },
+  red: { extraversion: 0.7, openness: 0.3, emotional_stability: 0.25 },
+  orange: { extraversion: 0.6, openness: 0.45, conscientiousness: 0.25 },
+  yellow: { openness: 0.65, extraversion: 0.45, conscientiousness: 0.2 },
+  green: { agreeableness: 0.7, emotional_stability: 0.35, openness: 0.3 },
+  cyan: { openness: 0.55, agreeableness: 0.5, emotional_stability: 0.25 },
+  blue: { agreeableness: 0.6, emotional_stability: 0.45, openness: 0.2 },
+  purple: { openness: 0.8, extraversion: 0.35, agreeableness: 0.2 },
+  pink: { agreeableness: 0.5, openness: 0.7, extraversion: 0.35 },
 };
 
 const NAMED_COLORS = {
@@ -52,15 +50,15 @@ const NAMED_COLORS = {
   pink: [255, 105, 180],
 };
 
-let cachedWorkStyles = null;
+let cachedBigFive = null;
 
-export async function loadWorkStyles(
+export async function loadBigFiveData(
   path = "content/occupation-big5.json",
   titlesPath = "content/work-style-titles-ja.json",
 ) {
-  if (cachedWorkStyles) return cachedWorkStyles;
+  if (cachedBigFive) return cachedBigFive;
   const response = await fetch(path, { cache: "no-store" });
-  if (!response.ok) throw new Error(`6因子の職業データを読み込めません (${response.status})`);
+  if (!response.ok) throw new Error(`Big Fiveの職業データを読み込めません (${response.status})`);
   const data = await response.json();
   let titleJa = {};
   try {
@@ -69,8 +67,8 @@ export async function loadWorkStyles(
   } catch (error) {
     console.warn("職業の日本語表示名を読み込めませんでした", error);
   }
-  cachedWorkStyles = { ...data, titleJa };
-  return cachedWorkStyles;
+  cachedBigFive = { ...data, titleJa };
+  return cachedBigFive;
 }
 
 function clamp(value, min = 0, max = 100) {
@@ -272,7 +270,7 @@ function occupationMatches(axes, dataset, limit = 3) {
     .slice(0, limit);
 }
 
-export function buildWorkStyleAnalysis(session, repo, dataset) {
+export function buildBigFiveAnalysis(session, repo, dataset) {
   const activity = activityAxes(session, repo, dataset);
   return {
     axes: activity.axes,
