@@ -109,7 +109,7 @@ main [id], main > section[id] { scroll-margin-top: 104px; }
 .eyebrow i { color: #b1bbb5; font-style: normal; }
 .eyebrow-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--coral); box-shadow: 0 0 0 5px var(--coral-pale); }
 h1, h2, h3, p { margin-top: 0; }
-h1, h2, h3 { letter-spacing: -.06em; }
+h1, h2, h3 { letter-spacing: -.06em; text-wrap: balance; }
 .responsive-breaks { text-wrap: pretty; }
 .section-label { margin-bottom: 19px; }
 .section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; margin-bottom: 48px; }
@@ -213,7 +213,7 @@ h1, h2, h3 { letter-spacing: -.06em; }
 .statement h2 { margin: 0 auto 31px; font-size: clamp(42px, 6vw, 76px); line-height: 1.16; }
 .statement h2 span { color: var(--green-deep); }
 .statement-text { max-width: 680px; margin: auto; color: var(--muted); font-size: 15px; line-height: 2.15; }
-.statement-text b { color: var(--ink); font-family: var(--latin); font-size: .95em; }
+.statement-text b { color: var(--ink); font-family: var(--latin); font-size: .95em; white-space: nowrap; }
 .statement-signature { display: flex; flex-direction: column; gap: 4px; margin-top: 43px; color: var(--green-deep); }
 .statement-signature span { font: 700 12px var(--latin); letter-spacing: .2em; }
 .statement-signature small { color: #99a59e; font: 500 10px var(--latin); }
@@ -641,7 +641,7 @@ blockquote { position: relative; z-index: 1; margin: 0; color: var(--green-deep)
   .guide-fact { align-items: flex-start; }
   .guide-fact b, .guide-fact small { overflow-wrap: break-word; }
   .guide-gallery-heading { align-items: flex-start; flex-direction: column; gap: 11px; margin: 65px 0 23px; }
-  .guide-gallery-heading h3 { font-size: clamp(30px, 8.8vw, 34px); }
+  .guide-gallery-heading h3 { font-size: clamp(26px, 8.2vw, 34px); }
   .guide-gallery { grid-template-columns: 1fr; gap: 12px; }
   .gallery-image-wrap { height: 410px; }
   .gallery-card-copy { padding: 16px 17px 19px; }
@@ -698,6 +698,8 @@ blockquote { position: relative; z-index: 1; margin: 0; color: var(--green-deep)
   .big-five-section { padding-top: 82px; padding-bottom: 95px; }
   .big-five-card { padding: 16px; border-radius: 22px; }
   .big-five-card-top { align-items: flex-start; flex-direction: column; gap: 11px; }
+  .big-five-section .section-heading h2 { font-size: clamp(26px, 7.9vw, 34px); }
+  .big-five-section .section-heading h2 span { white-space: nowrap; }
   .big-five-card h3 { font-size: 19px; }
   .big-five-chart-layout { grid-template-columns: 1fr; gap: 11px; margin-top: 18px; }
   .big-five-chart-wrap { min-height: 0; padding: 5px 0; border-radius: 17px; }
