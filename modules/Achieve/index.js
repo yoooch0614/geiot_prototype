@@ -1,5 +1,5 @@
 import { playCelebrationSound, esc } from "../shared/utils.js";
-import { avatarBuddy, avatarRewardForMissionCount } from "../shared/avatars.js";
+import { avatarBuddy, avatarRewardForMissionCount } from "../shared/avatars.js?v=8500692";
 
 export const AchieveScreen = {
   render(ctx) {

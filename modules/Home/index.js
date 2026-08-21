@@ -1,7 +1,7 @@
 import { esc } from "../shared/utils.js";
 import { openGuide } from "../shared/guide.js";
 import { askResume } from "../Select/index.js";
-import { avatarSvg, avatarColorValue, openAvatarPicker } from "../shared/avatars.js";
+import { avatarSvg, avatarColorValue, openAvatarPicker } from "../shared/avatars.js?v=8500692";
 
 const GUIDE_STEPS = [
   {
