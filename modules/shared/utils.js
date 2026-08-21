@@ -4,6 +4,50 @@ export const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) =>
   ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
 );
 
+// 文章用の表示文字列。
+// 日本語は空白がないため、ブラウザだけに任せると「個性の｜きっかけ」や
+// 「未来は、｜ひとつ」のように、助詞・読点の直後で意味が切れることがある。
+// U+2060 WORD JOINER は見た目の幅を増やさず、その境界だけ改行禁止にする。
+// 内容は先に esc() するので、JSON から来た文章を安全に HTML へ出せる。
+const JAPANESE_CHAR = "ぁ-んァ-ヶ一-龠々ー";
+const WORD_JOINER = "\u2060";
+
+function joinJapaneseBoundaries(value) {
+  return String(value ?? "")
+    // 複合助詞は先に処理する。
+    .replace(new RegExp(`([${JAPANESE_CHAR}])((?:から|まで|ので|のに|ても|にも|には|では|とは))(?=[${JAPANESE_CHAR}])`, "gu"), `$1${WORD_JOINER}$2${WORD_JOINER}`)
+    // 助詞を前後の語から離さない。短い文節が次の行に取り残されるのを防ぐ。
+    .replace(new RegExp(`([${JAPANESE_CHAR}])([のはがをにへとやもで])(?=[${JAPANESE_CHAR}])`, "gu"), `$1${WORD_JOINER}$2${WORD_JOINER}`)
+    // 読点を前後の文節から切らない。
+    .replace(new RegExp(`([${JAPANESE_CHAR}])(、)(?=[${JAPANESE_CHAR}])`, "gu"), `$1${WORD_JOINER}$2${WORD_JOINER}`);
+}
+
+export function formatJapaneseCopy(value) {
+  return joinJapaneseBoundaries(esc(value))
+    // コンテンツ側で指定した改行は、そのまま表示上の改行にする。
+    .replace(/\r?\n/g, "<br>");
+}
+
+// 画面やダイアログを HTML で追加したあとにも同じルールを適用する。
+// テキストノードを直接更新するので、属性値や HTML タグは壊さない。
+export function stabilizeJapaneseText(root) {
+  if (!root || typeof document === "undefined") return;
+  const walker = document.createTreeWalker(root, window.NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  let node = walker.nextNode();
+  while (node) {
+    const parent = node.parentElement;
+    const tag = parent?.tagName;
+    if (parent && !["SCRIPT", "STYLE", "NOSCRIPT", "TEXTAREA", "PRE"].includes(tag)) {
+      nodes.push(node);
+    }
+    node = walker.nextNode();
+  }
+  nodes.forEach((textNode) => {
+    textNode.nodeValue = joinJapaneseBoundaries(textNode.nodeValue);
+  });
+}
+
 // ── 音まわり ────────────────────────────────────────────────
 // <audio>（HTMLAudioElement）で鳴らしていたころは、iOS/Safari で「鳴るときと鳴らないときが
 // ある」が消えなかった。要素ひとつひとつが「読み込み状態」「再生位置」「再生許可」を抱えるため、

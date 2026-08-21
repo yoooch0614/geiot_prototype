@@ -1,0 +1,8 @@
+{
+  "appId": "com.geiot.ehoeho",
+  "appName": "えほえほ",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}

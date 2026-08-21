@@ -10,7 +10,7 @@ import { Settings } from "./Settings.js";
 import { Screens } from "./screens.js";
 import {
   unlockAudio, preloadAudio, playAudio, playBgm, stopBgm,
-  CELEBRATION_SOUNDS, CLICK_SOUND, HOME_BGM, HOME_NIGHT_BGM,
+  stabilizeJapaneseText, CELEBRATION_SOUNDS, CLICK_SOUND, HOME_BGM, HOME_NIGHT_BGM,
 } from "../modules/shared/utils.js";
 import { loadWorkStyles } from "../modules/Analysis/workStyles.js";
 
@@ -23,6 +23,20 @@ const root = document.getElementById("app");
 const themeMeta = document.querySelector('meta[name="theme-color"]');
 const repo = new ContentRepository();
 const session = new Session();
+
+// 画面遷移だけでなく、ガイドや確認ダイアログなど後から追加される文章にも
+// 日本語の意味単位ごとの改行ルールを適用する。
+const copyObserver = typeof MutationObserver === "function"
+  ? new MutationObserver((records) => {
+      records.forEach((record) => {
+        record.addedNodes.forEach((node) => {
+          if (node.nodeType === 1) stabilizeJapaneseText(node);
+          else if (node.nodeType === 3 && node.parentElement) stabilizeJapaneseText(node.parentElement);
+        });
+      });
+    })
+  : null;
+copyObserver?.observe(root, { childList: true, subtree: true });
 
 // UI は端末のローカル時刻で切り替える。06:00〜17:59 は朝/昼、18:00〜05:59 は夜。
 const DAY_START_HOUR = 6;
@@ -214,6 +228,7 @@ function go(name, params = {}) {
   currentScreenName = name;
   currentScreen?.unmount?.(ctx);
   root.innerHTML = screen.render(ctx, params);
+  stabilizeJapaneseText(root);
   root.querySelector(".screen")?.classList.add("page--in"); // 画面切り替えの入場アニメを全画面に統一
   screen.mount?.(ctx, params, root);
   currentScreen = screen;

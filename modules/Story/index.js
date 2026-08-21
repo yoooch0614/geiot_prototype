@@ -1,4 +1,4 @@
-import { playNarration, speakNarration, stopNarration, esc, stage, characterLayer, layersMarkup, fillLayer, bookColorLayer, vehicleColorLayer, extractPhotoColor, fillArtworkHoles, recolorVehicleImage, openCamera, createRepeatableSound } from "../shared/utils.js";
+import { playNarration, speakNarration, stopNarration, esc, formatJapaneseCopy, stage, characterLayer, layersMarkup, fillLayer, bookColorLayer, vehicleColorLayer, extractPhotoColor, fillArtworkHoles, recolorVehicleImage, openCamera, createRepeatableSound } from "../shared/utils.js";
 import { avatarBuddy } from "../shared/avatars.js";
 
 // 物語ページとミッションページを、いまのページを含む「1冊にできる範囲」で取り出す。
@@ -45,8 +45,8 @@ function pageMarkup(ctx, page, { index, globalIndex, showFinish }) {
       <div class="flip-page">
         ${bookmark}
         ${scene}
-        <p class="lead">${esc(page.text)}</p>
-        <p class="prompt">${esc(page.prompt)}</p>
+        <p class="lead">${formatJapaneseCopy(page.text)}</p>
+        <p class="prompt">${formatJapaneseCopy(page.prompt)}</p>
         ${action}
         ${finishBtn}
       </div>`;
@@ -55,7 +55,7 @@ function pageMarkup(ctx, page, { index, globalIndex, showFinish }) {
     <div class="flip-page">
       ${bookmark}
       ${scene}
-      <p class="lead">${esc(page.text)}</p>
+        <p class="lead">${formatJapaneseCopy(page.text)}</p>
       ${finishBtn}
     </div>`;
 }

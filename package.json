@@ -1,0 +1,26 @@
+{
+  "name": "ehoeho",
+  "version": "0.1.0",
+  "private": true,
+  "description": "えほえほ web app and Android APK build",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "web:build": "node tools/build_web.mjs",
+    "android:init": "npm run web:build && npx cap add android",
+    "android:sync": "npm run web:build && npx cap sync android",
+    "android:apk": "node tools/build_android_apk.mjs",
+    "android:release": "npm run android:sync && npx cap build android --androidreleasetype APK",
+    "android:open": "npm run android:sync && npx cap open android",
+    "android:run": "npm run android:sync && npx cap run android"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.5.0",
+    "@capacitor/core": "8.5.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.5.0"
+  }
+}

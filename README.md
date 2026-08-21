@@ -6,6 +6,32 @@ Flutter版のコアループ（モード選択 → 絵本選択 → 物語 → �
 
 三層分離は前回と同じ：**コンテンツ**（JSON+アセット）／**ロジック**／**プレゼンテーション**。
 
+## Android APK を作る（中文）
+
+这个项目已经加入 Capacitor Android 封装配置。整个网页应用和 `content/` 资源会一起打包进 APK，运行时不需要启动 `serve.py`。
+
+需要先安装 Node.js 22+ 和 Android Studio（包含 Android SDK），然后在项目根目录执行：
+
+```bash
+npm install
+npm run android:apk
+```
+
+第一次运行会自动创建 Android 工程、同步网页资源并生成可安装的 debug APK：
+
+```text
+android/ehoeho-debug.apk
+```
+
+以后修改网页或内容后，重新执行 `npm run android:apk` 即可。要在 Android Studio 中打开原生工程，可以执行：
+
+```bash
+npm run android:init
+npm run android:open
+```
+
+默认 Android 包名是 `com.geiot.ehoeho`，可在首次生成 Android 工程前修改 `capacitor.config.json`。`android/` 是原生工程；`www/` 只是同步时的临时目录，不需要手动编辑。
+
 ---
 
 ## うごかす（PCで見る）

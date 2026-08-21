@@ -15,6 +15,16 @@ __pycache__/
 
 # 配布用 zip（GitHubには上げない）
 *.zip
+
+# Capacitor / Android の生成物
+node_modules/
+www/
+android/.gradle/
+android/.idea/
+android/build/
+android/app/build/
+android/local.properties
+android/ehoeho-debug.apk
 670F5650-BE68-4E05-9EC9-9E1C00B3AAC3 (1).PNG
 
 # Claude Code のローカル設定（個人環境ごとの許可設定なので共有しない）

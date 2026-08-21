@@ -35,6 +35,31 @@
   align-items: center; text-align: center;
 }
 
+/* 文章正文必须有明确的可用宽度。
+   .flip-page 是纵向 flex 容器，align-items:center 会让 width:auto 的文字按
+   内容本身的宽度计算；长句因此可能不换行并撑出页面。用 100% 约束正文，
+   同时保留日文的自然断行，并让 URL 等没有空格的长字符串也能折行。 */
+.flip-page > .lead,
+.flip-page > .prompt {
+  width: min(100%, 720px);
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: anywhere;
+  line-break: strict;
+  text-wrap: pretty;
+}
+
+/* 故事页以外的标题、说明文字、列表内容也采用相同的日文断行策略。 */
+.screen :where(p, h1, h2, h3, h4, h5, h6, li) {
+  line-break: strict;
+  overflow-wrap: break-word;
+  text-wrap: pretty;
+}
+.screen :where(h1, h2, h3) { text-wrap: balance; }
+
 .page-bookmark {
   position: absolute; top: 14px; right: 14px; z-index: 8;
   width: 42px; height: 42px; padding: 0;

@@ -1,4 +1,4 @@
-import { playNarration, esc, stage, characterLayer } from "../shared/utils.js";
+import { playNarration, esc, formatJapaneseCopy, stage, characterLayer } from "../shared/utils.js";
 
 export const MissionScreen = {
   render(ctx, { page }) {
@@ -11,8 +11,8 @@ export const MissionScreen = {
           <img src="${img}" alt="" onerror="this.style.opacity=0">
           ${characterLayer(character)}
         </div>
-        <p class="lead">${esc(page.text)}</p>
-        <p class="prompt">${esc(page.prompt)}</p>
+        <p class="lead">${formatJapaneseCopy(page.text)}</p>
+        <p class="prompt">${formatJapaneseCopy(page.prompt)}</p>
         <button class="mission-shoot" data-shoot> ${esc(page.doneLabel || "とってみよう！")}</button>
       </div>`);
   },
