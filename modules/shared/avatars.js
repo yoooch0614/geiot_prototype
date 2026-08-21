@@ -147,34 +147,41 @@ export const DEFAULT_PARTS = { skin: "mikan", ears: "maru", eyes: "maru", mouth:
 
 const PART_LABELS = { skin: "からだの いろ", ears: "みみ", eyes: "おめめ", mouth: "おくち", acc: "かざり" };
 
-// うさぎさんは最初から使える。ほかのどうぶつとパーツは、ミッションを
-// ひとつクリアするたびにひとつずつ増える（「交換」ではなく、ずっと使える解放）。
+// うさぎさんは最初から使える。動物のプリセットを解放すると、
+// その動物に対応する「じぶんで つくる」のパーツも同時に使える。
 // からだの色・まるみみ・まる目・にっこり・かざりなしは、オリジナルを
 // 作りはじめたときの基本パーツとして最初から使える。
+export const AVATAR_ANIMAL_PARTS = Object.freeze({
+  rabbit: [{ partKey: "ears", partId: "long" }],
+  cat: [{ partKey: "ears", partId: "pointy" }],
+  dog: [{ partKey: "ears", partId: "tare" }],
+  tiger: [],
+  elephant: [
+    { partKey: "ears", partId: "big" },
+    { partKey: "mouth", partId: "zou" },
+  ],
+});
+
+// 「交換」ではなく、ずっと使える解放。動物と一緒に複数パーツが開く場合もある。
 export const AVATAR_REWARDS = [
-  { missionCount: 1, type: "animal", animal: "cat", label: "ねこさん" },
-  { missionCount: 2, type: "animal", animal: "dog", label: "いぬさん" },
+  { missionCount: 1, type: "animal", animal: "cat", label: "ねこさんと ねこみみ" },
+  { missionCount: 2, type: "animal", animal: "dog", label: "いぬさんと たれみみ" },
   { missionCount: 3, type: "animal", animal: "tiger", label: "とらさん" },
-  { missionCount: 4, type: "animal", animal: "elephant", label: "ぞうさん" },
+  { missionCount: 4, type: "animal", animal: "elephant", label: "ぞうさんと ぞうのパーツ" },
   { missionCount: 5, type: "animal", animal: "custom", label: "じぶんで つくる" },
   { missionCount: 6, type: "part", partKey: "skin", partId: "cream", label: "くりーむ色" },
   { missionCount: 7, type: "part", partKey: "skin", partId: "sora", label: "そら色" },
   { missionCount: 8, type: "part", partKey: "skin", partId: "momo", label: "もも色" },
   { missionCount: 9, type: "part", partKey: "skin", partId: "wakaba", label: "わかば色" },
   { missionCount: 10, type: "part", partKey: "skin", partId: "sumire", label: "すみれ色" },
-  { missionCount: 11, type: "part", partKey: "ears", partId: "pointy", label: "ねこみみ" },
-  { missionCount: 12, type: "part", partKey: "ears", partId: "long", label: "うさみみ" },
-  { missionCount: 13, type: "part", partKey: "ears", partId: "big", label: "ぞうみみ" },
-  { missionCount: 14, type: "part", partKey: "ears", partId: "tare", label: "たれみみ" },
-  { missionCount: 15, type: "part", partKey: "ears", partId: "tsuno", label: "つの" },
-  { missionCount: 16, type: "part", partKey: "eyes", partId: "kirakira", label: "きらきらのおめめ" },
-  { missionCount: 17, type: "part", partKey: "eyes", partId: "nikoniko", label: "にこにこのおめめ" },
-  { missionCount: 18, type: "part", partKey: "mouth", partId: "waai", label: "わーいのおくち" },
-  { missionCount: 19, type: "part", partKey: "mouth", partId: "neko", label: "ねこぐち" },
-  { missionCount: 20, type: "part", partKey: "mouth", partId: "zou", label: "ぞうのはな" },
-  { missionCount: 21, type: "part", partKey: "acc", partId: "ribbon", label: "リボン" },
-  { missionCount: 22, type: "part", partKey: "acc", partId: "kanmuri", label: "かんむり" },
-  { missionCount: 23, type: "part", partKey: "acc", partId: "happa", label: "はっぱ" },
+  { missionCount: 11, type: "part", partKey: "ears", partId: "tsuno", label: "つの" },
+  { missionCount: 12, type: "part", partKey: "eyes", partId: "kirakira", label: "きらきらのおめめ" },
+  { missionCount: 13, type: "part", partKey: "eyes", partId: "nikoniko", label: "にこにこのおめめ" },
+  { missionCount: 14, type: "part", partKey: "mouth", partId: "waai", label: "わーいのおくち" },
+  { missionCount: 15, type: "part", partKey: "mouth", partId: "neko", label: "ねこぐち" },
+  { missionCount: 16, type: "part", partKey: "acc", partId: "ribbon", label: "リボン" },
+  { missionCount: 17, type: "part", partKey: "acc", partId: "kanmuri", label: "かんむり" },
+  { missionCount: 18, type: "part", partKey: "acc", partId: "happa", label: "はっぱ" },
 ];
 
 function safeMissionCount(value) {
@@ -189,11 +196,27 @@ function rewardForTarget({ animal, partKey, partId } = {}) {
   ) ?? null;
 }
 
+function linkedAnimalForPart(partKey, partId) {
+  return Object.entries(AVATAR_ANIMAL_PARTS).find(([, parts]) =>
+    parts.some((part) => part.partKey === partKey && part.partId === partId)
+  )?.[0] ?? null;
+}
+
+function partLabel(partKey, partId) {
+  return AVATAR_PARTS[partKey]?.find((part) => part.id === partId)?.label ?? "このパーツ";
+}
+
 // その Avatar の要素が何回目の Mission で解放されるか。0 は最初から使える。
 export function avatarUnlockMission({ animal, partKey, partId } = {}) {
   if (animal === "rabbit") return 0;
   if (partKey === "skin" && isHexColor(partId)) return 0;
   if (partKey && DEFAULT_PARTS[partKey] === partId) return 0;
+  const linkedAnimal = linkedAnimalForPart(partKey, partId);
+  if (linkedAnimal) {
+    return linkedAnimal === "rabbit"
+      ? 0
+      : rewardForTarget({ animal: linkedAnimal })?.missionCount ?? null;
+  }
   return rewardForTarget({ animal, partKey, partId })?.missionCount ?? null;
 }
 
@@ -423,7 +446,8 @@ export function openAvatarPicker(ctx, root, { onChange } = {}) {
   const lockBadge = (required) => required !== null && missionCount < required
     ? `<span class="avatar-lock-badge">🔒 あと ${required - missionCount}こ</span>`
     : "";
-  const rewardLabel = (target) => rewardForTarget(target)?.label ?? "このパーツ";
+  const rewardLabel = (target) => rewardForTarget(target)?.label
+    ?? partLabel(target.partKey, target.partId);
   const notifyLocked = (target) => {
     const required = avatarUnlockMission(target);
     if (required === null || missionCount >= required) return;
