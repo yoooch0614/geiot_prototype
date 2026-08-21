@@ -54,7 +54,7 @@ python3 serve.py
 3. 表示される `http://<PCのIP>:8000` を **iPad の Safari** で開く
 4. Safariの共有 →「ホーム画面に追加」でアプリっぽく使える（PWA）
 
-写真撮影はファイル入力（`<input capture>`）で端末のカメラを開くので、**http のままでも動く**（`getUserMedia` と違い HTTPS 不要）。
+写真撮影はまずアプリ内カメラ（絵本の型付き取景）を試し、権限・HTTPS・端末の都合で使えない場合はファイル入力（`<input capture>`）へフォールバックする。後者は **http のままでも動く**（`getUserMedia` と違い HTTPS 不要）。
 
 ---
 

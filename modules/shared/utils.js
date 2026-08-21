@@ -338,8 +338,10 @@ export function playCelebrationSound(ctx) {
 }
 
 // カメラ（ファイル入力）を開き、選ばれた画像をdataURL化して onPicked に渡す。
+// アプリ内カメラが使えなかったときのフォールバックとして使う。
 export function openCamera(ctx, onPicked) {
   const input = ctx.els.camera;
+  if (!input) return;
   input.value = "";
   input.onchange = () => {
     const file = input.files && input.files[0];
@@ -349,6 +351,423 @@ export function openCamera(ctx, onPicked) {
     reader.readAsDataURL(file);
   };
   input.click();
+}
+
+const CAMERA_CANVAS_WIDTH = 800;
+const CAMERA_CANVAS_HEIGHT = 600;
+
+function loadImageElement(src) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = reject;
+    image.src = src;
+  });
+}
+
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
+function roundedRectPath(context, x, y, width, height, radius) {
+  const r = Math.min(radius, width / 2, height / 2);
+  context.moveTo(x + r, y);
+  context.arcTo(x + width, y, x + width, y + height, r);
+  context.arcTo(x + width, y + height, x, y + height, r);
+  context.arcTo(x, y + height, x, y, r);
+  context.arcTo(x, y, x + width, y, r);
+  context.closePath();
+}
+
+// frame は元画像の実ピクセル座標で書かれているため、カメラ用の800x600キャンバスへ変換する。
+// frame がないミッションは中央の丸角フレームを使う（既存の合成処理と同じフォールバック）。
+function missionFrameForCanvas(image, frame, width = CAMERA_CANVAS_WIDTH, height = CAMERA_CANVAS_HEIGHT) {
+  const sourceWidth = image?.naturalWidth || image?.width || 1000;
+  const sourceHeight = image?.naturalHeight || image?.height || 750;
+  const sourceFrame = frame
+    ? {
+        x: Number(frame.x) || 0,
+        y: Number(frame.y) || 0,
+        width: Number(frame.width) || sourceWidth * 0.5,
+        height: Number(frame.height) || sourceHeight * 0.5,
+        radius: Number(frame.radius) || 24,
+      }
+    : {
+        x: sourceWidth * 0.25,
+        y: sourceHeight * 0.25,
+        width: sourceWidth * 0.5,
+        height: sourceHeight * 0.5,
+        radius: 24,
+      };
+  const scaleX = width / sourceWidth;
+  const scaleY = height / sourceHeight;
+  return {
+    x: clamp(sourceFrame.x * scaleX, 0, width),
+    y: clamp(sourceFrame.y * scaleY, 0, height),
+    width: clamp(sourceFrame.width * scaleX, 1, width),
+    height: clamp(sourceFrame.height * scaleY, 1, height),
+    radius: sourceFrame.radius * Math.min(scaleX, scaleY),
+  };
+}
+
+// 透明部分のうち、frame の内側に閉じている連結領域だけを「撮影する型」として取り出す。
+// 画像の外周につながる透明背景は除外するので、PNGの余白を誤って型にしない。
+function missionTransparentMask(image, frame, width = CAMERA_CANVAS_WIDTH, height = CAMERA_CANVAS_HEIGHT) {
+  if (!image?.naturalWidth || !frame) return null;
+
+  const sourceWidth = image.naturalWidth;
+  const sourceHeight = image.naturalHeight;
+  const sourceFrame = {
+    left: clamp(Math.floor(Number(frame.x) || 0), 0, sourceWidth - 1),
+    top: clamp(Math.floor(Number(frame.y) || 0), 0, sourceHeight - 1),
+    right: clamp(Math.ceil((Number(frame.x) || 0) + (Number(frame.width) || 0)), 1, sourceWidth),
+    bottom: clamp(Math.ceil((Number(frame.y) || 0) + (Number(frame.height) || 0)), 1, sourceHeight),
+  };
+  if (sourceFrame.right <= sourceFrame.left || sourceFrame.bottom <= sourceFrame.top) return null;
+
+  const sourceCanvas = document.createElement("canvas");
+  sourceCanvas.width = sourceWidth;
+  sourceCanvas.height = sourceHeight;
+  const sourceContext = sourceCanvas.getContext("2d", { willReadFrequently: true });
+  sourceContext.drawImage(image, 0, 0);
+  const pixels = sourceContext.getImageData(0, 0, sourceWidth, sourceHeight).data;
+  const transparent = (x, y) => pixels[(y * sourceWidth + x) * 4 + 3] < 80;
+  const seen = new Uint8Array(sourceWidth * sourceHeight);
+  const accepted = new Uint8Array(sourceWidth * sourceHeight);
+  const frameWidth = sourceFrame.right - sourceFrame.left;
+  const frameHeight = sourceFrame.bottom - sourceFrame.top;
+  const minimumSize = Math.max(60, frameWidth * frameHeight * 0.002);
+
+  for (let y = sourceFrame.top; y < sourceFrame.bottom; y++) {
+    for (let x = sourceFrame.left; x < sourceFrame.right; x++) {
+      const start = y * sourceWidth + x;
+      if (seen[start] || !transparent(x, y)) continue;
+
+      const queue = [start];
+      const component = [];
+      seen[start] = 1;
+      let touchesFrame = false;
+      let minX = sourceWidth;
+      let minY = sourceHeight;
+      let maxX = -1;
+      let maxY = -1;
+
+      while (queue.length) {
+        const point = queue.pop();
+        const px = point % sourceWidth;
+        const py = (point / sourceWidth) | 0;
+        component.push(point);
+        minX = Math.min(minX, px); maxX = Math.max(maxX, px);
+        minY = Math.min(minY, py); maxY = Math.max(maxY, py);
+        if (px === sourceFrame.left || px === sourceFrame.right - 1 ||
+            py === sourceFrame.top || py === sourceFrame.bottom - 1) touchesFrame = true;
+
+        for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
+          const nx = px + dx;
+          const ny = py + dy;
+          if (nx < sourceFrame.left || nx >= sourceFrame.right ||
+              ny < sourceFrame.top || ny >= sourceFrame.bottom) continue;
+          const next = ny * sourceWidth + nx;
+          if (!seen[next] && transparent(nx, ny)) {
+            seen[next] = 1;
+            queue.push(next);
+          }
+        }
+      }
+
+      // frame 内に収まり、境界につながっていない十分大きな領域だけを採用する。
+      if (!touchesFrame && component.length >= minimumSize &&
+          minX >= sourceFrame.left && maxX < sourceFrame.right &&
+          minY >= sourceFrame.top && maxY < sourceFrame.bottom) {
+        component.forEach((point) => { accepted[point] = 1; });
+      }
+    }
+  }
+
+  let acceptedCount = 0;
+  for (const value of accepted) acceptedCount += value;
+  if (!acceptedCount) return null;
+
+  const mask = document.createElement("canvas");
+  mask.width = width;
+  mask.height = height;
+  const maskContext = mask.getContext("2d");
+  const maskData = maskContext.createImageData(width, height);
+  const scaleX = sourceWidth / width;
+  const scaleY = sourceHeight / height;
+  for (let y = 0; y < height; y++) {
+    const sourceY = Math.min(sourceHeight - 1, Math.floor(y * scaleY));
+    for (let x = 0; x < width; x++) {
+      const sourceX = Math.min(sourceWidth - 1, Math.floor(x * scaleX));
+      if (!accepted[sourceY * sourceWidth + sourceX]) continue;
+      const i = (y * width + x) * 4;
+      maskData.data[i] = 255;
+      maskData.data[i + 1] = 255;
+      maskData.data[i + 2] = 255;
+      maskData.data[i + 3] = 255;
+    }
+  }
+  maskContext.putImageData(maskData, 0, 0);
+  return mask;
+}
+
+// ミッションページの画像から、カメラの点線ガイドに必要な情報を作る。
+export async function createMissionGuide(backgroundUrl, frame) {
+  try {
+    const image = await loadImageElement(backgroundUrl);
+    return {
+      width: CAMERA_CANVAS_WIDTH,
+      height: CAMERA_CANVAS_HEIGHT,
+      frame: missionFrameForCanvas(image, frame),
+      mask: missionTransparentMask(image, frame),
+    };
+  } catch (_) {
+    return {
+      width: CAMERA_CANVAS_WIDTH,
+      height: CAMERA_CANVAS_HEIGHT,
+      frame: { x: 200, y: 150, width: 400, height: 300, radius: 24 },
+      mask: null,
+    };
+  }
+}
+
+function drawCameraGuide(context, guide) {
+  const { width, height, frame, mask } = guide;
+  context.clearRect(0, 0, width, height);
+  context.fillStyle = "rgba(12, 24, 42, .62)";
+  context.fillRect(0, 0, width, height);
+
+  if (mask) {
+    context.save();
+    context.globalCompositeOperation = "destination-out";
+    context.drawImage(mask, 0, 0, width, height);
+    context.restore();
+
+    const data = mask.getContext("2d").getImageData(0, 0, width, height).data;
+    context.fillStyle = "rgba(255, 255, 255, .95)";
+    for (let y = 1; y < height - 1; y += 2) {
+      for (let x = 1; x < width - 1; x += 2) {
+        const i = (y * width + x) * 4 + 3;
+        if (!data[i]) continue;
+        const edge = !data[((y - 1) * width + x) * 4 + 3] ||
+          !data[((y + 1) * width + x) * 4 + 3] ||
+          !data[(y * width + x - 1) * 4 + 3] ||
+          !data[(y * width + x + 1) * 4 + 3];
+        if (edge && ((x + y) / 3 | 0) % 2 === 0) context.fillRect(x - 2, y - 2, 4, 4);
+      }
+    }
+    return;
+  }
+
+  context.save();
+  context.globalCompositeOperation = "destination-out";
+  context.fillStyle = "rgba(0, 0, 0, 1)";
+  context.beginPath();
+  roundedRectPath(context, frame.x, frame.y, frame.width, frame.height, frame.radius);
+  context.fill();
+  context.restore();
+  context.save();
+  context.beginPath();
+  roundedRectPath(context, frame.x, frame.y, frame.width, frame.height, frame.radius);
+  context.strokeStyle = "rgba(255, 255, 255, .95)";
+  context.lineWidth = 5;
+  context.setLineDash([14, 12]);
+  context.stroke();
+  context.restore();
+}
+
+function drawCoverImage(context, image, width, height) {
+  const sourceWidth = image.videoWidth || image.naturalWidth || image.width;
+  const sourceHeight = image.videoHeight || image.naturalHeight || image.height;
+  if (!sourceWidth || !sourceHeight) return false;
+  const scale = Math.max(width / sourceWidth, height / sourceHeight);
+  const drawnWidth = sourceWidth * scale;
+  const drawnHeight = sourceHeight * scale;
+  context.drawImage(
+    image,
+    (width - drawnWidth) / 2,
+    (height - drawnHeight) / 2,
+    drawnWidth,
+    drawnHeight,
+  );
+  return true;
+}
+
+function stopCameraStream(stream) {
+  stream?.getTracks?.().forEach((track) => track.stop());
+}
+
+// まず getUserMedia の取景画面を試し、使えない環境だけ従来のファイル入力へ戻す。
+// アプリ内カメラで撮った写真は guide.frame の範囲だけをそのまま保存するため、
+// 撮影後に指で移動・拡大するプレビューは表示しない。
+export function openMissionCamera(ctx, page, { onGuidedCapture, onFallback } = {}) {
+  const backgroundUrl = ctx.repo.assetUrl(page?.image);
+  const modal = document.createElement("div");
+  modal.className = "guided-camera";
+  modal.innerHTML = `
+    <div class="guided-camera__panel" role="dialog" aria-modal="true" aria-label="カメラで撮影">
+      <div class="guided-camera__head">
+        <h2>点線の中に いれてね</h2>
+        <button type="button" class="guided-camera__close" data-camera-cancel aria-label="とじる">×</button>
+      </div>
+      <div class="guided-camera__view" data-camera-view>
+        <video data-camera-video autoplay playsinline muted></video>
+        <canvas data-camera-overlay width="${CAMERA_CANVAS_WIDTH}" height="${CAMERA_CANVAS_HEIGHT}"></canvas>
+        <p class="guided-camera__status" data-camera-status>カメラを じゅんび中…</p>
+      </div>
+      <p class="guided-camera__hint">点線の中に、のこしたい いろや もようを うつしてね。</p>
+      <div class="guided-camera__actions">
+        <button type="button" class="retry" data-camera-cancel>やめる</button>
+        <button type="button" class="mission-shoot" data-camera-shutter disabled>● しゃしんを とる</button>
+      </div>
+    </div>`;
+  document.body.append(modal);
+
+  const video = modal.querySelector("[data-camera-video]");
+  const overlay = modal.querySelector("[data-camera-overlay]");
+  const status = modal.querySelector("[data-camera-status]");
+  const shutter = modal.querySelector("[data-camera-shutter]");
+  const guidePromise = createMissionGuide(backgroundUrl, page?.frame);
+  let guide = null;
+  let stream = null;
+  let closed = false;
+  let fallbackStarted = false;
+
+  const close = () => {
+    closed = true;
+    stopCameraStream(stream);
+    video.srcObject = null;
+    stream = null;
+    modal.remove();
+  };
+  modal.querySelectorAll("[data-camera-cancel]").forEach((button) => { button.onclick = close; });
+
+  const fallback = () => {
+    if (closed || fallbackStarted) return;
+    fallbackStarted = true;
+    close();
+    const choice = document.createElement("div");
+    choice.className = "guided-camera guided-camera--fallback";
+    choice.innerHTML = `
+      <div class="guided-camera__panel" role="dialog" aria-modal="true" aria-label="写真をえらぶ">
+        <div class="guided-camera__head">
+          <h2>カメラが ひらかなかったよ</h2>
+          <button type="button" class="guided-camera__close" data-fallback-cancel aria-label="とじる">×</button>
+        </div>
+        <p class="guided-camera__fallback-copy">写真をえらんで、あとで 点線の中に うごかせるよ。</p>
+        <div class="guided-camera__actions">
+          <button type="button" class="retry" data-fallback-cancel>やめる</button>
+          <button type="button" class="mission-shoot" data-fallback-open>写真を えらぶ</button>
+        </div>
+      </div>`;
+    document.body.append(choice);
+    choice.querySelectorAll("[data-fallback-cancel]").forEach((button) => {
+      button.onclick = () => choice.remove();
+    });
+    choice.querySelector("[data-fallback-open]").onclick = () => {
+      choice.remove();
+      openCamera(ctx, (dataUrl) => onFallback?.(dataUrl));
+    };
+  };
+
+  const requestStream = async () => {
+    if (!navigator.mediaDevices?.getUserMedia) throw new Error("getUserMedia is not supported");
+    const request = navigator.mediaDevices.getUserMedia({
+      audio: false,
+      video: { facingMode: { ideal: "environment" } },
+    });
+    // 権限ダイアログが応答しない端末で画面が固まらないよう、8秒でフォールバックする。
+    const timeout = new Promise((_, reject) => {
+      window.setTimeout(() => reject(new Error("camera timeout")), 8000);
+    });
+    request.then((lateStream) => {
+      if (closed || fallbackStarted) stopCameraStream(lateStream);
+    }).catch(() => {});
+    return Promise.race([request, timeout]);
+  };
+
+  const start = async () => {
+    try {
+      guide = await guidePromise;
+      if (closed) return;
+      drawCameraGuide(overlay.getContext("2d"), guide);
+      if (closed) return;
+      stream = await requestStream();
+      if (closed || fallbackStarted) {
+        stopCameraStream(stream);
+        return;
+      }
+      video.srcObject = stream;
+      await video.play().catch(() => {});
+      if (!video.videoWidth) {
+        await new Promise((resolve) => {
+          let timer;
+          const done = () => { window.clearTimeout(timer); resolve(); };
+          timer = window.setTimeout(done, 3000);
+          video.addEventListener("loadedmetadata", done, { once: true });
+        });
+      }
+      if (!video.videoWidth) throw new Error("camera video metadata unavailable");
+      status.hidden = true;
+      shutter.disabled = false;
+    } catch (error) {
+      console.info("アプリ内カメラを使えないため、写真入力へ切り替えます", error?.message ?? error);
+      fallback();
+    }
+  };
+
+  shutter.onclick = async () => {
+    if (!stream || !video.videoWidth || closed) return;
+    shutter.disabled = true;
+    status.hidden = false;
+    status.textContent = "しゃしんを つくっているよ…";
+    const capture = document.createElement("canvas");
+    capture.width = CAMERA_CANVAS_WIDTH;
+    capture.height = CAMERA_CANVAS_HEIGHT;
+    const captureContext = capture.getContext("2d");
+    if (!drawCoverImage(captureContext, video, capture.width, capture.height)) {
+      shutter.disabled = false;
+      status.textContent = "もういちど ためしてね";
+      return;
+    }
+    const dataUrl = capture.toDataURL("image/jpeg", 0.92);
+    const capturedGuide = guide;
+    close();
+    try {
+      await onGuidedCapture?.(dataUrl, capturedGuide);
+    } catch (error) {
+      console.warn("カメラ写真の保存に失敗しました", error);
+      ctx.notify?.("保存に しっぱいしました", "error");
+    }
+  };
+
+  start();
+}
+
+// アプリ内カメラで撮影した写真を、点線ガイドと同じ範囲で絵本に保存する。
+// 手動フォールバックの PreviewScreen は従来どおり独自に合成する。
+export async function completeMissionPhoto(ctx, page, dataUrl, placement = {}) {
+  const [vehicleColor, composedUrl] = await Promise.all([
+    extractPhotoColor(dataUrl),
+    composeMissionPhoto(ctx.repo.assetUrl(page.image), dataUrl, page.frame, {
+      ...placement,
+      guided: true,
+      scale: 1,
+      dx: 0,
+      dy: 0,
+    }),
+  ]);
+  ctx.session.completeMission({
+    missionId: page.id,
+    missionText: page.prompt,
+    caption: page.diaryCaption || page.prompt,
+    photoUrl: composedUrl,
+    missionImage: page.image,
+    vehicleColor,
+    vehicleSourceUrl: dataUrl,
+    vehicleTextureScale: 1,
+  });
+  return composedUrl;
 }
 
 // 読み聞かせ系の画面（おはなし・ミッション・撮影プレビュー・達成・完了）を
@@ -825,6 +1244,41 @@ export async function composeMissionPhoto(backgroundUrl, photoUrl, frame, placem
       // 指定がない絵本（汎用SVGの背景など）は、中央固定の額縁を使う。
       // 背景がほとんど隠れてしまわないよう、キャンバス（800x600）の半分程度に留める。
       : { x: 200, y: 150, width: 400, height: 300, radius: 24 };
+
+    if (placement.guided) {
+      // アプリ内カメラの800x600画像から、取景中の点線範囲だけを同じ座標へ移す。
+      // これにより、撮影後に写真全体を縮小したり、指で位置を合わせ直したりしない。
+      const sourceWindow = placement.captureWindow || targetFrame;
+      const sourceX = sourceWindow.x * photo.naturalWidth / canvas.width;
+      const sourceY = sourceWindow.y * photo.naturalHeight / canvas.height;
+      const sourceWidth = sourceWindow.width * photo.naturalWidth / canvas.width;
+      const sourceHeight = sourceWindow.height * photo.naturalHeight / canvas.height;
+      const photoLayer = document.createElement("canvas");
+      photoLayer.width = canvas.width;
+      photoLayer.height = canvas.height;
+      const photoContext = photoLayer.getContext("2d");
+      photoContext.drawImage(
+        photo,
+        sourceX, sourceY, sourceWidth, sourceHeight,
+        targetFrame.x, targetFrame.y, targetFrame.width, targetFrame.height,
+      );
+
+      // 透明な型が取れた場合は、その形そのものに写真を切り抜く。
+      // 透明部分のない既存素材は、これまでどおり frame の丸角範囲を使う。
+      const mask = missionTransparentMask(background, frame, canvas.width, canvas.height);
+      if (mask) {
+        photoContext.globalCompositeOperation = "destination-in";
+        photoContext.drawImage(mask, 0, 0, canvas.width, canvas.height);
+      } else {
+        photoContext.globalCompositeOperation = "destination-in";
+        photoContext.beginPath();
+        roundedRectPath(photoContext, targetFrame.x, targetFrame.y, targetFrame.width, targetFrame.height, targetFrame.radius);
+        photoContext.fill();
+      }
+      context.drawImage(photoLayer, 0, 0);
+      return canvas.toDataURL("image/jpeg", 0.9);
+    }
+
     // 元から透明な切り抜きPNGはそのまま、白背景などの素材画像は背景を消して
     // キャラクターだけを取り出す。どちらでもなければ「ふつうの写真」扱い。
     let subject = photo;

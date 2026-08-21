@@ -1,4 +1,4 @@
-import { playNarration, speakNarration, stopNarration, esc, formatJapaneseCopy, stage, characterLayer, layersMarkup, fillLayer, bookColorLayer, vehicleColorLayer, extractPhotoColor, fillArtworkHoles, recolorVehicleImage, openCamera, createRepeatableSound } from "../shared/utils.js";
+import { playNarration, speakNarration, stopNarration, esc, formatJapaneseCopy, stage, characterLayer, layersMarkup, fillLayer, bookColorLayer, vehicleColorLayer, extractPhotoColor, fillArtworkHoles, recolorVehicleImage, openMissionCamera, completeMissionPhoto, createRepeatableSound } from "../shared/utils.js";
 import { avatarBuddy } from "../shared/avatars.js";
 import { localizeText } from "../shared/i18n.js";
 
@@ -136,10 +136,16 @@ export const StoryScreen = {
 
     root.querySelectorAll("[data-shoot]").forEach((btn) => {
       const idx = Number(btn.dataset.shoot);
-      // 写真はプレビューで位置を決めたあと、確定時に背景と合成する。
-      btn.onclick = () => openCamera(ctx, (dataUrl) => {
-        const page = pages[idx];
-        ctx.go("PREVIEW", { page, dataUrl });
+      const page = pages[idx];
+      btn.onclick = () => openMissionCamera(ctx, page, {
+        // カメラが起動した場合は、点線ガイドと同じ範囲をそのまま保存する。
+        onGuidedCapture: async (dataUrl, guide) => {
+          await completeMissionPhoto(ctx, page, dataUrl, { captureWindow: guide.frame });
+          ctx.notify?.("しゃしんを 保存したよ！");
+          ctx.go("ACHIEVE", { page });
+        },
+        // 権限・HTTPS・端末非対応などでカメラが起動しない場合だけ、従来の手動調整へ。
+        onFallback: (dataUrl) => ctx.go("PREVIEW", { page, dataUrl }),
       });
     });
     root.querySelector("[data-finish]")?.addEventListener("click", () => ctx.advance());

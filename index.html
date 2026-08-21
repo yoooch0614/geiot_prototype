@@ -26,8 +26,8 @@
     </div>
   </main>
 
-  <!-- 写真撮影用の隠し入力。iOS/Androidでは端末のカメラが開く。
-       ファイル入力なので http（同一Wi-Fi）でも動く（getUserMediaと違いHTTPS不要）-->
+  <!-- アプリ内カメラを使えない端末・環境向けのフォールバック入力。
+       ファイル入力なので http（同一Wi-Fi）でも動く（getUserMediaと違いHTTPS不要）。-->
   <input id="camera-input" type="file" accept="image/*" capture="environment" hidden>
 
   <!-- ページめくり演出（本物の紙をめくるような効果）。CDNを使わず同梱しているので、

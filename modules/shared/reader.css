@@ -107,6 +107,54 @@
 }
 .photo-convert input { width: 20px; height: 20px; accent-color: var(--green); }
 .convert-hint { margin: -12px 0 0; color: #7a877e; font-size: 12px; }
+
+/* アプリ内カメラ。取景中は絵本の型以外を暗くし、透明な型だけを見せる。 */
+.guided-camera {
+  position: fixed; inset: 0; z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  padding: max(14px, env(safe-area-inset-top)) 14px max(14px, env(safe-area-inset-bottom));
+  background: rgba(12, 24, 42, .82);
+}
+.guided-camera__panel {
+  width: min(100%, 760px); max-height: 100%; overflow-y: auto;
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  padding: 18px; border-radius: 28px; background: var(--paper);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, .32);
+}
+.guided-camera__head {
+  width: 100%; display: flex; align-items: center; justify-content: center;
+  position: relative; min-height: 42px;
+}
+.guided-camera__head h2 { margin: 0; color: var(--ink); font-size: clamp(22px, 5vw, 32px); text-align: center; }
+.guided-camera__close {
+  position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+  width: 42px; height: 42px; border: 0; border-radius: 50%;
+  color: var(--ink); background: var(--card); font: 900 28px/1 inherit; cursor: pointer;
+  box-shadow: 0 2px 8px rgba(58, 74, 63, .14);
+}
+.guided-camera__view {
+  position: relative; width: min(100%, 720px); aspect-ratio: 4 / 3;
+  overflow: hidden; border-radius: 20px; background: #1b2a3b;
+  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, .22);
+}
+.guided-camera__view video,
+.guided-camera__view canvas {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+}
+.guided-camera__view video { object-fit: cover; background: #1b2a3b; }
+.guided-camera__view canvas { pointer-events: none; }
+.guided-camera__status {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  margin: 0; padding: 10px 18px; border-radius: 999px;
+  color: #fff; background: rgba(12, 24, 42, .72); font-weight: 900; white-space: nowrap;
+}
+.guided-camera__hint { margin: 0; color: #6f806f; font-weight: 700; text-align: center; }
+.guided-camera__fallback-copy { margin: 0; color: var(--ink); font-weight: 700; text-align: center; }
+.guided-camera__actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.guided-camera__actions .retry,
+.guided-camera__actions .mission-shoot { margin: 0; }
+.guided-camera__actions button:disabled { opacity: .45; cursor: wait; }
+
 /* 挿絵の透明な部分（＝まだ色のないくるま・おうち・おはな）から、こどもが撮った写真がのぞく。
    写真（.fill）を挿絵（.art）の下に敷くだけで、はめこみになる。 */
 .scene .fill { position: absolute; inset: 0; z-index: 0; }
@@ -166,6 +214,16 @@
   align-self: center; font-family: inherit; font-weight: 700; font-size: 15px; color: #7a877e;
   background: none; border: none; text-decoration: underline; cursor: pointer;
 }
+
+@media (max-width: 520px) {
+  .guided-camera { padding-left: 8px; padding-right: 8px; }
+  .guided-camera__panel { padding: 12px; border-radius: 22px; gap: 9px; }
+  .guided-camera__head h2 { font-size: 21px; }
+  .guided-camera__hint { font-size: 13px; }
+  .guided-camera__actions { width: 100%; }
+  .guided-camera__actions button { flex: 1; min-width: 130px; padding-left: 14px; padding-right: 14px; }
+}
+
 .preview-actions { display: flex; gap: 12px; justify-content: center; }
 .retry {
   font-family: inherit; font-weight: 700; font-size: 18px; color: var(--ink);

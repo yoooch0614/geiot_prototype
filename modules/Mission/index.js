@@ -1,4 +1,4 @@
-import { playNarration, esc, formatJapaneseCopy, stage, characterLayer } from "../shared/utils.js";
+import { playNarration, esc, formatJapaneseCopy, stage, characterLayer, openMissionCamera, completeMissionPhoto } from "../shared/utils.js";
 
 export const MissionScreen = {
   render(ctx, { page }) {
@@ -20,19 +20,14 @@ export const MissionScreen = {
     playNarration(ctx.repo.assetUrl(page.audio));
     root.querySelector("[data-back]").onclick = () => ctx.go("HOME");
 
-    const input = ctx.els.camera;
-    const openCamera = () => {
-      input.value = "";
-      input.onchange = () => {
-        const file = input.files && input.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = () => ctx.go("PREVIEW", { page, dataUrl: reader.result });
-        reader.readAsDataURL(file);
-      };
-      input.click();
-    };
-    root.querySelector("[data-shoot]").onclick = openCamera;
+    root.querySelector("[data-shoot]").onclick = () => openMissionCamera(ctx, page, {
+      onGuidedCapture: async (dataUrl, guide) => {
+        await completeMissionPhoto(ctx, page, dataUrl, { captureWindow: guide.frame });
+        ctx.notify?.("しゃしんを 保存したよ！");
+        ctx.go("ACHIEVE", { page });
+      },
+      onFallback: (dataUrl) => ctx.go("PREVIEW", { page, dataUrl }),
+    });
     // 「しゃしんなし」ボタンは撤去済み。要素が無いのに onclick を触るとエラーになるためガード
     const tap = root.querySelector("[data-tap]");
     if (tap) {
