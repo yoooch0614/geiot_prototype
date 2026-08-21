@@ -11,16 +11,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=diary-photo-choice-logo-20260821">
 </head>
 <body class="night-theme">
   <!-- すべての画面はここに描画される（js/app.js が切り替える）-->
   <main id="app" class="app">
     <!-- 起動中スプラッシュ。最初の画面が描画されると自動的に消える（innerHTML差し替え）-->
-    <!-- 画面に出すアイコンは icon.webp（46KB）。png（455KB）だと、Wi-Fi経由のiPadで
-         読み込み途中の「上半分だけ」が見えてしまう。ファビコン／ホーム画面用は png のまま。 -->
+    <!-- 起動中もタイトル画面と同じ新しいロゴを表示する。ファビコン／ホーム画面用は従来のアイコンを使う。 -->
     <div class="screen center splash" aria-hidden="true">
-      <img class="splash-icon" src="content/assets/icon.webp" alt="えほえほ">
+      <img class="splash-icon" src="content/assets/logotitle_ver2.png" alt="えほえほ">
       <span class="splash-dots"><i></i><i></i><i></i></span>
       <p class="splash-label">じゅんび中…</p>
     </div>
@@ -33,6 +32,6 @@
   <!-- ページめくり演出（本物の紙をめくるような効果）。CDNを使わず同梱しているので、
        Wi-Fiがオフラインでも（serve.py経由なら）動く。 -->
   <script src="js/vendor/page-flip.browser.js"></script>
-  <script type="module" src="js/app.js?v=photo-fill-switch-20260821"></script>
+  <script type="module" src="js/app.js?v=diary-photo-choice-logo-20260821"></script>
 </body>
 </html>

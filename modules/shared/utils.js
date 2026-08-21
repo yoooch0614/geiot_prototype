@@ -1110,38 +1110,6 @@ export async function composeMissionPhoto(backgroundUrl, photoUrl, frame, placem
     }
     return false;
   };
-  // 白色を「色なし」として扱うため、写真の元の縦横比を保ったまま
-  // 白〜ほぼ白のピクセルだけを透明にしたcanvasを返す。
-  // 写真全体を切り抜いたり拡大縮小したりしないので、点線ガイドの位置は変わらない。
-  const removeWhitePixels = (photo) => {
-    const sourceWidth = photo.naturalWidth || photo.width;
-    const sourceHeight = photo.naturalHeight || photo.height;
-    const maxDimension = 1600;
-    const ratio = Math.min(1, maxDimension / Math.max(sourceWidth, sourceHeight));
-    const width = Math.max(1, Math.round(sourceWidth * ratio));
-    const height = Math.max(1, Math.round(sourceHeight * ratio));
-    const output = document.createElement("canvas");
-    output.width = width;
-    output.height = height;
-    const outputContext = output.getContext("2d", { willReadFrequently: true });
-    outputContext.drawImage(photo, 0, 0, width, height);
-    const imageData = outputContext.getImageData(0, 0, width, height);
-    const data = imageData.data;
-    let removed = 0;
-    for (let i = 0; i < data.length; i += 4) {
-      const alpha = data[i + 3];
-      if (!alpha) continue;
-      const min = Math.min(data[i], data[i + 1], data[i + 2]);
-      const max = Math.max(data[i], data[i + 1], data[i + 2]);
-      // JPEGの白い紙や室内光の影を少し吸収しつつ、色のある部分は残す。
-      if (min >= 232 && max - min <= 24) {
-        data[i + 3] = 0;
-        removed++;
-      }
-    }
-    outputContext.putImageData(imageData, 0, 0);
-    return { canvas: output, width, height, removedRatio: removed / (width * height) };
-  };
   // 白背景など、ふちが一様な色の画像（切り抜き素材をJPEG等で保存したもの）から
   // 背景を透明にして、キャラクターだけを切り出したcanvasを返す。
   // ・四隅の色を「背景色」とみなし、ふちからつながっている同系色だけを消す
@@ -1281,19 +1249,16 @@ export async function composeMissionPhoto(backgroundUrl, photoUrl, frame, placem
       // アプリ内カメラの800x600画像から、取景中の点線範囲だけを同じ座標へ移す。
       // これにより、撮影後に写真全体を縮小したり、指で位置を合わせ直したりしない。
       const sourceWindow = placement.captureWindow || targetFrame;
-      const guidedPhoto = placement.removeBackground ? removeWhitePixels(photo).canvas : photo;
-      const guidedPhotoWidth = guidedPhoto.naturalWidth || guidedPhoto.width;
-      const guidedPhotoHeight = guidedPhoto.naturalHeight || guidedPhoto.height;
-      const sourceX = sourceWindow.x * guidedPhotoWidth / canvas.width;
-      const sourceY = sourceWindow.y * guidedPhotoHeight / canvas.height;
-      const sourceWidth = sourceWindow.width * guidedPhotoWidth / canvas.width;
-      const sourceHeight = sourceWindow.height * guidedPhotoHeight / canvas.height;
+      const sourceX = sourceWindow.x * photo.naturalWidth / canvas.width;
+      const sourceY = sourceWindow.y * photo.naturalHeight / canvas.height;
+      const sourceWidth = sourceWindow.width * photo.naturalWidth / canvas.width;
+      const sourceHeight = sourceWindow.height * photo.naturalHeight / canvas.height;
       const photoLayer = document.createElement("canvas");
       photoLayer.width = canvas.width;
       photoLayer.height = canvas.height;
       const photoContext = photoLayer.getContext("2d");
       photoContext.drawImage(
-        guidedPhoto,
+        photo,
         sourceX, sourceY, sourceWidth, sourceHeight,
         targetFrame.x, targetFrame.y, targetFrame.width, targetFrame.height,
       );
@@ -1325,21 +1290,13 @@ export async function composeMissionPhoto(backgroundUrl, photoUrl, frame, placem
     // 従来どおり自动判定を維持する。
     const removeBackground = placement.removeBackground === undefined
       ? true : placement.removeBackground === true;
-    if (removeBackground) {
-      const whiteRemoved = removeWhitePixels(photo);
-      if (whiteRemoved.removedRatio > 0) {
-        subject = whiteRemoved.canvas;
-        subjectWidth = whiteRemoved.width;
-        subjectHeight = whiteRemoved.height;
+    if (!isCharacter && removeBackground) {
+      const cutout = cutOutUniformBackground(photo);
+      if (cutout) {
+        subject = cutout;
+        subjectWidth = cutout.width;
+        subjectHeight = cutout.height;
         isCharacter = true;
-      } else if (!isCharacter) {
-        const cutout = cutOutUniformBackground(photo);
-        if (cutout) {
-          subject = cutout;
-          subjectWidth = cutout.width;
-          subjectHeight = cutout.height;
-          isCharacter = true;
-        }
       }
     }
 

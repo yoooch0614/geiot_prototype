@@ -124,7 +124,7 @@ body[data-animations="off"] *::after {
    index.html に静的に書いてあり、最初の画面が描画されると消える。
    白画面のまま待たせないためのもの。 */
 .splash { gap: 20px; }
-/* 起動中のロゴ。タイトル画面と同じ icon.png を使い、見た目を揃える。 */
+/* 起動中のロゴ。タイトル画面と同じ logotitle_ver2.png を使い、見た目を揃える。 */
 .splash-icon {
   width: clamp(140px, 34vw, 200px);
   aspect-ratio: 1 / 1;

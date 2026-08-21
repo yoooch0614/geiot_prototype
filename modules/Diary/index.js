@@ -13,6 +13,20 @@ export const DiaryScreen = {
         aria-label="${bookmarked ? "お気に入りをはずす" : `${esc(label)}をお気に入りに追加`}"
         title="${bookmarked ? "お気に入りをはずす" : "お気に入りに追加"}">${bookmarked ? "★" : "☆"}</button>`;
     };
+    const photoChoice = (photoUrl, blankUrl) => `
+      <div class="photo-choice" data-photo-choice>
+        <div class="photo-scene">
+          <img data-photo-filled src="${photoUrl}" alt="しゃしんを はった えほん">
+          <img data-photo-blank src="${blankUrl}" alt="いろを つけるまえの えほん" hidden>
+        </div>
+        <label class="photo-choice-switch">
+          <span class="photo-choice-side">写真を はる</span>
+          <input type="checkbox" data-photo-blank-toggle aria-label="白いままにする">
+          <span class="photo-choice-slider" aria-hidden="true"></span>
+          <span class="photo-choice-side">白いまま</span>
+        </label>
+        <p class="photo-choice-hint" data-photo-choice-hint>写真を はった じょうたい</p>
+      </div>`;
     const entries = memory.entries.map((e, entryIndex) => {
       const colorFills = (e.colorFills ?? []).filter((fill) => memory.bookColorPhotos?.[fill.from]);
       const hasColorFills = colorFills.length > 0;
@@ -36,9 +50,7 @@ export const DiaryScreen = {
       <div class="diary-entry">
         ${bookmarkButton(entryIndex, "写真")}
         ${e.photoUrl
-          ? `<div class="photo-scene">
-               <img src="${e.photoUrl}" alt="">
-             </div>`
+          ? photoChoice(e.photoUrl, fallback)
           : `<div class="no-photo"${fallback ? ` style="background-image:url('${fallback}')"` : ""}>
                <span class="no-photo-label"><span class="camera-icon" aria-hidden="true"></span> しゃしんなし</span>
              </div>`}
@@ -94,6 +106,21 @@ export const DiaryScreen = {
         });
         sync();
       };
+    });
+    root.querySelectorAll("[data-photo-choice]").forEach((choice) => {
+      const toggle = choice.querySelector("[data-photo-blank-toggle]");
+      const filled = choice.querySelector("[data-photo-filled]");
+      const blank = choice.querySelector("[data-photo-blank]");
+      const hint = choice.querySelector("[data-photo-choice-hint]");
+      const sync = () => {
+        const showBlank = toggle.checked;
+        filled.hidden = showBlank;
+        blank.hidden = !showBlank;
+        hint.textContent = showBlank
+          ? "いろを つけるまえの、白いままの えほん"
+          : "写真を はった じょうたい";
+      };
+      toggle.addEventListener("change", sync);
     });
     root.querySelectorAll("[data-memory-color]").forEach(async (scene) => {
       const fills = JSON.parse(scene.dataset.memoryFills || "[]");

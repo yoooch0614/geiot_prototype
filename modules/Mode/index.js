@@ -35,7 +35,7 @@ const WELCOME_STEPS = [
 export const ModeScreen = {
   render(ctx) {
     const cat = ctx.repo.assetUrl("assets/char-cat.webp");
-    const icon = ctx.repo.assetUrl("assets/icon.webp");
+    const icon = ctx.repo.assetUrl("assets/logotitle_ver2.png");
     const bird = ctx.repo.assetUrl("assets/bird.gif");
     // 1. 歩くきつねのGIFアセットを読み込む
     const fox = ctx.repo.assetUrl("assets/wolk_foxy.gif");

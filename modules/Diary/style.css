@@ -78,6 +78,31 @@
 }
 
 .diary-entry img { width: 100%; border-radius: 14px; display: block; }
+.photo-choice { display: flex; flex-direction: column; gap: 8px; }
+.photo-choice .photo-scene > img { width: 100%; display: block; }
+.photo-choice-switch {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 7px 6px 2px; cursor: pointer;
+}
+.photo-choice-side {
+  flex: 1; min-width: 0; color: var(--ink); font-size: 13px; font-weight: 900;
+  text-align: center; white-space: nowrap;
+}
+.photo-choice-switch input {
+  position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none;
+}
+.photo-choice-slider {
+  position: relative; flex: 0 0 auto; width: 48px; height: 27px; border-radius: 999px;
+  background: #d2dcd0; box-shadow: inset 0 0 0 2px rgba(58, 74, 63, .12); transition: background 150ms;
+}
+.photo-choice-slider::after {
+  content: ""; position: absolute; left: 3px; top: 3px; width: 21px; height: 21px;
+  border-radius: 50%; background: #fff; box-shadow: 0 2px 5px rgba(30, 45, 35, .22); transition: transform 150ms;
+}
+.photo-choice-switch input:checked + .photo-choice-slider { background: var(--green); }
+.photo-choice-switch input:checked + .photo-choice-slider::after { transform: translateX(21px); }
+.photo-choice-switch input:focus-visible + .photo-choice-slider { outline: 3px solid var(--coral); outline-offset: 3px; }
+.photo-choice-hint { margin: 0 0 2px; color: #7a877e; font-size: 12px; font-weight: 700; text-align: center; }
 
 /* おはなしの挿絵は、こどもが撮った写真をうしろに敷いてから挿絵を重ねる。
    透明にしてあるくるま・おうちの部分から写真がのぞく（おはなし画面の .scene と同じ重ね方）。 */

@@ -5,9 +5,9 @@
  * go(name, params) で画面を切り替えるだけ。個々の見た目は screens.js。
  */
 import { ContentRepository } from "./ContentRepository.js";
-import { Session } from "./Session.js?v=photo-fill-switch-20260821";
+import { Session } from "./Session.js?v=diary-photo-choice-logo-20260821";
 import { Settings } from "./Settings.js";
-import { Screens } from "./screens.js?v=photo-fill-switch-20260821";
+import { Screens } from "./screens.js?v=diary-photo-choice-logo-20260821";
 import {
   unlockAudio, preloadAudio, playAudio, playBgm, stopBgm,
   stabilizeJapaneseText,
@@ -311,7 +311,7 @@ document.addEventListener("pointerdown", (e) => {
 function renderLoadingScreen() {
   root.innerHTML = `
     <div class="screen center splash" aria-live="polite">
-      <img class="splash-icon" src="content/assets/icon.webp" alt="えほえほ">
+      <img class="splash-icon" src="content/assets/logotitle_ver2.png" alt="えほえほ">
       <span class="splash-dots"><i></i><i></i><i></i></span>
       <p class="splash-label">じゅんび中…</p>
     </div>`;

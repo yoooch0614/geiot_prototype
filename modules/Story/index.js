@@ -1,4 +1,4 @@
-import { playNarration, speakNarration, stopNarration, esc, formatJapaneseCopy, stage, characterLayer, layersMarkup, fillLayer, bookColorLayer, vehicleColorLayer, extractPhotoColor, fillArtworkHoles, recolorVehicleImage, openMissionCamera, createRepeatableSound } from "../shared/utils.js?v=photo-fill-switch-20260821";
+import { playNarration, speakNarration, stopNarration, esc, formatJapaneseCopy, stage, characterLayer, layersMarkup, fillLayer, bookColorLayer, vehicleColorLayer, extractPhotoColor, fillArtworkHoles, recolorVehicleImage, openMissionCamera, completeMissionPhoto, createRepeatableSound } from "../shared/utils.js?v=diary-photo-choice-logo-20260821";
 import { avatarBuddy } from "../shared/avatars.js";
 import { localizeText } from "../shared/i18n.js";
 
@@ -139,8 +139,11 @@ export const StoryScreen = {
       const page = pages[idx];
       btn.onclick = () => openMissionCamera(ctx, page, {
         // カメラが起動した場合は、点線ガイドと同じ範囲をそのまま保存する。
-        onGuidedCapture: (dataUrl, guide) =>
-          ctx.go("PREVIEW", { page, dataUrl, guided: true, captureWindow: guide.frame }),
+        onGuidedCapture: async (dataUrl, guide) => {
+          await completeMissionPhoto(ctx, page, dataUrl, { captureWindow: guide.frame });
+          ctx.notify?.("しゃしんを 保存したよ！");
+          ctx.go("ACHIEVE", { page });
+        },
         // 権限・HTTPS・端末非対応などでカメラが起動しない場合だけ、従来の手動調整へ。
         onFallback: (dataUrl) => ctx.go("PREVIEW", { page, dataUrl }),
       });
