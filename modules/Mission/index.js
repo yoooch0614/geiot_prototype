@@ -1,4 +1,4 @@
-import { playNarration, esc, formatJapaneseCopy, stage, characterLayer, openMissionCamera, completeMissionPhoto } from "../shared/utils.js";
+import { playNarration, esc, formatJapaneseCopy, stage, characterLayer, openMissionCamera } from "../shared/utils.js?v=photo-fill-switch-20260821";
 
 export const MissionScreen = {
   render(ctx, { page }) {
@@ -21,11 +21,8 @@ export const MissionScreen = {
     root.querySelector("[data-back]").onclick = () => ctx.go("HOME");
 
     root.querySelector("[data-shoot]").onclick = () => openMissionCamera(ctx, page, {
-      onGuidedCapture: async (dataUrl, guide) => {
-        await completeMissionPhoto(ctx, page, dataUrl, { captureWindow: guide.frame });
-        ctx.notify?.("しゃしんを 保存したよ！");
-        ctx.go("ACHIEVE", { page });
-      },
+      onGuidedCapture: (dataUrl, guide) =>
+        ctx.go("PREVIEW", { page, dataUrl, guided: true, captureWindow: guide.frame }),
       onFallback: (dataUrl) => ctx.go("PREVIEW", { page, dataUrl }),
     });
     // 「しゃしんなし」ボタンは撤去済み。要素が無いのに onclick を触るとエラーになるためガード
