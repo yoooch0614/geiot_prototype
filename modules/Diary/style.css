@@ -22,18 +22,12 @@
 .diary-view-button:focus-visible { outline: 3px solid var(--coral); outline-offset: 2px; }
 .diary-panel { width: 100%; display: flex; flex-direction: column; gap: 26px; }
 .diary-panel[hidden] { display: none; }
-.picture-book-panel { gap: 18px; }
-.diary-panel[data-diary-panel="scratchboard"] .photo-scene,
-.diary-panel[data-diary-panel="scratchboard"] .diary-scene,
-.diary-panel[data-diary-panel="scratchboard"] .no-photo {
+.scratchboard-preview .photo-scene,
+.scratchboard-preview .diary-scene,
+.scratchboard-preview .no-photo {
   background: #fff;
 }
-.diary-panel[data-diary-panel="scratchboard"] .diary-scene .fill,
-.diary-panel[data-diary-panel="scratchboard"] .diary-scene .book-color-art {
-  visibility: hidden;
-}
-.picture-book-panel .picture-book-scene,
-.picture-book-panel .picture-book-mission-image { background-color: #fff; }
+.storybook-preview { gap: 18px; }
 
 /* ページ背景にはその絵本の表紙をぼかして敷く。内容はその上に浮かせる */
 .diary-bg {
@@ -149,23 +143,31 @@
   position: absolute; inset: 0; z-index: 2;
   width: 100%; height: 100%; object-fit: cover; opacity: 0; pointer-events: none;
 }
-.picture-book-page {
+.storybook-page {
   position: relative; width: 100%; box-sizing: border-box;
   padding: 16px; border: 1px solid rgba(58, 74, 63, .1); border-radius: 22px;
   background: rgba(255, 255, 255, .97); box-shadow: 0 4px 14px rgba(58, 74, 63, .12);
 }
-.picture-book-page::before { display: none; }
-.picture-book-scene { aspect-ratio: 4 / 3; }
-.picture-book-scene .art,
-.picture-book-scene .book-color-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.picture-book-scene .art { z-index: 1; }
-.picture-book-page .memory-bookmark { top: 10px; right: 10px; }
-.picture-book-mission-image { width: 100%; border-radius: 14px; display: block; background: #fff; }
-.picture-book-text {
+.storybook-page::before { display: none; }
+.storybook-scene {
+  position: relative; aspect-ratio: 4 / 3; overflow: hidden;
+  border-radius: 14px; background: #fff;
+}
+.storybook-scene .fill,
+.storybook-scene .art,
+.storybook-scene .book-color-art {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+}
+.storybook-scene .fill { z-index: 0; }
+.storybook-scene .art { z-index: 1; }
+.storybook-scene .book-color-art { z-index: 2; opacity: 0; pointer-events: none; }
+.storybook-page .memory-bookmark { top: 10px; right: 10px; }
+.storybook-mission-image { width: 100%; border-radius: 14px; display: block; background: #fff; }
+.storybook-text {
   margin: 14px 4px 0; color: #263d31; font-size: 19px; font-weight: 700;
   line-height: 1.75; text-align: left; white-space: normal; line-break: strict;
 }
-.picture-book-prompt {
+.storybook-prompt {
   margin: 12px 0 0; padding: 12px 14px; border-radius: 16px;
   color: #3f8838; background: #eef8e9; font-size: 16px; font-weight: 700;
   line-height: 1.65; text-align: left; white-space: normal; line-break: strict;
@@ -187,9 +189,9 @@
 
 @media (max-width: 520px) {
   .diary-view-button { padding-left: 8px; padding-right: 8px; font-size: 13px; }
-  .picture-book-page { padding: 12px; border-radius: 18px; }
-  .picture-book-text { margin-left: 2px; margin-right: 2px; font-size: 17px; }
-  .picture-book-prompt { font-size: 15px; }
+  .storybook-page { padding: 12px; border-radius: 18px; }
+  .storybook-text { margin-left: 2px; margin-right: 2px; font-size: 17px; }
+  .storybook-prompt { font-size: 15px; }
 }
 
 /* 表紙の「よんだひと」チップ。読んだ当時のアバターを日記に残す */

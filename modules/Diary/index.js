@@ -7,7 +7,7 @@ function pictureBookScene(ctx, memory, page, entry) {
   const fillPhoto = entry?.fillPhoto || (page.fillFrom ? memory.bookColorPhotos?.[page.fillFrom] : null);
   const colorFills = (page.colorFills ?? []).filter((fill) => memory.bookColorPhotos?.[fill.from]);
   return `
-    <div class="diary-scene picture-book-scene${colorFills.length ? " has-book-color" : ""}"
+    <div class="storybook-scene${colorFills.length ? " has-book-color" : ""}"
       ${colorFills.length ? `data-memory-color data-memory-source="${source}" data-memory-fills='${esc(JSON.stringify(colorFills))}'` : ""}>
       ${fillPhoto ? `<img class="fill" src="${esc(fillPhoto)}" alt="">` : ""}
       <img class="art" src="${source}" alt="">
@@ -29,19 +29,19 @@ function pictureBookPages(ctx, memory, book, bookmarkButton) {
       const { entry, index } = match;
       if (page.type === "story") {
         return `
-      <article class="picture-book-page">
+      <article class="storybook-page">
         ${bookmarkButton(index, "挿絵")}
         ${pictureBookScene(ctx, memory, page, entry)}
-        <p class="picture-book-text">${formatJapaneseCopy(page.text)}</p>
+        <p class="storybook-text">${formatJapaneseCopy(page.text)}</p>
       </article>`;
       }
       const image = entry.photoUrl || ctx.repo.assetUrl(entry.missionImage) || ctx.repo.assetUrl(page.image);
       return `
-      <article class="picture-book-page picture-book-page--mission">
+      <article class="storybook-page storybook-page--mission">
         ${bookmarkButton(index, "写真")}
-        <img class="picture-book-mission-image" src="${esc(image)}" alt="">
-        <p class="picture-book-text">${formatJapaneseCopy(page.text)}</p>
-        ${page.prompt ? `<p class="picture-book-prompt">${formatJapaneseCopy(page.prompt)}</p>` : ""}
+        <img class="storybook-mission-image" src="${esc(image)}" alt="">
+        <p class="storybook-text">${formatJapaneseCopy(page.text)}</p>
+        ${page.prompt ? `<p class="storybook-prompt">${formatJapaneseCopy(page.prompt)}</p>` : ""}
       </article>`;
     })
     .join("") || `<p class="empty">きろくが ありません</p>`;
@@ -122,10 +122,10 @@ export const DiaryScreen = {
             <span class="diary-reader-text">${memory.reader.name ? `${esc(memory.reader.name)}が よんだよ` : "いっしょに よんだよ"}</span>
           </div>` : ""}
         </div>
-        <section class="diary-panel" data-diary-panel="scratchboard">
+        <section class="diary-panel scratchboard-preview" data-diary-panel="scratchboard">
           ${scratchboardEntries}
         </section>
-        <section class="diary-panel picture-book-panel" data-diary-panel="picture-book" hidden>
+        <section class="diary-panel storybook-preview" data-diary-panel="picture-book" hidden>
           ${pictureBookEntries}
         </section>
         <button class="big-next" data-close>本棚にもどる</button>
