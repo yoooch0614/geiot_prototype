@@ -115,12 +115,18 @@ h1, h2, h3 { letter-spacing: -.06em; text-wrap: balance; }
 .section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; margin-bottom: 48px; }
 .section-heading h2 { margin: 0; font-size: clamp(36px, 5vw, 68px); line-height: 1.08; }
 .section-heading h2 em, .feature-copy h2 em, .members-section h2 em, .hero h1 em, .closing h2 em { color: var(--green-deep); font-style: normal; }
-.section-heading > p { margin: 0 0 5px; color: var(--muted); font-size: 14px; line-height: 1.8; text-align: right; }
+:root[lang="ja"] .product-section .section-heading h2 { white-space: nowrap; font-size: clamp(18px, 4.2vw, 50px); }
+.section-heading > p { margin: 0 0 5px; color: var(--muted); font-size: 14px; line-height: 1.8; text-align: left; }
 
 /* Hero */
 .hero { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(420px, .88fr); align-items: center; min-height: 790px; padding-top: 78px; padding-bottom: 86px; }
 .hero-copy { position: relative; z-index: 2; padding-left: clamp(0px, 3vw, 45px); }
 .hero h1 { max-width: 720px; margin: 27px 0 22px; font-size: clamp(50px, 6.1vw, 78px); line-height: 1.04; font-weight: 900; }
+h1 br + span, h1 br + em,
+h2 br + span, h2 br + em,
+h3 br + span, h3 br + em,
+blockquote br + span, blockquote br + em,
+.headline-line { display: inline-block; white-space: nowrap; }
 /* Keep the English headline on its authored two-line rhythm; its size is set
    independently because Latin words use the hero column differently. */
 :root[lang="en"] .hero h1 { font-size: clamp(44px, 4.55vw, 62px); }
@@ -235,6 +241,7 @@ h1, h2, h3 { letter-spacing: -.06em; text-wrap: balance; }
 .card-topline span:first-child { color: var(--ink); font-weight: 700; }
 .product-card-copy { position: relative; z-index: 2; margin-top: 59px; max-width: 100%; }
 .product-card h3 { margin: 0 0 18px; color: var(--ink); font-size: clamp(28px, 3.2vw, 42px); line-height: 1.12; }
+:root[lang="ja"] .product-card h3 { white-space: nowrap; font-size: clamp(22px, 2.15vw, 30px); }
 .product-card p { max-width: 240px; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.85; }
 .card-visual { position: absolute; right: 0; bottom: 0; left: 0; height: 210px; }
 .card-visual--books { overflow: hidden; background: linear-gradient(180deg, transparent, rgba(120,211,155,.15)); }
@@ -271,7 +278,8 @@ h1, h2, h3 { letter-spacing: -.06em; text-wrap: balance; }
 .guide-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 40px; margin-bottom: 48px; }
 .guide-header h2 { margin: 0; font-size: clamp(43px, 5.6vw, 76px); line-height: 1.08; }
 .guide-header h2 span { color: var(--green-deep); }
-.guide-header > p { margin: 0 0 7px; color: var(--muted); font-size: 14px; line-height: 1.9; text-align: right; }
+:root[lang="ja"] .guide-header h2 { white-space: nowrap; font-size: clamp(20px, 4.2vw, 52px); }
+.guide-header > p { margin: 0 0 7px; color: var(--muted); font-size: 14px; line-height: 1.9; text-align: left; }
 .guide-intro-grid { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(300px, .88fr); gap: 17px; align-items: stretch; }
 .guide-flow { position: relative; display: flex; flex-direction: column; gap: 1px; padding: 21px 24px; overflow: hidden; border-radius: var(--radius); background: #fff; box-shadow: var(--shadow); }
 .guide-flow-line { position: absolute; top: 56px; bottom: 56px; left: 57px; width: 1px; background: linear-gradient(var(--green), var(--blue), var(--coral)); opacity: .45; }
@@ -297,6 +305,7 @@ h1, h2, h3 { letter-spacing: -.06em; text-wrap: balance; }
 .guide-fact small { margin-top: 4px; color: #a8bdd8; font-size: 10px; }
 .guide-gallery-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 25px; margin: 100px 0 31px; }
 .guide-gallery-heading h3 { margin: 0; color: var(--ink); font-size: clamp(31px, 4vw, 52px); line-height: 1.12; }
+:root .guide-gallery-heading h3 { white-space: nowrap; font-size: clamp(16px, 3.9vw, 50px); }
 .gallery-count { color: #a6b1aa; font: 700 11px var(--latin); letter-spacing: .12em; }
 .guide-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 17px; }
 .guide-gallery-card { overflow: hidden; border-radius: var(--radius); background: #fff; box-shadow: var(--shadow); }
@@ -416,7 +425,8 @@ blockquote { position: relative; z-index: 1; margin: 0; color: var(--green-deep)
 .section-label--light { color: var(--green); }
 .demo-header h2 { margin: 0; font-size: clamp(43px, 5.6vw, 76px); line-height: 1.08; }
 .demo-header h2 span { color: var(--green); }
-.demo-header > p { margin: 0 0 6px; color: #a8bdd8; font-size: 14px; line-height: 1.9; text-align: right; }
+:root .demo-header h2 { white-space: nowrap; font-size: clamp(20px, 5vw, 56px); }
+.demo-header > p { margin: 0 0 6px; color: #a8bdd8; font-size: 14px; line-height: 1.9; text-align: left; }
 .demo-frame-wrap { overflow: hidden; border: 1px solid rgba(170,202,238,.24); border-radius: 28px; background: #182943; box-shadow: 0 31px 70px rgba(0,0,0,.25); }
 .demo-frame-top { display: flex; align-items: center; gap: 15px; height: 51px; padding: 0 19px; border-bottom: 1px solid rgba(170,202,238,.18); color: #9fb5d0; font-size: 10px; letter-spacing: .04em; }
 .window-dots { display: inline-flex; gap: 6px; }
@@ -446,6 +456,8 @@ blockquote { position: relative; z-index: 1; margin: 0; color: var(--green-deep)
 
 /* Members */
 .members-section { padding-top: 155px; padding-bottom: 122px; }
+.members-section .section-heading h2 { white-space: nowrap; font-size: clamp(18px, 4.2vw, 50px); }
+.members-section .section-heading > p { text-align: left; }
 .members-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
 .member { display: grid; grid-template-columns: 24px 42px minmax(0, 1fr); align-items: center; gap: 11px; min-height: 92px; padding: 13px 15px; border-top: 1px solid var(--line); }
 .member-number { color: #9ca9a2; font-size: 9px; }
@@ -507,7 +519,7 @@ blockquote { position: relative; z-index: 1; margin: 0; color: var(--green-deep)
   /* re-stated inside the media query: :root[lang] outranks a bare .hero h1,
      so the desktop EN rule would otherwise leak into every smaller width. */
   :root[lang="en"] .hero h1 { font-size: clamp(28px, 9.2vw, 72px); }
-  :root[lang="en"] .hero h1 em { white-space: normal; }
+  :root[lang="en"] .hero h1 em { white-space: nowrap; }
   .hero h1, .section-heading h2, .guide-header h2, .demo-header h2,
   .feature-copy h2, .insight-heading h2, .hearing-intro h2, .closing h2,
   .section-heading > p, .guide-header > p, .demo-header > p { overflow-wrap: break-word; }
@@ -534,6 +546,10 @@ blockquote { position: relative; z-index: 1; margin: 0; color: var(--green-deep)
   .guide-header > p { margin: 0; text-align: left; }
   .guide-intro-grid { grid-template-columns: 1fr; }
   .members-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 901px) {
+  .guide-header > p { white-space: nowrap; }
 }
 
 @media (max-width: 580px) {
@@ -612,7 +628,7 @@ blockquote { position: relative; z-index: 1; margin: 0; color: var(--green-deep)
   .product-grid { grid-template-columns: 1fr; gap: 12px; }
   .product-card, .product-card--wide { grid-column: auto; min-height: 520px; }
   .product-card-copy { max-width: 100%; margin-top: 32px; }
-  .product-card h3 { font-size: clamp(30px, 9vw, 36px); }
+  :root[lang="ja"] .product-card h3 { font-size: clamp(21px, 6.8vw, 30px); }
   .product-card p { max-width: 100%; font-size: 12px; line-height: 1.75; overflow-wrap: break-word; }
   .card-visual { height: 190px; }
   .feature-band { gap: 23px; padding-top: 48px; padding-bottom: 96px; }
