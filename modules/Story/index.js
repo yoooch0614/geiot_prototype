@@ -1,4 +1,4 @@
-import { playNarration, speakNarration, stopNarration, esc, formatJapaneseCopy, stage, characterLayer, layersMarkup, fillLayer, bookColorLayer, vehicleColorLayer, extractPhotoColor, fillArtworkHoles, recolorVehicleImage, openMissionCamera, completeMissionPhoto, createRepeatableSound } from "../shared/utils.js?v=suki-no-tane-picture-book-20260821";
+import { playNarration, speakNarration, stopNarration, esc, formatJapaneseCopy, stage, characterLayer, layersMarkup, fillLayer, bookColorLayer, vehicleColorLayer, extractPhotoColor, fillArtworkHoles, recolorVehicleImage, openMissionCamera, completeMissionPhoto, createRepeatableSound } from "../shared/utils.js?v=suki-no-tane-white-scratchboard-20260821";
 import { avatarBuddy } from "../shared/avatars.js";
 import { localizeText } from "../shared/i18n.js";
 

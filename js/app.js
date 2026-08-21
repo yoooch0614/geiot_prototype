@@ -5,9 +5,9 @@
  * go(name, params) で画面を切り替えるだけ。個々の見た目は screens.js。
  */
 import { ContentRepository } from "./ContentRepository.js";
-import { Session } from "./Session.js?v=suki-no-tane-picture-book-20260821";
+import { Session } from "./Session.js?v=suki-no-tane-white-scratchboard-20260821";
 import { Settings } from "./Settings.js";
-import { Screens } from "./screens.js?v=suki-no-tane-picture-book-20260821";
+import { Screens } from "./screens.js?v=suki-no-tane-white-scratchboard-20260821";
 import {
   unlockAudio, preloadAudio, playAudio, playBgm, stopBgm,
   stabilizeJapaneseText,

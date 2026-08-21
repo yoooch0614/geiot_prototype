@@ -23,6 +23,13 @@
 .diary-panel { width: 100%; display: flex; flex-direction: column; gap: 26px; }
 .diary-panel[hidden] { display: none; }
 .picture-book-panel { gap: 18px; }
+.diary-panel[data-diary-panel="scratchboard"] .photo-scene,
+.diary-panel[data-diary-panel="scratchboard"] .diary-scene,
+.diary-panel[data-diary-panel="scratchboard"] .no-photo {
+  background: #fff;
+}
+.picture-book-panel .picture-book-scene,
+.picture-book-panel .picture-book-mission-image { background-color: #fff; }
 
 /* ページ背景にはその絵本の表紙をぼかして敷く。内容はその上に浮かせる */
 .diary-bg {

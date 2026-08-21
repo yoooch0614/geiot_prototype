@@ -1,4 +1,4 @@
-import { playNarration, esc, formatJapaneseCopy, stage, characterLayer, openMissionCamera, completeMissionPhoto } from "../shared/utils.js?v=suki-no-tane-picture-book-20260821";
+import { playNarration, esc, formatJapaneseCopy, stage, characterLayer, openMissionCamera, completeMissionPhoto } from "../shared/utils.js?v=suki-no-tane-white-scratchboard-20260821";
 
 export const MissionScreen = {
   render(ctx, { page }) {
