@@ -117,11 +117,13 @@ h1, h2, h3 { letter-spacing: -.06em; text-wrap: balance; }
 .section-heading h2 em, .feature-copy h2 em, .members-section h2 em, .hero h1 em, .closing h2 em { color: var(--green-deep); font-style: normal; }
 :root[lang="ja"] .product-section .section-heading h2 { white-space: nowrap; font-size: clamp(18px, 4.2vw, 50px); }
 .section-heading > p { margin: 0 0 5px; color: var(--muted); font-size: 14px; line-height: 1.8; text-align: left; }
+.product-lead { white-space: nowrap; }
 
 /* Hero */
 .hero { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(420px, .88fr); align-items: center; min-height: 790px; padding-top: 78px; padding-bottom: 86px; }
 .hero-copy { position: relative; z-index: 2; padding-left: clamp(0px, 3vw, 45px); }
 .hero h1 { max-width: 720px; margin: 27px 0 22px; font-size: clamp(50px, 6.1vw, 78px); line-height: 1.04; font-weight: 900; }
+.hero-title-line { display: inline-block; white-space: nowrap; }
 h1 br + span, h1 br + em,
 h2 br + span, h2 br + em,
 h3 br + span, h3 br + em,
@@ -457,7 +459,7 @@ blockquote { position: relative; z-index: 1; margin: 0; color: var(--green-deep)
 /* Members */
 .members-section { padding-top: 155px; padding-bottom: 122px; }
 .members-section .section-heading h2 { white-space: nowrap; font-size: clamp(18px, 4.2vw, 50px); }
-.members-section .section-heading > p { text-align: left; }
+.members-section .section-heading > p { text-align: left; white-space: nowrap; }
 .members-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
 .member { display: grid; grid-template-columns: 24px 42px minmax(0, 1fr); align-items: center; gap: 11px; min-height: 92px; padding: 13px 15px; border-top: 1px solid var(--line); }
 .member-number { color: #9ca9a2; font-size: 9px; }
@@ -550,6 +552,7 @@ blockquote { position: relative; z-index: 1; margin: 0; color: var(--green-deep)
 
 @media (min-width: 901px) {
   .guide-header > p { white-space: nowrap; }
+  .big-five-section .section-heading > p { white-space: nowrap; }
 }
 
 @media (max-width: 580px) {
@@ -565,11 +568,12 @@ blockquote { position: relative; z-index: 1; margin: 0; color: var(--green-deep)
   .menu-toggle { width: 36px; height: 36px; padding: 7px; border-radius: 11px; }
   .mobile-menu { top: 78px; right: 9px; left: 9px; }
   .hero { padding-top: 74px; padding-bottom: 54px; }
-  .hero h1 { margin-top: 22px; font-size: clamp(37px, 11.7vw, 58px); line-height: 1.08; }
+  .hero h1 { margin-top: 22px; font-size: clamp(30px, 10.4vw, 58px); line-height: 1.08; }
   :root[lang="en"] .hero h1 { font-size: clamp(28px, 8.4vw, 48px); }
   .hero-lead { font-size: clamp(18px, 5.8vw, 23px); line-height: 1.45; }
   .hero-text { font-size: 13px; line-height: 1.9; }
   .hero-explain { margin-top: -6px; font-size: 12px; }
+  .product-lead { font-size: clamp(7px, 2.4vw, 13px); letter-spacing: -.04em; }
   .hero-actions { align-items: flex-start; flex-direction: column; gap: 17px; }
   .hero-meta { gap: 8px 18px; margin-top: 34px; }
   .hero-quick-facts { gap: 13px; margin-top: 21px; }
