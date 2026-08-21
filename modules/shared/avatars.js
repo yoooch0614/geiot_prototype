@@ -11,11 +11,11 @@ import { esc } from "./utils.js";
 import { localizeUi } from "./i18n.js";
 
 export const AVATAR_ANIMALS = [
-  { id: "elephant", label: "ぞうさん" },
   { id: "rabbit", label: "うさぎさん" },
-  { id: "tiger", label: "とらさん" },
   { id: "cat", label: "ねこさん" },
   { id: "dog", label: "いぬさん" },
+  { id: "tiger", label: "とらさん" },
+  { id: "elephant", label: "ぞうさん" },
 ];
 
 export const AVATAR_COLORS = [
