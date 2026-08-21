@@ -16,12 +16,23 @@ function storedPage(value, fallback) {
   return fallback;
 }
 
-function originalPageFor(entry, page) {
-  return storedPage(entry.originalPage, {
+// 絵本の元データ（content/books/*.json）は、写真や色ぬりでは絶対に書き換わらない
+// 唯一の「本当の元絵」。保存された originalPage がどんな経路で作られていても
+// （過去のバージョンの記録・保存の不具合など）、ここで見つかった元絵を最優先にすることで、
+// スクラッチボードに完成後の写真が紛れ込む余地をなくす。
+function canonicalPageImage(book, pageId) {
+  return book?.pages?.find((p) => p.id === pageId)?.image ?? null;
+}
+
+function originalPageFor(book, entry, page) {
+  const pageId = entry.kind === "story" ? page.id : entry.missionId;
+  const stored = storedPage(entry.originalPage, {
     id: page.id,
     type: page.type,
     image: entry.kind === "story" ? (entry.image || page.image) : (entry.missionImage || page.image),
   });
+  const canonicalImage = canonicalPageImage(book, pageId);
+  return canonicalImage ? { ...stored, image: canonicalImage } : stored;
 }
 
 function completedPageFor(ctx, memory, entry, page) {
@@ -92,8 +103,9 @@ function pictureBookPages(ctx, memory, book, bookmarkButton) {
 
 export const DiaryScreen = {
   render(ctx, { memory, fromPlay }) {
+    const book = ctx.repo.book(memory.bookId);
     // ページ背景にはその絵本の表紙をぼかして敷く
-    const cover = ctx.repo.assetUrl(ctx.repo.book(memory.bookId)?.cover);
+    const cover = ctx.repo.assetUrl(book?.cover);
     const bookmarkButton = (entryIndex, label) => {
       const bookmarked = ctx.session.isMemoryBookmarked(memory.id, entryIndex);
       return `<button type="button" class="memory-bookmark${bookmarked ? " is-active" : ""}"
@@ -107,7 +119,7 @@ export const DiaryScreen = {
         type: e.kind,
         image: e.kind === "story" ? e.image : e.missionImage,
       };
-      const originalPage = originalPageFor(e, page);
+      const originalPage = originalPageFor(book, e, page);
       const originalImage = resolveImage(ctx, originalPage.image);
       // おはなしの挿絵は1枚の絵として見せる（キャプションなし）。
       // スクラッチボードでは、完成後の写真・色レイヤーを一切重ねず、元画像だけを見せる。
@@ -130,7 +142,6 @@ export const DiaryScreen = {
         <p class="diary-caption">${esc(e.caption)}</p>
       </div>`;
     }).join("") || `<p class="empty">きろくが ありません</p>`;
-    const book = ctx.repo.book(memory.bookId);
     const pictureBookEntries = book
       ? pictureBookPages(ctx, memory, book, bookmarkButton)
       : `<p class="empty">きろくが ありません</p>`;

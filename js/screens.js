@@ -8,7 +8,7 @@ import { StoryScreen } from "../modules/Story/index.js?v=suki-no-tane-original-c
 import { PreviewScreen } from "../modules/Preview/index.js?v=suki-no-tane-original-completed-pages-20260821";
 import { AchieveScreen } from "../modules/Achieve/index.js?v=suki-no-tane-original-completed-pages-20260821";
 import { CompleteScreen } from "../modules/Complete/index.js";
-import { DiaryScreen } from "../modules/Diary/index.js?v=suki-no-tane-original-completed-pages-20260821";
+import { DiaryScreen } from "../modules/Diary/index.js?v=diary-scratchboard-canonical-source-20260821";
 import { GalleryScreen } from "../modules/Gallery/index.js";
 import { BookmarksScreen } from "../modules/Bookmarks/index.js";
 import { SettingsScreen, PrivacyScreen } from "../modules/Settings/index.js";

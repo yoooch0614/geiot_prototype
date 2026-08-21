@@ -7,7 +7,7 @@
 import { ContentRepository } from "./ContentRepository.js";
 import { Session } from "./Session.js?v=suki-no-tane-original-completed-pages-20260821";
 import { Settings } from "./Settings.js";
-import { Screens } from "./screens.js?v=suki-no-tane-original-completed-pages-20260821";
+import { Screens } from "./screens.js?v=diary-scratchboard-canonical-source-20260821";
 import {
   unlockAudio, preloadAudio, playAudio, playBgm, stopBgm,
   stabilizeJapaneseText,
