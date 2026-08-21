@@ -1,6 +1,51 @@
-import { esc, fillArtworkHoles, recolorVehicleImage } from "../shared/utils.js";
+import { esc, formatJapaneseCopy, fillArtworkHoles, recolorVehicleImage } from "../shared/utils.js";
 import { avatarBuddy } from "../shared/avatars.js";
 import { localizeText } from "../shared/i18n.js";
+
+function pictureBookScene(ctx, memory, page, entry) {
+  const source = ctx.repo.assetUrl(page.image);
+  const fillPhoto = entry?.fillPhoto || (page.fillFrom ? memory.bookColorPhotos?.[page.fillFrom] : null);
+  const colorFills = (page.colorFills ?? []).filter((fill) => memory.bookColorPhotos?.[fill.from]);
+  return `
+    <div class="diary-scene picture-book-scene${colorFills.length ? " has-book-color" : ""}"
+      ${colorFills.length ? `data-memory-color data-memory-source="${source}" data-memory-fills='${esc(JSON.stringify(colorFills))}'` : ""}>
+      ${fillPhoto ? `<img class="fill" src="${esc(fillPhoto)}" alt="">` : ""}
+      <img class="art" src="${source}" alt="">
+      ${colorFills.map((_, i) => `<img class="book-color-art" data-memory-color-layer data-memory-fill-index="${i}" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="">`).join("")}
+    </div>`;
+}
+
+function pictureBookPages(ctx, memory, book, bookmarkButton) {
+  const entriesByKey = new Map(memory.entries.map((entry, index) => [
+    entry.kind === "story" ? `story:${entry.image}` : `mission:${entry.missionId}`,
+    { entry, index },
+  ]));
+  return (book.pages ?? [])
+    .filter((page) => page.type !== "end")
+    .map((page) => {
+      const key = page.type === "story" ? `story:${page.image}` : `mission:${page.id}`;
+      const match = entriesByKey.get(key);
+      if (!match) return "";
+      const { entry, index } = match;
+      if (page.type === "story") {
+        return `
+      <article class="picture-book-page">
+        ${bookmarkButton(index, "挿絵")}
+        ${pictureBookScene(ctx, memory, page, entry)}
+        <p class="picture-book-text">${formatJapaneseCopy(page.text)}</p>
+      </article>`;
+      }
+      const image = entry.photoUrl || ctx.repo.assetUrl(entry.missionImage) || ctx.repo.assetUrl(page.image);
+      return `
+      <article class="picture-book-page picture-book-page--mission">
+        ${bookmarkButton(index, "写真")}
+        <img class="picture-book-mission-image" src="${esc(image)}" alt="">
+        <p class="picture-book-text">${formatJapaneseCopy(page.text)}</p>
+        ${page.prompt ? `<p class="picture-book-prompt">${formatJapaneseCopy(page.prompt)}</p>` : ""}
+      </article>`;
+    })
+    .join("") || `<p class="empty">きろくが ありません</p>`;
+}
 
 export const DiaryScreen = {
   render(ctx, { memory, fromPlay }) {
@@ -27,7 +72,7 @@ export const DiaryScreen = {
         </label>
         <p class="photo-choice-hint" data-photo-choice-hint>写真を はった じょうたい</p>
       </div>`;
-    const entries = memory.entries.map((e, entryIndex) => {
+    const scratchboardEntries = memory.entries.map((e, entryIndex) => {
       const colorFills = (e.colorFills ?? []).filter((fill) => memory.bookColorPhotos?.[fill.from]);
       const hasColorFills = colorFills.length > 0;
       // おはなしの挿絵は1枚の絵として見せる（キャプションなし）。
@@ -57,9 +102,17 @@ export const DiaryScreen = {
         <p class="diary-caption">${esc(e.caption)}</p>
       </div>`;
     }).join("") || `<p class="empty">きろくが ありません</p>`;
+    const book = ctx.repo.book(memory.bookId);
+    const pictureBookEntries = book
+      ? pictureBookPages(ctx, memory, book, bookmarkButton)
+      : `<p class="empty">きろくが ありません</p>`;
     return `
       <div class="screen diary">
         ${cover ? `<div class="diary-bg" aria-hidden="true" style="background-image:url('${cover}')"></div>` : ""}
+        <div class="diary-view-switch" role="tablist" aria-label="表示方法をえらぶ">
+          <button type="button" class="diary-view-button is-active" data-diary-view-button="scratchboard" aria-pressed="true">スクラッチボード</button>
+          <button type="button" class="diary-view-button" data-diary-view-button="picture-book" aria-pressed="false">絵本</button>
+        </div>
         <div class="diary-cover">
           <span class="diary-date">${esc(memory.date)}</span>
           <h2>${esc(memory.bookTitle)} の きろく</h2>
@@ -69,12 +122,32 @@ export const DiaryScreen = {
             <span class="diary-reader-text">${memory.reader.name ? `${esc(memory.reader.name)}が よんだよ` : "いっしょに よんだよ"}</span>
           </div>` : ""}
         </div>
-        ${entries}
+        <section class="diary-panel" data-diary-panel="scratchboard">
+          ${scratchboardEntries}
+        </section>
+        <section class="diary-panel picture-book-panel" data-diary-panel="picture-book" hidden>
+          ${pictureBookEntries}
+        </section>
         <button class="big-next" data-close>本棚にもどる</button>
       </div>`;
   },
   mount(ctx, params = {}, root) {
     const { view, memory, fromBookmarks } = params;
+    const viewButtons = [...root.querySelectorAll("[data-diary-view-button]")];
+    const viewPanels = [...root.querySelectorAll("[data-diary-panel]")];
+    const setDiaryView = (viewMode) => {
+      viewButtons.forEach((button) => {
+        const active = button.dataset.diaryViewButton === viewMode;
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+      viewPanels.forEach((panel) => {
+        panel.hidden = panel.dataset.diaryPanel !== viewMode;
+      });
+    };
+    viewButtons.forEach((button) => {
+      button.onclick = () => setDiaryView(button.dataset.diaryViewButton);
+    });
     root.querySelector("[data-close]").onclick = () => {
       if (fromBookmarks) {
         ctx.go("BOOKMARKS");

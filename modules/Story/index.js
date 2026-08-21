@@ -1,4 +1,4 @@
-import { playNarration, speakNarration, stopNarration, esc, formatJapaneseCopy, stage, characterLayer, layersMarkup, fillLayer, bookColorLayer, vehicleColorLayer, extractPhotoColor, fillArtworkHoles, recolorVehicleImage, openMissionCamera, completeMissionPhoto, createRepeatableSound } from "../shared/utils.js?v=suki-no-tane-final-switch-20260821";
+import { playNarration, speakNarration, stopNarration, esc, formatJapaneseCopy, stage, characterLayer, layersMarkup, fillLayer, bookColorLayer, vehicleColorLayer, extractPhotoColor, fillArtworkHoles, recolorVehicleImage, openMissionCamera, completeMissionPhoto, createRepeatableSound } from "../shared/utils.js?v=suki-no-tane-picture-book-20260821";
 import { avatarBuddy } from "../shared/avatars.js";
 import { localizeText } from "../shared/i18n.js";
 
@@ -36,18 +36,6 @@ function pageMarkup(ctx, page, { index, globalIndex, showFinish }) {
       ${characterLayer(character)}
       ${layersMarkup(ctx, page.layers)}
     </div>`;
-  const finalPhotoChoice = showFinish && (page.fillFrom || page.vehicleColorFrom || page.colorFills?.length)
-    ? `
-        <div class="photo-choice final-photo-choice" data-final-photo-choice>
-          <label class="photo-choice-switch">
-            <span class="photo-choice-side">写真で いっぱい</span>
-            <input type="checkbox" data-final-photo-blank-toggle aria-label="白いままにする">
-            <span class="photo-choice-slider" aria-hidden="true"></span>
-            <span class="photo-choice-side">白いまま</span>
-          </label>
-          <p class="photo-choice-hint" data-final-photo-choice-hint>写真を はった じょうたい</p>
-        </div>`
-    : "";
   const finishBtn = showFinish ? `<button class="big-next" data-finish>つぎへ ›</button>` : "";
 
   if (page.type === "mission") {
@@ -69,7 +57,6 @@ function pageMarkup(ctx, page, { index, globalIndex, showFinish }) {
       ${bookmark}
         ${scene}
         <p class="lead">${formatJapaneseCopy(page.text)}</p>
-        ${finalPhotoChoice}
         ${finishBtn}
       </div>`;
 }
@@ -161,21 +148,6 @@ export const StoryScreen = {
         onFallback: (dataUrl) => ctx.go("PREVIEW", { page, dataUrl }),
       });
     });
-    const finalPhotoChoice = root.querySelector("[data-final-photo-choice]");
-    if (finalPhotoChoice) {
-      const toggle = finalPhotoChoice.querySelector("[data-final-photo-blank-toggle]");
-      const hint = finalPhotoChoice.querySelector("[data-final-photo-choice-hint]");
-      const pageElement = finalPhotoChoice.closest(".flip-page");
-      toggle.addEventListener("change", () => {
-        const showBlank = toggle.checked;
-        pageElement.querySelectorAll(".fill, [data-book-color-art], [data-vehicle-art]").forEach((layer) => {
-          layer.style.visibility = showBlank ? "hidden" : "";
-        });
-        hint.textContent = showBlank
-          ? "いろを つけるまえの、白いままの えほん"
-          : "写真を はった じょうたい";
-      });
-    }
     root.querySelector("[data-finish]")?.addEventListener("click", () => ctx.advance());
 
     // 物語もミッションも同じ1冊として読み込む。ミッション未達成でも先のページを

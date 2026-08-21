@@ -3,6 +3,27 @@
 
 .diary { padding-top: 24px; gap: 26px; }
 
+.diary-view-switch {
+  position: sticky; top: 8px; z-index: 6;
+  display: flex; gap: 6px; width: min(100%, 620px); padding: 6px;
+  border: 1px solid rgba(58, 74, 63, .12); border-radius: 999px;
+  background: rgba(255, 255, 255, .92); box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+}
+.diary-view-button {
+  flex: 1; min-width: 0; border: 0; border-radius: 999px; padding: 11px 14px;
+  color: #4f6558; background: transparent; font: 900 15px/1.2 inherit;
+  cursor: pointer; transition: color 150ms, background 150ms, transform 120ms;
+}
+.diary-view-button.is-active {
+  color: #fff; background: var(--green); box-shadow: 0 3px 0 #4f9a45;
+}
+.diary-view-button:active { transform: translateY(2px); }
+.diary-view-button:focus-visible { outline: 3px solid var(--coral); outline-offset: 2px; }
+.diary-panel { width: 100%; display: flex; flex-direction: column; gap: 26px; }
+.diary-panel[hidden] { display: none; }
+.picture-book-panel { gap: 18px; }
+
 /* ページ背景にはその絵本の表紙をぼかして敷く。内容はその上に浮かせる */
 .diary-bg {
   position: absolute; inset: 0; z-index: 0;
@@ -85,7 +106,7 @@
   padding: 7px 6px 2px; cursor: pointer;
 }
 .photo-choice-side {
-  flex: 1; min-width: 0; color: var(--ink); font-size: 13px; font-weight: 900;
+  flex: 1; min-width: 0; color: #263d31; font-size: 13px; font-weight: 900;
   text-align: center; white-space: nowrap;
 }
 .photo-choice-switch input {
@@ -102,11 +123,11 @@
 .photo-choice-switch input:checked + .photo-choice-slider { background: var(--green); }
 .photo-choice-switch input:checked + .photo-choice-slider::after { transform: translateX(21px); }
 .photo-choice-switch input:focus-visible + .photo-choice-slider { outline: 3px solid var(--coral); outline-offset: 3px; }
-.photo-choice-hint { margin: 0 0 2px; color: #7a877e; font-size: 12px; font-weight: 700; text-align: center; }
+.photo-choice-hint { margin: 0 0 2px; color: #6a7e70; font-size: 12px; font-weight: 700; text-align: center; }
 
 /* おはなしの挿絵は、こどもが撮った写真をうしろに敷いてから挿絵を重ねる。
    透明にしてあるくるま・おうちの部分から写真がのぞく（おはなし画面の .scene と同じ重ね方）。 */
-.diary-scene { position: relative; border-radius: 14px; overflow: hidden; }
+.diary-scene { position: relative; border-radius: 14px; overflow: hidden; background: #fff; }
 .diary-scene .fill {
   position: absolute; inset: 0;
   width: 100%; height: 100%; object-fit: cover;
@@ -116,6 +137,27 @@
 .diary-scene .book-color-art {
   position: absolute; inset: 0; z-index: 2;
   width: 100%; height: 100%; object-fit: cover; opacity: 0; pointer-events: none;
+}
+.picture-book-page {
+  position: relative; width: 100%; box-sizing: border-box;
+  padding: 16px; border: 1px solid rgba(58, 74, 63, .1); border-radius: 22px;
+  background: rgba(255, 255, 255, .97); box-shadow: 0 4px 14px rgba(58, 74, 63, .12);
+}
+.picture-book-page::before { display: none; }
+.picture-book-scene { aspect-ratio: 4 / 3; }
+.picture-book-scene .art,
+.picture-book-scene .book-color-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.picture-book-scene .art { z-index: 1; }
+.picture-book-page .memory-bookmark { top: 10px; right: 10px; }
+.picture-book-mission-image { width: 100%; border-radius: 14px; display: block; background: #fff; }
+.picture-book-text {
+  margin: 14px 4px 0; color: #263d31; font-size: 19px; font-weight: 700;
+  line-height: 1.75; text-align: left; white-space: normal; line-break: strict;
+}
+.picture-book-prompt {
+  margin: 12px 0 0; padding: 12px 14px; border-radius: 16px;
+  color: #3f8838; background: #eef8e9; font-size: 16px; font-weight: 700;
+  line-height: 1.65; text-align: left; white-space: normal; line-break: strict;
 }
 .diary-caption { font-size: 18px; font-weight: 700; text-align: center; margin: 12px 0 4px; }
 
@@ -130,6 +172,13 @@
 
 @media (prefers-reduced-motion: reduce) {
   .diary-entry { animation: none; }
+}
+
+@media (max-width: 520px) {
+  .diary-view-button { padding-left: 8px; padding-right: 8px; font-size: 13px; }
+  .picture-book-page { padding: 12px; border-radius: 18px; }
+  .picture-book-text { margin-left: 2px; margin-right: 2px; font-size: 17px; }
+  .picture-book-prompt { font-size: 15px; }
 }
 
 /* 表紙の「よんだひと」チップ。読んだ当時のアバターを日記に残す */
