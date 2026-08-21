@@ -28,6 +28,10 @@
 .diary-panel[data-diary-panel="scratchboard"] .no-photo {
   background: #fff;
 }
+.diary-panel[data-diary-panel="scratchboard"] .diary-scene .fill,
+.diary-panel[data-diary-panel="scratchboard"] .diary-scene .book-color-art {
+  visibility: hidden;
+}
 .picture-book-panel .picture-book-scene,
 .picture-book-panel .picture-book-mission-image { background-color: #fff; }
 
