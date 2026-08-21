@@ -35,6 +35,8 @@ export class Session {
     this.bookId = null;
     this.pageIndex = 0;
     this.runMissions = [];    // 今回のプレイの達成 [{missionId, photoUrl, caption, missionText}]
+    this.completedMissionCount = 0; // Avatar解放に使う、端末での累計ミッション数
+    this.lastMissionCompletion = null; // 直前の達成（お祝い画面の解放通知用）
     this.memories = [];       // 完成した絵本日記（写真つき・IndexedDBから復元される）
     this.bookmarks = [];      // お気に入りのページ／日記エントリー（軽いメタ情報だけ）
     this.welcomeGuideSeen = false; // 最初のアプリ全体ガイドを見たか
@@ -123,6 +125,7 @@ export class Session {
   // つづきから始めるか最初からかは、本を選んだときに本人にたずねる（Select画面）。
   startBook(bookId, { restart = false } = {}) {
     this.bookId = bookId;
+    this.lastMissionCompletion = null;
     if (!restart && this.hasResume(bookId)) {
       this.pageIndex = this._savedRun.pageIndex ?? 0;
       this.runMissions = this._savedRun.missions ?? [];
@@ -147,13 +150,34 @@ export class Session {
   // missionImage はそのミッションの挿絵（写真がないとき日記の代わり絵に使う）
   // missionCharacter は写真の上に重ねるキャラクター（おはなしページと同じ演出）
   completeMission({ missionId, missionText, caption, photoUrl, missionImage, missionCharacter, vehicleColor, vehicleSourceUrl, vehicleTextureScale }) {
-    this.runMissions.push({ missionId, missionText, caption, photoUrl, missionImage, missionCharacter, vehicleColor, vehicleSourceUrl, vehicleTextureScale });
+    const mission = { missionId, missionText, caption, photoUrl, missionImage, missionCharacter, vehicleColor, vehicleSourceUrl, vehicleTextureScale };
+    const existingIndex = this.runMissions.findIndex((item) => item.missionId === missionId);
+    const isNewMission = existingIndex < 0;
+    if (isNewMission) {
+      this.runMissions.push(mission);
+      this.completedMissionCount += 1;
+    } else {
+      // 再撮影や保存の再試行では記録だけ新しくし、解放回数は増やさない。
+      this.runMissions[existingIndex] = mission;
+    }
+    this.lastMissionCompletion = {
+      missionId,
+      isNewMission,
+      completedMissionCount: this.completedMissionCount,
+    };
     this.activityDays.add(today()); // 外で活動した日として記録
     this._save();
     this._saveRun(); // 写真はすぐIndexedDBへ（リロードしても消えない）
+    return { ...this.lastMissionCompletion };
   }
   isMissionDone(missionId) {
     return this.runMissions.some((m) => m.missionId === missionId);
+  }
+  getCompletedMissionCount() { return this.completedMissionCount; }
+  takeLastMissionCompletion() {
+    const result = this.lastMissionCompletion;
+    this.lastMissionCompletion = null;
+    return result ? { ...result } : null;
   }
   // そのミッションでこどもが撮った写真。ページの透明部分（くるま・おうち・おはな）に
   // 敷いて見せるために使う（page.fillFrom）。
@@ -297,6 +321,7 @@ export class Session {
       memoryLog: this.memoryLog,
       dailyMission: { ...this.dailyMission },
       missionDoneDays: { ...this.missionDoneDays },
+      completedMissionCount: this.completedMissionCount,
       avatar: { ...this.avatar },
       resume: this._savedRun,
       settings: { ...settings },
@@ -391,6 +416,8 @@ export class Session {
     this.activityDays = new Set();
     this.memoryLog = [];
     this.missionDoneDays = {}; // ミッションの設定（dailyMission）は親の意図なので残す
+    this.completedMissionCount = 0;
+    this.lastMissionCompletion = null;
     this.avatar = { animal: null, color: "green", name: null, parts: null, paint: null };
     this.memories = [];
     this.bookmarks = [];
@@ -433,6 +460,7 @@ export class Session {
         memoryLog: this.memoryLog,
         dailyMission: this.dailyMission,
         missionDoneDays: this.missionDoneDays,
+        completedMissionCount: this.completedMissionCount,
         avatar: this.avatar,
         bookmarks: this.bookmarks,
         welcomeGuideSeen: this.welcomeGuideSeen,
@@ -460,6 +488,7 @@ export class Session {
       if (s.missionDoneDays && typeof s.missionDoneDays === "object" && !Array.isArray(s.missionDoneDays)) {
         this.missionDoneDays = s.missionDoneDays;
       }
+      this.completedMissionCount = Math.max(0, Math.floor(Number(s.completedMissionCount) || 0));
       if (s.avatar && typeof s.avatar === "object") {
         const savedName = String(s.avatar.name ?? "").trim().slice(0, 8);
         this.avatar = {

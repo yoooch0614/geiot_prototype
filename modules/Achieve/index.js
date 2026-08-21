@@ -1,5 +1,5 @@
 import { playCelebrationSound, esc } from "../shared/utils.js";
-import { avatarBuddy } from "../shared/avatars.js";
+import { avatarBuddy, avatarRewardForMissionCount } from "../shared/avatars.js";
 
 export const AchieveScreen = {
   render(ctx) {
@@ -22,7 +22,13 @@ export const AchieveScreen = {
   },
   mount(ctx, _params, root) {
     playCelebrationSound(ctx);
-    ctx.notify?.("ミッション かんりょう！");
+    const completion = ctx.session.takeLastMissionCompletion?.();
+    const reward = completion?.isNewMission
+      ? avatarRewardForMissionCount(completion.completedMissionCount)
+      : null;
+    ctx.notify?.(reward
+      ? `ミッション かんりょう！ ${reward.label}が つかえるようになったよ！`
+      : "ミッション かんりょう！");
 
     const layer = root.querySelector("[data-confetti]");
     const shapes = ["circle", "square", "star"];

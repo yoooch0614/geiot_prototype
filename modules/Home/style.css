@@ -197,6 +197,15 @@
 }
 .avatar-kicker { margin: 0 0 2px; color: var(--coral); font-size: 13px; font-weight: 900; }
 .avatar-title { margin: 0 0 12px; font-size: 21px; font-weight: 900; }
+.avatar-progress {
+  margin: -4px auto 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: #6e7e70;
+  background: #f3f8ee;
+  font-size: 12px;
+  font-weight: 900;
+}
 .avatar-preview {
   display: flex; align-items: center; justify-content: center;
   width: 92px; height: 92px;
@@ -212,6 +221,8 @@
   display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;
 }
 .avatar-choice {
+  position: relative;
+  overflow: hidden;
   display: flex; flex-direction: column; align-items: center; gap: 2px;
   width: calc((100% - 20px) / 3);
   min-width: 92px;
@@ -229,7 +240,30 @@
   border-color: var(--green);
   background: #eef9e6;
 }
+.avatar-choice.is-locked {
+  border-color: rgba(130, 142, 132, .18);
+  color: #8c968e;
+  background: #f5f6f2;
+  cursor: not-allowed;
+}
+.avatar-choice.is-locked .avatar-face,
+.avatar-choice.is-locked .avatar-choice-custom-face {
+  filter: grayscale(1);
+  opacity: .42;
+}
 .avatar-choice .avatar-face { width: 56px; height: 56px; }
+.avatar-lock-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 18px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  color: #8a7247;
+  background: #fff4cf;
+  font-size: 10px;
+  font-weight: 900;
+  white-space: nowrap;
+}
 .avatar-color-label { margin: 14px 0 8px; color: #7a877e; font-size: 13px; font-weight: 900; }
 .avatar-color-row { display: flex; justify-content: center; gap: 12px; }
 .avatar-color {
@@ -275,6 +309,8 @@
 }
 .avatar-part-row::-webkit-scrollbar { display: none; }
 .avatar-part-option {
+  position: relative;
+  overflow: hidden;
   flex: 0 0 auto;
   display: flex; align-items: center; justify-content: center;
   width: 58px; height: 58px;
@@ -290,6 +326,29 @@
   border-color: var(--green);
   background: #eef9e6;
   box-shadow: 0 0 0 2px rgba(107, 191, 89, .2);
+}
+.avatar-part-option.is-locked {
+  border-color: rgba(130, 142, 132, .18);
+  background: #f5f6f2;
+  cursor: not-allowed;
+}
+.avatar-part-option.is-locked .avatar-face {
+  filter: grayscale(1);
+  opacity: .38;
+}
+.avatar-lock-mark {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(255, 244, 207, .94);
+  font-size: 11px;
+  line-height: 1;
 }
 .avatar-part-option .avatar-face { width: 48px; height: 48px; }
 .avatar-part-option--skin { border-radius: 50%; width: 44px; height: 44px; }

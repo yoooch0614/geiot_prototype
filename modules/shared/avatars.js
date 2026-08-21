@@ -147,6 +147,76 @@ export const DEFAULT_PARTS = { skin: "mikan", ears: "maru", eyes: "maru", mouth:
 
 const PART_LABELS = { skin: "からだの いろ", ears: "みみ", eyes: "おめめ", mouth: "おくち", acc: "かざり" };
 
+// うさぎさんは最初から使える。ほかのどうぶつとパーツは、ミッションを
+// ひとつクリアするたびにひとつずつ増える（「交換」ではなく、ずっと使える解放）。
+// からだの色・まるみみ・まる目・にっこり・かざりなしは、オリジナルを
+// 作りはじめたときの基本パーツとして最初から使える。
+export const AVATAR_REWARDS = [
+  { missionCount: 1, type: "animal", animal: "cat", label: "ねこさん" },
+  { missionCount: 2, type: "animal", animal: "dog", label: "いぬさん" },
+  { missionCount: 3, type: "animal", animal: "tiger", label: "とらさん" },
+  { missionCount: 4, type: "animal", animal: "elephant", label: "ぞうさん" },
+  { missionCount: 5, type: "animal", animal: "custom", label: "じぶんで つくる" },
+  { missionCount: 6, type: "part", partKey: "skin", partId: "cream", label: "くりーむ色" },
+  { missionCount: 7, type: "part", partKey: "skin", partId: "sora", label: "そら色" },
+  { missionCount: 8, type: "part", partKey: "skin", partId: "momo", label: "もも色" },
+  { missionCount: 9, type: "part", partKey: "skin", partId: "wakaba", label: "わかば色" },
+  { missionCount: 10, type: "part", partKey: "skin", partId: "sumire", label: "すみれ色" },
+  { missionCount: 11, type: "part", partKey: "ears", partId: "pointy", label: "ねこみみ" },
+  { missionCount: 12, type: "part", partKey: "ears", partId: "long", label: "うさみみ" },
+  { missionCount: 13, type: "part", partKey: "ears", partId: "big", label: "ぞうみみ" },
+  { missionCount: 14, type: "part", partKey: "ears", partId: "tare", label: "たれみみ" },
+  { missionCount: 15, type: "part", partKey: "ears", partId: "tsuno", label: "つの" },
+  { missionCount: 16, type: "part", partKey: "eyes", partId: "kirakira", label: "きらきらのおめめ" },
+  { missionCount: 17, type: "part", partKey: "eyes", partId: "nikoniko", label: "にこにこのおめめ" },
+  { missionCount: 18, type: "part", partKey: "mouth", partId: "waai", label: "わーいのおくち" },
+  { missionCount: 19, type: "part", partKey: "mouth", partId: "neko", label: "ねこぐち" },
+  { missionCount: 20, type: "part", partKey: "mouth", partId: "zou", label: "ぞうのはな" },
+  { missionCount: 21, type: "part", partKey: "acc", partId: "ribbon", label: "リボン" },
+  { missionCount: 22, type: "part", partKey: "acc", partId: "kanmuri", label: "かんむり" },
+  { missionCount: 23, type: "part", partKey: "acc", partId: "happa", label: "はっぱ" },
+];
+
+function safeMissionCount(value) {
+  return Math.max(0, Math.floor(Number(value) || 0));
+}
+
+function rewardForTarget({ animal, partKey, partId } = {}) {
+  return AVATAR_REWARDS.find((reward) =>
+    animal
+      ? reward.type === "animal" && reward.animal === animal
+      : reward.type === "part" && reward.partKey === partKey && reward.partId === partId
+  ) ?? null;
+}
+
+// その Avatar の要素が何回目の Mission で解放されるか。0 は最初から使える。
+export function avatarUnlockMission({ animal, partKey, partId } = {}) {
+  if (animal === "rabbit") return 0;
+  if (partKey === "skin" && isHexColor(partId)) return 0;
+  if (partKey && DEFAULT_PARTS[partKey] === partId) return 0;
+  return rewardForTarget({ animal, partKey, partId })?.missionCount ?? null;
+}
+
+export function isAvatarAnimalUnlocked(animal, missionCount) {
+  const required = avatarUnlockMission({ animal });
+  return required !== null && safeMissionCount(missionCount) >= required;
+}
+
+export function isAvatarPartUnlocked(partKey, partId, missionCount) {
+  const required = avatarUnlockMission({ partKey, partId });
+  return required !== null && safeMissionCount(missionCount) >= required;
+}
+
+export function avatarRewardForMissionCount(missionCount) {
+  const count = safeMissionCount(missionCount);
+  return AVATAR_REWARDS.find((reward) => reward.missionCount === count) ?? null;
+}
+
+export function avatarNextReward(missionCount) {
+  const count = safeMissionCount(missionCount);
+  return AVATAR_REWARDS.find((reward) => reward.missionCount > count) ?? null;
+}
+
 function partOr(key, id) {
   if (key === "skin" && isHexColor(id)) return id; // じぶんで作った色
   return AVATAR_PARTS[key].some((p) => p.id === id) ? id : DEFAULT_PARTS[key];
@@ -335,14 +405,34 @@ export function avatarBuddy(avatar, extraClass = "") {
 // 保存後は onChange を呼ぶので、呼び出し元で表示を更新する。
 export function openAvatarPicker(ctx, root, { onChange } = {}) {
   const current = ctx.session.getAvatar();
-  let animal = current.animal;
+  const missionCount = ctx.session.getCompletedMissionCount?.() ?? 0;
+  let animal = current.animal && isAvatarAnimalUnlocked(current.animal, missionCount)
+    ? current.animal
+    : null;
   let color = current.color;
   let parts = { ...DEFAULT_PARTS, ...(current.parts ?? {}) };
+  Object.keys(DEFAULT_PARTS).forEach((key) => {
+    if (!isAvatarPartUnlocked(key, parts[key], missionCount)) parts[key] = DEFAULT_PARTS[key];
+  });
   let paint = safePaint(current.paint);   // いろぬり（canvasのPNGデータURL）
   let pencil = "#e5484d";                 // いま持っている いろえんぴつ
   let erasing = false;
   const NAME_MAX = 8;
   const PAINT_PENCILS = ["#e5484d", "#f5a34a", "#ffd23f", "#6bbf59", "#40c4b7", "#4f86e0", "#9b6ee8", "#f298ab", "#8a5a3a", "#ffffff"];
+
+  const lockBadge = (required) => required !== null && missionCount < required
+    ? `<span class="avatar-lock-badge">🔒 あと ${required - missionCount}こ</span>`
+    : "";
+  const rewardLabel = (target) => rewardForTarget(target)?.label ?? "このパーツ";
+  const notifyLocked = (target) => {
+    const required = avatarUnlockMission(target);
+    if (required === null || missionCount >= required) return;
+    ctx.notify?.(`あと ${required - missionCount}こ ミッションを クリアすると ${rewardLabel(target)}が つかえるよ！`);
+  };
+  const nextReward = avatarNextReward(missionCount);
+  const progressText = nextReward
+    ? `ミッション ${missionCount}こ クリア ／ あと ${nextReward.missionCount - missionCount}こで ${nextReward.label}`
+    : `ミッション ${missionCount}こ クリア！ ぜんぶ ひらいたよ！`;
 
   const modal = document.createElement("div");
   modal.className = "avatar-modal";
@@ -351,16 +441,21 @@ export function openAvatarPicker(ctx, root, { onChange } = {}) {
       <button type="button" class="avatar-close" data-avatar-close aria-label="とじる">×</button>
       <p class="avatar-kicker">じぶんを つくろう！</p>
       <h3 class="avatar-title">どの どうぶつに へんしん する？</h3>
+      <p class="avatar-progress" data-avatar-progress>${progressText}</p>
       <div class="avatar-preview" data-avatar-preview></div>
       <div class="avatar-animal-grid">
         ${AVATAR_ANIMALS.map((a) => `
-          <button type="button" class="avatar-choice" data-avatar-animal="${a.id}">
+          <button type="button" class="avatar-choice${isAvatarAnimalUnlocked(a.id, missionCount) ? "" : " is-locked"}" data-avatar-animal="${a.id}"
+            aria-disabled="${!isAvatarAnimalUnlocked(a.id, missionCount)}">
             ${avatarSvg(a.id)}
             <span>${a.label}</span>
+            ${lockBadge(avatarUnlockMission({ animal: a.id }))}
           </button>`).join("")}
-        <button type="button" class="avatar-choice avatar-choice--custom" data-avatar-animal="custom">
+        <button type="button" class="avatar-choice avatar-choice--custom${isAvatarAnimalUnlocked("custom", missionCount) ? "" : " is-locked"}" data-avatar-animal="custom"
+          aria-disabled="${!isAvatarAnimalUnlocked("custom", missionCount)}">
           <span class="avatar-choice-custom-face" data-custom-face></span>
           <span>じぶんで つくる</span>
+          ${lockBadge(avatarUnlockMission({ animal: "custom" }))}
         </button>
       </div>
       <div class="avatar-parts" data-avatar-parts hidden></div>
@@ -410,14 +505,19 @@ export function openAvatarPicker(ctx, root, { onChange } = {}) {
       <div class="avatar-part-group">
         <p class="avatar-part-label">${PART_LABELS[key]}</p>
         <div class="avatar-part-row" data-part-row="${key}">
-          ${AVATAR_PARTS[key].map((option) => key === "skin"
-            ? `<button type="button" class="avatar-part-option avatar-part-option--skin${parts.skin === option.id ? " is-selected" : ""}"
+          ${AVATAR_PARTS[key].map((option) => {
+            const unlocked = isAvatarPartUnlocked(key, option.id, missionCount);
+            const lock = !unlocked ? `<span class="avatar-lock-mark" aria-hidden="true">🔒</span>` : "";
+            return key === "skin"
+            ? `<button type="button" class="avatar-part-option avatar-part-option--skin${parts.skin === option.id ? " is-selected" : ""}${unlocked ? "" : " is-locked"}"
                 data-part-key="skin" data-part-id="${option.id}" style="background:${option.value}"
-                aria-label="${option.label}"></button>`
-            : `<button type="button" class="avatar-part-option${parts[key] === option.id ? " is-selected" : ""}"
-                data-part-key="${key}" data-part-id="${option.id}" aria-label="${option.label}">
+                aria-label="${option.label}" aria-disabled="${!unlocked}">${lock}</button>`
+            : `<button type="button" class="avatar-part-option${parts[key] === option.id ? " is-selected" : ""}${unlocked ? "" : " is-locked"}"
+                data-part-key="${key}" data-part-id="${option.id}" aria-label="${option.label}" aria-disabled="${!unlocked}">
                 ${avatarSvg({ animal: "custom", parts: { ...parts, [key]: option.id } })}
-              </button>`).join("")}
+                ${lock}
+              </button>`;
+          }).join("")}
           ${key === "skin" ? `
             <span class="avatar-part-option avatar-part-option--skin avatar-color--custom${isHexColor(parts.skin) ? " is-selected" : ""}" title="じぶんの いろ">
               <span class="avatar-custom-fill"${isHexColor(parts.skin) ? ` style="background:${parts.skin}"` : ""}></span>
@@ -453,6 +553,11 @@ export function openAvatarPicker(ctx, root, { onChange } = {}) {
     });
     partsBox.querySelectorAll("[data-part-key]").forEach((button) => {
       button.onclick = () => {
+        const target = { partKey: button.dataset.partKey, partId: button.dataset.partId };
+        if (!isAvatarPartUnlocked(target.partKey, target.partId, missionCount)) {
+          notifyLocked(target);
+          return;
+        }
         parts = { ...parts, [button.dataset.partKey]: button.dataset.partId };
         draw();
       };
@@ -557,7 +662,11 @@ export function openAvatarPicker(ctx, root, { onChange } = {}) {
       : `<span class="avatar-preview-empty" aria-hidden="true">？</span>`;
     customFacePreview.innerHTML = avatarSvg({ animal: "custom", parts, paint });
     modal.querySelectorAll("[data-avatar-animal]").forEach((button) => {
+      const target = { animal: button.dataset.avatarAnimal };
+      const unlocked = isAvatarAnimalUnlocked(target.animal, missionCount);
       button.classList.toggle("is-selected", button.dataset.avatarAnimal === animal);
+      button.classList.toggle("is-locked", !unlocked);
+      button.setAttribute("aria-disabled", String(!unlocked));
     });
     modal.querySelectorAll("[data-avatar-color]").forEach((button) => {
       button.classList.toggle("is-selected", button.dataset.avatarColor === color);
@@ -567,11 +676,19 @@ export function openAvatarPicker(ctx, root, { onChange } = {}) {
     if (isHexColor(color)) modal.querySelector("[data-color-fill]").style.background = color;
     partsBox.hidden = animal !== "custom";
     if (animal === "custom") drawParts();
-    saveButton.disabled = !animal; // どうぶつを えらぶまで へんしんできない
+    saveButton.disabled = !animal || !isAvatarAnimalUnlocked(animal, missionCount); // どうぶつを えらぶまで へんしんできない
   };
 
   modal.querySelectorAll("[data-avatar-animal]").forEach((button) => {
-    button.onclick = () => { animal = button.dataset.avatarAnimal; draw(); };
+    button.onclick = () => {
+      const target = { animal: button.dataset.avatarAnimal };
+      if (!isAvatarAnimalUnlocked(target.animal, missionCount)) {
+        notifyLocked(target);
+        return;
+      }
+      animal = target.animal;
+      draw();
+    };
   });
   modal.querySelectorAll("[data-avatar-color]").forEach((button) => {
     button.onclick = () => { color = button.dataset.avatarColor; draw(); };
@@ -599,6 +716,10 @@ export function openAvatarPicker(ctx, root, { onChange } = {}) {
 
   saveButton.onclick = () => {
     if (!animal) return;
+    if (!isAvatarAnimalUnlocked(animal, missionCount)) {
+      notifyLocked({ animal });
+      return;
+    }
     const name = nameInput.value.trim().slice(0, NAME_MAX);
     ctx.session.setAvatar({
       animal, color, name,
