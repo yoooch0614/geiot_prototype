@@ -37,6 +37,8 @@ html, body {
   background: radial-gradient(120% 80% at 50% -10%, #ffffff 0%, var(--paper) 55%);
   font-family: var(--font); color: var(--ink);
   -webkit-font-smoothing: antialiased;
+  /* 手机浏览器不要把连续两次轻触识别成双击放大；双指缩放仍可用。 */
+  touch-action: manipulation;
 }
 .app {
   height: 100dvh;
@@ -44,6 +46,7 @@ html, body {
   width: auto;
   margin: 0 auto;
   position: relative;
+  touch-action: manipulation;
 }
 
 .screen {
@@ -51,7 +54,9 @@ html, body {
   padding: max(18px, env(safe-area-inset-top)) 18px max(18px, env(safe-area-inset-bottom));
   display: flex; flex-direction: column; gap: 16px; position: relative;
   overflow: auto;
+  touch-action: manipulation;
 }
+.screen .stf__parent { touch-action: manipulation; }
 .screen.center { justify-content: center; align-items: center; text-align: center; }
 .page--in { animation: pageIn 420ms cubic-bezier(0.22,1,0.36,1); }
 @keyframes pageIn { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: none; } }
@@ -143,8 +148,14 @@ body[data-animations="off"] *::after {
 }
 
 /* ── 全体の仕上げ ───────────────────── */
-/* iOSでボタン連打時に文字が選択されて青くなるのを防ぐ */
-button { -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
+/* iOSでボタン連打時に文字が選択されて青くなるのと、ダブルタップ拡大を防ぐ */
+button, a, [role="button"] {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+input, select, textarea { touch-action: manipulation; }
 
 @media (prefers-reduced-motion: reduce) {
   .splash-icon, .splash-dots i { animation: none; }

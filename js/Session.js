@@ -342,6 +342,7 @@ export class Session {
           missionText: m.missionText,
           missionImage: m.missionImage,
           missionCharacter: m.missionCharacter,
+          vehicleColor: m.vehicleColor || null,
         });
       }
     }

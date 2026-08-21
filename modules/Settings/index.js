@@ -7,6 +7,7 @@ import {
   isNarrationEnabled,
   setNarrationEnabled,
 } from "../shared/utils.js";
+import { localizeText, localizeUi, t } from "../shared/i18n.js";
 
 function defaultBackTo(ctx) {
   if (ctx.session.mode === "parent") return "PARENT";
@@ -23,7 +24,7 @@ function toggleMarkup(key, label, description, enabled, badge = "") {
       </div>
       <button type="button" class="settings-switch${enabled ? " is-on" : ""}"
         data-setting-toggle="${key}" role="switch" aria-checked="${enabled}">
-        ${enabled ? "オン" : "オフ"}
+        ${enabled ? t("common.on") : t("common.off")}
       </button>
     </div>`;
 }
@@ -46,15 +47,15 @@ function selectMarkup(key, label, description, value, options) {
 
 function themeMarkup(value) {
   const choices = [
-    { value: "day", label: "昼", icon: "☀", iconClass: "sun" },
-    { value: "auto", label: "自動", icon: "◐", iconClass: "auto" },
-    { value: "night", label: "夜", icon: "☾", iconClass: "moon" },
+    { value: "day", label: t("settings.day"), icon: "☀", iconClass: "sun" },
+    { value: "auto", label: t("settings.auto"), icon: "◐", iconClass: "auto" },
+    { value: "night", label: t("settings.night"), icon: "☾", iconClass: "moon" },
   ];
   return `
     <div class="settings-row settings-row--theme">
       <div class="settings-copy">
-        <strong>テーマ</strong>
-        <span>自動・昼・夜から選べます</span>
+        <strong>${esc(t("settings.theme"))}</strong>
+        <span>${esc(t("settings.themeDescription"))}</span>
       </div>
       <div class="settings-theme-switch" data-theme-switch role="group" aria-label="テーマ">
         ${choices.map((choice) => `
@@ -69,9 +70,9 @@ function themeMarkup(value) {
 
 function openPinChange(ctx, root) {
   const stages = [
-    "現在の PIN を入力",
-    "新しい PIN を入力",
-    "新しい PIN をもう一度入力",
+    t("settings.pinCurrent"),
+    t("settings.pinNew"),
+    t("settings.pinConfirm"),
   ];
   const keys = [1, 2, 3, 4, 5, 6, 7, 8, 9, "", 0, "backspace"];
   let stage = 0;
@@ -105,7 +106,7 @@ function openPinChange(ctx, root) {
     modal.querySelector("[data-pin-stage]").textContent = stages[stage];
     dots.innerHTML = Array.from({ length: 4 }, (_, i) =>
       `<span class="pin-change-dot${i < buffer.length ? " is-filled" : ""}"></span>`).join("");
-    messageNode.textContent = message;
+    messageNode.textContent = localizeText(message);
     messageNode.className = `pin-change-message${messageType ? ` is-${messageType}` : ""}`;
   };
 
@@ -182,6 +183,7 @@ function openPinChange(ctx, root) {
     if (event.target === modal) close();
   };
   root.append(modal);
+  localizeUi(modal);
   draw();
 }
 
@@ -223,10 +225,10 @@ export const SettingsScreen = {
 
         <section class="settings-group" aria-labelledby="settings-language-title">
           <h3 id="settings-language-title">ことば</h3>
-          ${selectMarkup("language", "画面の言語", "翻訳版は順次追加予定です", language, [
+          ${selectMarkup("language", "画面の言語", "日本語・English・中文に切り替えられます（テスト中）", language, [
             { value: "ja", label: "日本語" },
-            { value: "zh-Hans", label: "中文（準備中）", disabled: true },
-            { value: "en", label: "English（準備中）", disabled: true },
+            { value: "en", label: "（テスト中）English" },
+            { value: "zh-Hans", label: "（测试中）中文" },
           ])}
         </section>
 
@@ -264,7 +266,7 @@ export const SettingsScreen = {
     const updateToggle = (button, enabled) => {
       button.classList.toggle("is-on", enabled);
       button.setAttribute("aria-checked", String(enabled));
-      button.textContent = enabled ? "オン" : "オフ";
+      button.textContent = enabled ? t("common.on") : t("common.off");
     };
 
     root.querySelectorAll("[data-setting-toggle]").forEach((button) => {
@@ -287,6 +289,7 @@ export const SettingsScreen = {
     };
     root.querySelector('[data-setting-select="language"]').onchange = (event) => {
       ctx.setLanguage(event.target.value);
+      ctx.go("SETTINGS", { from: backTo });
     };
 
     const exportButton = root.querySelector("[data-export-records]");
@@ -305,9 +308,9 @@ export const SettingsScreen = {
         link.click();
         link.remove();
         window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-        ctx.notify("きろくを書き出しました");
+        ctx.notify(t("settings.exportSuccess"));
       } catch (_) {
-        ctx.notify("書き出しに失敗しました", "error");
+        ctx.notify(t("settings.exportError"), "error");
       } finally {
         exportButton.disabled = false;
       }
@@ -332,7 +335,7 @@ export const SettingsScreen = {
       ctx.go("PRIVACY", { from: backTo });
     };
     root.querySelector("[data-reset-settings]").onclick = () => {
-      if (!window.confirm("設定を初期値にもどしますか？")) return;
+      if (!window.confirm(t("settings.resetConfirm"))) return;
       ctx.settings.reset();
       setBgmEnabled(true);
       setSoundEnabled(true);

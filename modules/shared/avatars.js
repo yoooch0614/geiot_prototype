@@ -8,6 +8,7 @@
  * おはなし画面・お祝い画面・絵本日記にも登場する（avatarBuddy）。
  */
 import { esc } from "./utils.js";
+import { localizeUi } from "./i18n.js";
 
 export const AVATAR_ANIMALS = [
   { id: "elephant", label: "ぞうさん" },
@@ -446,6 +447,7 @@ export function openAvatarPicker(ctx, root, { onChange } = {}) {
           <button type="button" class="avatar-paint-tool" data-paint-clear>ぜんぶ けす</button>
         </div>
       </div>`;
+    localizeUi(partsBox);
     partsBox.querySelectorAll("[data-part-row]").forEach((row) => {
       if (scrolls.has(row.dataset.partRow)) row.scrollLeft = scrolls.get(row.dataset.partRow);
     });
@@ -612,5 +614,6 @@ export function openAvatarPicker(ctx, root, { onChange } = {}) {
   };
 
   root.appendChild(modal);
+  localizeUi(modal);
   draw();
 }

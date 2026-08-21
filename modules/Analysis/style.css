@@ -429,6 +429,28 @@
   font-size: 10px;
 }
 
+/* 夜間は昼用の淡い候補カードと灰色の補助文字をそのまま使うと、
+   職業名が背景に埋もれるため、夜用の濃いカードと明るい文字に切り替える。 */
+body.night-theme .analysis-work-style-source,
+body.night-theme .analysis-work-style-note,
+body.night-theme .analysis-work-style-empty {
+  color: #b9cbe2;
+}
+body.night-theme .analysis-work-style-list li {
+  border-color: rgba(120, 211, 155, .28);
+  background: #223957;
+}
+body.night-theme .analysis-work-style-rank {
+  color: #f2fff7;
+  background: #3d8d68;
+}
+body.night-theme .analysis-work-style-copy b {
+  color: #f4f8ff;
+}
+body.night-theme .analysis-work-style-copy small {
+  color: #aebfda;
+}
+
 /* アイコン共通の土台 */
 .trait-icon {
   position: relative;

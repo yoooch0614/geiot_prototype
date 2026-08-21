@@ -10,9 +10,12 @@ import { Settings } from "./Settings.js";
 import { Screens } from "./screens.js";
 import {
   unlockAudio, preloadAudio, playAudio, playBgm, stopBgm,
-  stabilizeJapaneseText, CELEBRATION_SOUNDS, CLICK_SOUND, HOME_BGM, HOME_NIGHT_BGM,
+  stabilizeJapaneseText,
+  setEmbeddedAudioEnabled,
+  CELEBRATION_SOUNDS, CLICK_SOUND, HOME_BGM, HOME_NIGHT_BGM,
 } from "../modules/shared/utils.js";
-import { loadWorkStyles } from "../modules/Analysis/workStyles.js";
+import { loadBigFiveData } from "../modules/Analysis/workStyles.js";
+import { localizeText, localizeUi, t } from "../modules/shared/i18n.js";
 
 // BGMを流す画面。トップ（MODE）・あそびえらび（HOME）・本だな（SELECT）の3つ。
 // 絵本を読みはじめたら止める（おはなしの音やページめくり音の邪魔になるため）。
@@ -97,7 +100,7 @@ function showToast(message, type = "success") {
   toast.dataset.appToast = "";
   toast.setAttribute("role", "status");
   toast.setAttribute("aria-live", "polite");
-  toast.textContent = message;
+  toast.textContent = localizeText(message);
   document.body.append(toast);
   requestAnimationFrame(() => toast.classList.add("is-visible"));
   window.setTimeout(() => {
@@ -154,9 +157,33 @@ function setAnimationsEnabled(enabled) {
 }
 
 function setLanguage(value) {
-  Settings.set("language", value);
+  const language = Settings.set("language", value);
   applyDisplaySettings();
+  return language;
 }
+
+// touch-action がない古いモバイルブラウザ向けの二重タップ拡大ガード。
+// 同じ場所への短時間の2回目だけを抑止し、通常のスクロール・スワイプ・
+// 離れた場所への連続タップはそのまま通す。CSS側で双指ズームは許可している。
+function installDoubleTapZoomGuard() {
+  let lastTap = null;
+  document.addEventListener("touchend", (event) => {
+    if (event.defaultPrevented || event.changedTouches.length !== 1) return;
+    const touch = event.changedTouches[0];
+    const now = Date.now();
+    const isDoubleTap = lastTap &&
+      now - lastTap.time < 320 &&
+      Math.hypot(touch.clientX - lastTap.x, touch.clientY - lastTap.y) < 32;
+    if (isDoubleTap) {
+      event.preventDefault();
+      lastTap = null;
+      return;
+    }
+    lastTap = { time: now, x: touch.clientX, y: touch.clientY };
+  }, { passive: false });
+}
+
+installDoubleTapZoomGuard();
 
 function scheduleThemeSync() {
   if (themeTimer) window.clearTimeout(themeTimer);
@@ -204,7 +231,7 @@ document.addEventListener("visibilitychange", () => {
 const ctx = {
   repo,
   session,
-  workStyles: null,
+  bigFiveData: null,
   settings: Settings,
   els: { camera: document.getElementById("camera-input") },
   go,
@@ -214,6 +241,7 @@ const ctx = {
   setFontSize,
   setAnimationsEnabled,
   setLanguage,
+  t,
   setThemeMode,
   unlockParent: unlockParentSession,
   lockParent: lockParentSession,
@@ -232,6 +260,7 @@ function go(name, params = {}) {
   root.querySelector(".screen")?.classList.add("page--in"); // 画面切り替えの入場アニメを全画面に統一
   screen.mount?.(ctx, params, root);
   currentScreen = screen;
+  localizeUi(root);
   root.scrollTop = 0;
   root.querySelector(".screen")?.scrollTo(0, 0);
 
@@ -265,6 +294,14 @@ function advance() {
   window.addEventListener(type, unlockAudio, { once: true, capture: true })
 );
 
+// company website の speaker と、埋め込みアプリ側の音声を同期する。
+window.addEventListener("message", (event) => {
+  if (event.origin !== window.location.origin || event.source !== window.parent) return;
+  if (event.data?.type !== "pictupath-site-sound") return;
+  const enabled = setEmbeddedAudioEnabled(event.data.enabled);
+  if (enabled) unlockAudio();
+});
+
 // ボタンを押した手ごたえのクリック音。画面ごとに書くと付け忘れるので、ここでまとめて拾う。
 // 指を離すのを待たず、押した瞬間（pointerdown）に鳴らしたほうが反応がよく感じられる。
 document.addEventListener("pointerdown", (e) => {
@@ -285,16 +322,16 @@ async function boot() {
   try {
     // コンテンツの読み込みと、保存済みデータ（思い出・読みかけの本）の復元を並行で待つ。
     // session.restore() は失敗しても例外を出さない（保存が効かないだけで動く）。
-    const workStylesPromise = loadWorkStyles().catch((error) => {
-      console.warn("Work Styles の参照データを読み込めませんでした", error);
+    const bigFiveDataPromise = loadBigFiveData().catch((error) => {
+      console.warn("Big Five の参照データを読み込めませんでした", error);
       return null;
     });
-    const [, , loadedWorkStyles] = await Promise.all([
+    const [, , loadedBigFiveData] = await Promise.all([
       repo.load(),
       session.restore(),
-      workStylesPromise,
+      bigFiveDataPromise,
     ]);
-    ctx.workStyles = loadedWorkStyles;
+    ctx.bigFiveData = loadedBigFiveData;
   } catch (err) {
     showServerHint(err);
     return;

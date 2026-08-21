@@ -1,5 +1,6 @@
 import { esc } from "../shared/utils.js";
 import { openGuide } from "../shared/guide.js";
+import { t } from "../shared/i18n.js";
 
 const BOOKS_PER_SHELF = 4; // 1つの棚 = 2段 x 2冊
 
@@ -197,13 +198,13 @@ export const SelectScreen = {
     root.querySelector("[data-retry-content]")?.addEventListener("click", async (event) => {
       const button = event.currentTarget;
       button.disabled = true;
-      button.textContent = "読み込み中…";
+      button.textContent = t("select.loading");
       try {
         await ctx.repo.load();
         ctx.go("SELECT", _p);
       } catch (_) {
         button.disabled = false;
-        button.textContent = "もういちど";
+        button.textContent = t("common.retry");
         ctx.notify?.("読み込みに しっぱいしました", "error");
       }
     });

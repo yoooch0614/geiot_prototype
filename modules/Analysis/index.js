@@ -1,12 +1,37 @@
 import { esc } from "../shared/utils.js";
-import { buildWorkStyleAnalysis } from "./workStyles.js";
+import { buildBigFiveAnalysis } from "./workStyles.js";
 
 const ANALYSIS_TRAITS = [
-  { icon: "palette", label: "好きな色", value: "みずいろ・きいろ" },
+  { icon: "palette", label: "好きな色", value: "写真の色を記録すると反映" },
   { icon: "smile", label: "性格", value: "こうきしんおうせいで、やさしい" },
   { icon: "star", label: "好きなこと", value: "どうぶつ・のりもの・おえかき" },
   { icon: "book", label: "習い事の提案", value: "図工教室・リトミック" },
 ];
+
+const COLOR_FAMILY_LABELS = {
+  red: "あか系",
+  orange: "オレンジ系",
+  yellow: "きいろ系",
+  green: "みどり系",
+  cyan: "みずいろ系",
+  blue: "あお系",
+  purple: "むらさき系",
+  pink: "ピンク系",
+};
+
+function colorSummary(evidence = {}) {
+  return Object.entries(evidence.colorFamilies ?? {})
+    .sort(([, a], [, b]) => b - a)
+    .map(([family, count]) => `${COLOR_FAMILY_LABELS[family] || family}${count > 1 ? `×${count}` : ""}`)
+    .join("・");
+}
+
+function analysisTraits(analysis) {
+  const summary = colorSummary(analysis.evidence);
+  return ANALYSIS_TRAITS.map((trait) => trait.icon === "palette"
+    ? { ...trait, value: summary || trait.value }
+    : trait);
+}
 
 function normalizeFilters(params = {}) {
   const month = /^\d{4}-\d{2}$/.test(params.month ?? "") ? params.month : "";
@@ -126,11 +151,12 @@ function buildExportSvg(report, analysis) {
   const historyY = 1080;
   const historyHeight = 110 + historyRows.length * 58;
   const height = historyY + historyHeight + 100;
-  const axes5 = analysis.axes;
+  const axes = analysis.axes;
+  const traits = analysisTraits(analysis);
   const center = { x: 440, y: 710 };
   const radius = 190;
-  const angles = axes5.map((_, i) => (Math.PI * 2 * i) / axes5.length - Math.PI / 2);
-  const points = axes5.map((axis, i) => ({
+  const angles = axes.map((_, i) => (Math.PI * 2 * i) / axes.length - Math.PI / 2);
+  const points = axes.map((axis, i) => ({
     ...axis,
     x: center.x + Math.cos(angles[i]) * radius * axis.value / 100,
     y: center.y + Math.sin(angles[i]) * radius * axis.value / 100,
@@ -139,18 +165,18 @@ function buildExportSvg(report, analysis) {
   const rings = [0.2, 0.4, 0.6, 0.8, 1].map((scale) =>
     `<circle cx="${center.x}" cy="${center.y}" r="${(radius * scale).toFixed(1)}" class="export-ring" />`
   ).join("");
-  const axes = axes5.map((axis, i) => {
+  const axisLines = axes.map((axis, i) => {
     const x = center.x + Math.cos(angles[i]) * radius;
     const y = center.y + Math.sin(angles[i]) * radius;
     return `<line x1="${center.x}" y1="${center.y}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" class="export-axis" />`;
   }).join("");
-  const labels = axes5.map((axis, i) => {
+  const labels = axes.map((axis, i) => {
     const x = center.x + Math.cos(angles[i]) * (radius + 58);
     const y = center.y + Math.sin(angles[i]) * (radius + 58);
     return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" class="export-axis-label" text-anchor="middle" fill="${axis.color}">${xmlEscape(axis.label)}</text>
       <text x="${x.toFixed(1)}" y="${(y + 24).toFixed(1)}" class="export-axis-value" text-anchor="middle">${axis.value}</text>`;
   }).join("");
-  const traitRows = ANALYSIS_TRAITS.map((trait, i) => {
+  const traitRows = traits.map((trait, i) => {
     const y = 520 + i * 112;
     return `<rect x="900" y="${y - 38}" width="570" height="88" rx="18" class="export-row" />
       ${svgLines(trait.label, 930, y, 14, 24, "export-trait-label")}
@@ -207,18 +233,18 @@ function buildExportSvg(report, analysis) {
       <text x="1290" y="343" class="stat-label" text-anchor="middle">活動した日</text>
 
       <rect x="${chartCard.x}" y="${chartCard.y}" width="${chartCard.width}" height="${chartCard.height}" rx="24" fill="#ffffff" />
-      <text x="${chartCard.x + 32}" y="440" class="card-title">5つの ちから（${analysis.source === "activity" ? "活動から集計" : "デモ表示"}）</text>
-      ${rings}${axes}<polygon points="${polygon}" class="export-polygon" />${labels}
+      <text x="${chartCard.x + 32}" y="440" class="card-title">Big Five（${analysis.source === "activity" ? "活動から集計" : "デモ表示"}）</text>
+      ${rings}${axisLines}<polygon points="${polygon}" class="export-polygon" />${labels}
       <circle cx="${center.x}" cy="${center.y}" r="5" fill="#6c7b70" />
 
       <rect x="${traitsCard.x}" y="${traitsCard.y}" width="${traitsCard.width}" height="${traitsCard.height}" rx="24" fill="#ffffff" />
-      <text x="${traitsCard.x + 32}" y="440" class="card-title">お子さまの とくちょう（デモ表示）</text>
+      <text x="${traitsCard.x + 32}" y="440" class="card-title">お子さまの Big Five メモ</text>
       ${traitRows}
 
       <rect x="${padding}" y="${historyY}" width="${width - padding * 2}" height="${historyHeight}" rx="24" fill="#ffffff" />
       <text x="${padding + 32}" y="${historyY + 58}" class="card-title">活動履歴（実際の記録）</text>
       ${historyMarkup}
-      <text x="${padding}" y="${height - 42}" class="footnote">※ 特性分析と特性メモは現在プロトタイプのデモ値です。診断・評価ではありません。</text>
+      <text x="${padding}" y="${height - 42}" class="footnote">※ Big Five と職業候補は遊びや体験を振り返るための参考表示です。診断・評価ではありません。</text>
     </svg>`,
   };
 }
@@ -256,21 +282,21 @@ export const AnalysisScreen = {
     const s = ctx.session;
     const filters = normalizeFilters(params);
     const report = reportStats(s, filters);
-    const analysis = buildWorkStyleAnalysis(s, ctx.repo, ctx.workStyles);
+    const analysis = buildBigFiveAnalysis(s, ctx.repo, ctx.bigFiveData);
     const months = monthChoices(s, filters.month);
     const days = recordDates(s);
     const { completedCount, missionCount, week: streak } = report;
 
     // 軸ごとに色を持たせる。時計回りに配置され、conic-gradient の色停止位置ともここで揃えている。
-    const axes5 = analysis.axes;
+    const axes = analysis.axes;
 
     const size = 300;
     const center = size / 2;
     const radius = 84;
     const maxValue = 100;
 
-    const points = axes5.map((axis, index) => {
-      const angle = (Math.PI * 2 * index) / axes5.length - Math.PI / 2;
+    const points = axes.map((axis, index) => {
+      const angle = (Math.PI * 2 * index) / axes.length - Math.PI / 2;
       const distance = (axis.value / maxValue) * radius;
       const x = center + Math.cos(angle) * distance;
       const y = center + Math.sin(angle) * distance;
@@ -279,11 +305,11 @@ export const AnalysisScreen = {
 
     const polygonPoints = points.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
 
-    // グラデーション塗りは conic-gradient で作った円を、五角形の形に clip-path で
+    // グラデーション塗りは conic-gradient で作った円を、軸の数に合わせた多角形に clip-path で
     // 切り抜くことで表現する（各軸の色停止位置は points と同じ角度に揃えている）。
     const clipPercent = points.map((p) => `${((p.x / size) * 100).toFixed(1)}% ${((p.y / size) * 100).toFixed(1)}%`).join(", ");
     const gradientStops = points
-      .map((p, i) => `${p.color} ${((i / axes5.length) * 100).toFixed(1)}%`)
+      .map((p, i) => `${p.color} ${((i / axes.length) * 100).toFixed(1)}%`)
       .concat([`${points[0].color} 100%`])
       .join(", ");
 
@@ -317,7 +343,7 @@ export const AnalysisScreen = {
     }).join("");
 
     // 特性まとめのアイコンは絵文字ではなくCSS図形で表現する
-    const traits = ANALYSIS_TRAITS;
+    const traits = analysisTraits(analysis);
 
     const traitIconMarkup = (icon) => {
       if (icon === "palette") {
@@ -348,10 +374,11 @@ export const AnalysisScreen = {
         <span class="trait-value">${esc(t.value)}</span>
       </div>`).join("");
 
-    const workStyleSource = analysis.source === "activity"
-      ? "えほんの達成記録から、今の活動傾向を集計しています。"
-      : "活動記録がまだないため、デモ値で計算しています。";
-    const workStyleMatches = analysis.matches.length
+    const uploadedColorSummary = colorSummary(analysis.evidence);
+    const bigFiveSource = analysis.source === "activity"
+      ? `えほんの達成記録${uploadedColorSummary ? `とアップロード写真の色（${uploadedColorSummary}）` : ""}から、今の活動傾向を集計しています。`
+      : "活動記録がまだないため、デモ値で計算しています。写真をアップロードすると色も結果に反映されます。";
+    const occupationMatches = analysis.matches.length
       ? `<ol class="analysis-work-style-list">${analysis.matches.map((match) => `
           <li>
             <span class="analysis-work-style-rank">${match.score}%</span>
@@ -421,10 +448,10 @@ export const AnalysisScreen = {
           <div class="stat"><b>${report.activityDays}</b><span>活動した日</span></div>
         </div>
         <div class="analysis-card analysis-chart-card">
-          <h3 class="log-title">5つの ちから</h3>
+            <h3 class="log-title">Big Five（ビッグファイブ・5因子）</h3>
           <div class="analysis-chart-wrap" style="width:${size}px;height:${size}px;">
             <div class="analysis-chart-glow" style="clip-path: polygon(${clipPercent}); background: conic-gradient(from 0deg, ${gradientStops});"></div>
-            <svg viewBox="0 0 ${size} ${size}" class="analysis-chart" role="img" aria-label="子どもの特性分析">
+            <svg viewBox="0 0 ${size} ${size}" class="analysis-chart" role="img" aria-label="子どもの Big Five 5因子参考プロフィール">
               ${rings}
               ${axesLines}
               <polygon points="${polygonPoints}" class="analysis-polygon" />
@@ -440,9 +467,9 @@ export const AnalysisScreen = {
           <div class="trait-list">${traitsMarkup}</div>
         </div>
         <div class="analysis-card analysis-work-style-card">
-          <h3 class="log-title">仕事の スタイルとの つながり</h3>
-          <p class="analysis-work-style-source">${esc(workStyleSource)}</p>
-          ${workStyleMatches}
+          <h3 class="log-title">Big Five と職業の つながり</h3>
+          <p class="analysis-work-style-source">${esc(bigFiveSource)}</p>
+          ${occupationMatches}
           <p class="analysis-work-style-note">※ 将来の職業診断ではなく、遊びや体験と仕事の スタイルのつながりを見る参考表示です。</p>
         </div>
         <div class="analysis-card analysis-next-card">
@@ -455,13 +482,13 @@ export const AnalysisScreen = {
             ? report.log.map((item) => `<li><span>${esc(item.date)}</span><b>${esc(item.bookTitle)}</b><em>${item.count}こ たっせい</em></li>`).join("")
             : "<li class=\"analysis-history-empty\">まだ活動記録がありません。</li>"}</ul>
         </div>
-        <p class="analysis-disclaimer">※ 5つの ちからと仕事の スタイル候補はプロトタイプの参考表示です。診断・評価ではありません。</p>
+        <p class="analysis-disclaimer">※ Big Five と職業候補はプロトタイプの参考表示です。診断・評価ではありません。</p>
       </div>`;
   },
   mount(ctx, params = {}, root) {
     root.querySelector("[data-back]").onclick = () => ctx.go("SELECT");
     const report = reportStats(ctx.session, params);
-    const analysis = buildWorkStyleAnalysis(ctx.session, ctx.repo, ctx.workStyles);
+    const analysis = buildBigFiveAnalysis(ctx.session, ctx.repo, ctx.bigFiveData);
     root.querySelector("[data-export-png]").onclick = () => exportPng(report, analysis);
     root.querySelector("[data-export-pdf]").onclick = () => {
       const cleanup = () => document.body.classList.remove("is-printing-analysis");

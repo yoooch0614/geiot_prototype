@@ -1,5 +1,6 @@
 import { esc, fillArtworkHoles, recolorVehicleImage } from "../shared/utils.js";
 import { avatarBuddy } from "../shared/avatars.js";
+import { localizeText } from "../shared/i18n.js";
 
 export const DiaryScreen = {
   render(ctx, { memory, fromPlay }) {
@@ -80,7 +81,7 @@ export const DiaryScreen = {
         button.classList.toggle("is-active", active);
         button.textContent = active ? "★" : "☆";
         button.setAttribute("aria-pressed", String(active));
-        button.setAttribute("aria-label", active ? "お気に入りをはずす" : `${label}をお気に入りに追加`);
+        button.setAttribute("aria-label", localizeText(active ? "お気に入りをはずす" : `${label}をお気に入りに追加`));
       };
       button.onclick = (event) => {
         event.preventDefault();

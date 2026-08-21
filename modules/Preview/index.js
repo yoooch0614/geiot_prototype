@@ -1,4 +1,5 @@
 import { stage, composeMissionPhoto, extractPhotoColor } from "../shared/utils.js";
+import { t } from "../shared/i18n.js";
 
 export const PreviewScreen = {
   render(ctx, { page, dataUrl }) {
@@ -87,7 +88,7 @@ export const PreviewScreen = {
     root.querySelector("[data-keep]").onclick = async (event) => {
       const button = event.currentTarget;
       button.disabled = true;
-      button.textContent = "つくっているよ…";
+      button.textContent = t("preview.busy");
       try {
         const rect = positioner.getBoundingClientRect();
         const vehicleColor = await extractPhotoColor(dataUrl);
@@ -113,7 +114,7 @@ export const PreviewScreen = {
       } catch (error) {
         console.warn("写真の保存に失敗しました", error);
         button.disabled = false;
-        button.textContent = "✓ これにする";
+        button.textContent = t("preview.keep");
         ctx.notify?.("保存に しっぱいしました", "error");
       }
     };

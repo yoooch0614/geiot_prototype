@@ -1,3 +1,5 @@
+import { localizeText } from "../shared/i18n.js";
+
 let pinLockTimer = null;
 
 export const PinScreen = {
@@ -39,12 +41,12 @@ export const PinScreen = {
       buttons.forEach((button) => { button.disabled = locked; });
       status.classList.toggle("is-locked", locked);
       if (locked) {
-        status.textContent = `3回つづけてまちがえたので、${Math.ceil(remaining / 1000)}秒まってね`;
+        status.textContent = localizeText(`3回つづけてまちがえたので、${Math.ceil(remaining / 1000)}秒まってね`);
         if (!pinLockTimer) pinLockTimer = window.setInterval(syncLockState, 250);
       } else if (pinLockTimer) {
         window.clearInterval(pinLockTimer);
         pinLockTimer = null;
-        status.textContent = "もう一度ためしてね";
+        status.textContent = localizeText("もう一度ためしてね");
       }
     };
     draw();
@@ -73,7 +75,7 @@ export const PinScreen = {
               draw();
               syncLockState();
             } else {
-              status.textContent = `PINがちがいます（あと${ctx.session.pinAttemptsLeft()}回）`;
+              status.textContent = localizeText(`PINがちがいます（あと${ctx.session.pinAttemptsLeft()}回）`);
               setTimeout(() => {
                 if (!ctx.session.isPinLocked()) status.textContent = "";
               }, 900);

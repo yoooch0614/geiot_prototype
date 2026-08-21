@@ -196,9 +196,23 @@ const BGM_FADE = 0.4;      // 止めるときのフェードアウト（秒）�
 let bgmUrl = null;         // いま鳴らしたいBGM（画面が決める）
 let bgmSource = null;
 let bgmGain = null;
-let bgmEnabled = Settings.get("bgmEnabled") !== false;
-let soundEnabled = Settings.get("soundEnabled") !== false;
-let narrationEnabled = Settings.get("narrationEnabled") !== false;
+const appQuery = new URLSearchParams(window.location.search);
+const isCompanyEmbed = appQuery.get("source") === "company";
+let embeddedAudioEnabled = !isCompanyEmbed || appQuery.get("sound") !== "off";
+const storedAudioSettings = {
+  bgm: Settings.get("bgmEnabled") !== false,
+  sound: Settings.get("soundEnabled") !== false,
+  narration: Settings.get("narrationEnabled") !== false,
+};
+let embeddedAudioBackup = {
+  bgm: storedAudioSettings.bgm,
+  sound: storedAudioSettings.sound,
+  narration: storedAudioSettings.narration,
+};
+// company website の speaker が iframe product の BGM・効果音・朗読をまとめて制御する。
+let bgmEnabled = embeddedAudioEnabled && storedAudioSettings.bgm;
+let soundEnabled = embeddedAudioEnabled && storedAudioSettings.sound;
+let narrationEnabled = embeddedAudioEnabled && storedAudioSettings.narration;
 let speaking = false;
 
 // 鳴らす条件（曲が読み込み済み・AudioContextが動いている）がそろっていたら鳴らしはじめる。
@@ -257,8 +271,8 @@ export function isBgmEnabled() {
 }
 
 export function setBgmEnabled(enabled) {
-  bgmEnabled = Boolean(enabled);
-  Settings.set("bgmEnabled", bgmEnabled);
+  bgmEnabled = embeddedAudioEnabled && Boolean(enabled);
+  if (!isCompanyEmbed) Settings.set("bgmEnabled", bgmEnabled);
   if (bgmEnabled) startBgmIfReady();
   else stopBgmPlayback();
   return bgmEnabled;
@@ -269,8 +283,8 @@ export function isSoundEnabled() {
 }
 
 export function setSoundEnabled(enabled) {
-  soundEnabled = Boolean(enabled);
-  Settings.set("soundEnabled", soundEnabled);
+  soundEnabled = embeddedAudioEnabled && Boolean(enabled);
+  if (!isCompanyEmbed) Settings.set("soundEnabled", soundEnabled);
   return soundEnabled;
 }
 
@@ -279,10 +293,37 @@ export function isNarrationEnabled() {
 }
 
 export function setNarrationEnabled(enabled) {
-  narrationEnabled = Boolean(enabled);
-  Settings.set("narrationEnabled", narrationEnabled);
+  narrationEnabled = embeddedAudioEnabled && Boolean(enabled);
+  if (!isCompanyEmbed) Settings.set("narrationEnabled", narrationEnabled);
   if (!narrationEnabled) stopNarration();
   return narrationEnabled;
+}
+
+// company website の speaker から、埋め込みアプリの音声もまとめて切り替える。
+// 埋め込み中は設定を localStorage に保存せず、元アプリの音声設定を汚さない。
+export function setEmbeddedAudioEnabled(enabled) {
+  if (!isCompanyEmbed) return Boolean(enabled);
+
+  const next = Boolean(enabled);
+  if (next === embeddedAudioEnabled) return next;
+
+  if (!next) {
+    embeddedAudioBackup = {
+      bgm: bgmEnabled,
+      sound: soundEnabled,
+      narration: narrationEnabled,
+    };
+  }
+
+  embeddedAudioEnabled = next;
+  bgmEnabled = next && embeddedAudioBackup.bgm;
+  soundEnabled = next && embeddedAudioBackup.sound;
+  narrationEnabled = next && embeddedAudioBackup.narration;
+
+  if (bgmEnabled) startBgmIfReady();
+  else stopBgmPlayback();
+  if (!narrationEnabled) stopNarration();
+  return next;
 }
 
 // ボタンを押したときの音。押した手ごたえとして、どの画面のボタンでも鳴る（登録は app.js）。

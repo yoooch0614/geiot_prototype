@@ -1,5 +1,6 @@
 import { playNarration, speakNarration, stopNarration, esc, formatJapaneseCopy, stage, characterLayer, layersMarkup, fillLayer, bookColorLayer, vehicleColorLayer, extractPhotoColor, fillArtworkHoles, recolorVehicleImage, openCamera, createRepeatableSound } from "../shared/utils.js";
 import { avatarBuddy } from "../shared/avatars.js";
+import { localizeText } from "../shared/i18n.js";
 
 // 物語ページとミッションページを、いまのページを含む「1冊にできる範囲」で取り出す。
 // ・ end ページの手前で必ず区切る（達成の演出は別画面 COMPLETE が受け持つため）。
@@ -116,7 +117,7 @@ export const StoryScreen = {
         button.classList.toggle("is-active", active);
         button.textContent = active ? "★" : "☆";
         button.setAttribute("aria-pressed", String(active));
-        button.setAttribute("aria-label", active ? "しおりをはずす" : "しおりに追加");
+        button.setAttribute("aria-label", localizeText(active ? "しおりをはずす" : "しおりに追加"));
       };
       button.onclick = (event) => {
         event.preventDefault();
