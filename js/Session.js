@@ -149,8 +149,26 @@ export class Session {
   // photoUrl が null なら「タップ達成」（写真なし）
   // missionImage はそのミッションの挿絵（写真がないとき日記の代わり絵に使う）
   // missionCharacter は写真の上に重ねるキャラクター（おはなしページと同じ演出）
-  completeMission({ missionId, missionText, caption, photoUrl, missionImage, missionCharacter, vehicleColor, vehicleSourceUrl, vehicleTextureScale }) {
-    const mission = { missionId, missionText, caption, photoUrl, missionImage, missionCharacter, vehicleColor, vehicleSourceUrl, vehicleTextureScale };
+  completeMission({ missionId, missionText, caption, photoUrl, missionImage, missionCharacter, vehicleColor, vehicleSourceUrl, vehicleTextureScale, originalPage = null, completedPage = null }) {
+    // 元ページと完成ページは別オブジェクトで保存する。
+    // 確認画面のスクラッチボードが、写真を貼った後の画像を参照しないための境界。
+    const original = originalPage && typeof originalPage === "object"
+      ? { ...originalPage }
+      : { type: "mission", id: missionId, image: missionImage || null };
+    const completed = completedPage && typeof completedPage === "object"
+      ? { ...completedPage }
+      : {
+          type: "mission",
+          id: missionId,
+          image: photoUrl || missionImage || null,
+          photoUrl: photoUrl || null,
+        };
+    const mission = {
+      missionId, missionText, caption, photoUrl, missionImage, missionCharacter,
+      vehicleColor, vehicleSourceUrl, vehicleTextureScale,
+      originalPage: original,
+      completedPage: completed,
+    };
     const existingIndex = this.runMissions.findIndex((item) => item.missionId === missionId);
     const isNewMission = existingIndex < 0;
     if (isNewMission) {
@@ -350,14 +368,40 @@ export class Session {
       if (page.type === "story" && page.image) {
         // 挿絵の透明部分（くるま・おうち・おはな）に敷く写真も一緒に残しておく。
         // これが無いと、日記では透明のまま＝色のない絵に見えてしまう（おはなし画面と食い違う）。
-        entries.push({
-          kind: "story",
+        const originalPage = {
+          id: page.id,
+          type: "story",
+          image: page.image,
+        };
+        const completedPage = {
+          id: page.id,
+          type: "story",
           image: page.image,
           fillPhoto: page.fillFrom ? (done.get(page.fillFrom)?.photoUrl ?? null) : null,
           colorFills: page.colorFills ?? null,
+        };
+        entries.push({
+          kind: "story",
+          image: page.image,
+          // 後方互換用の従来フィールドは残し、新しい表示用データは分離して持つ。
+          fillPhoto: completedPage.fillPhoto,
+          colorFills: completedPage.colorFills,
+          originalPage,
+          completedPage,
         });
       } else if (page.type === "mission" && done.has(page.id)) {
         const m = done.get(page.id);
+        const originalPage = m.originalPage && typeof m.originalPage === "object"
+          ? { ...m.originalPage }
+          : { id: page.id, type: "mission", image: page.image };
+        const completedPage = m.completedPage && typeof m.completedPage === "object"
+          ? { ...m.completedPage }
+          : {
+              id: page.id,
+              type: "mission",
+              image: m.photoUrl || page.image,
+              photoUrl: m.photoUrl || null,
+            };
         entries.push({
           kind: "mission",
           missionId: page.id,
@@ -368,6 +412,8 @@ export class Session {
           missionImage: m.missionImage,
           missionCharacter: m.missionCharacter,
           vehicleColor: m.vehicleColor || null,
+          originalPage,
+          completedPage,
         });
       }
     }

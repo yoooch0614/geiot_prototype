@@ -2,10 +2,51 @@ import { esc, formatJapaneseCopy, fillArtworkHoles, recolorVehicleImage } from "
 import { avatarBuddy } from "../shared/avatars.js";
 import { localizeText } from "../shared/i18n.js";
 
+function resolveImage(ctx, value) {
+  if (!value) return null;
+  if (/^(?:data:|https?:|blob:)/i.test(value)) return value;
+  return ctx.repo.assetUrl(value);
+}
+
+function storedPage(value, fallback) {
+  if (typeof value === "string") return { ...fallback, image: value };
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    return { ...fallback, ...value };
+  }
+  return fallback;
+}
+
+function originalPageFor(entry, page) {
+  return storedPage(entry.originalPage, {
+    id: page.id,
+    type: page.type,
+    image: entry.kind === "story" ? (entry.image || page.image) : (entry.missionImage || page.image),
+  });
+}
+
+function completedPageFor(ctx, memory, entry, page) {
+  const fallback = page.type === "story"
+    ? {
+        id: page.id,
+        type: "story",
+        image: page.image,
+        fillPhoto: entry.fillPhoto || (page.fillFrom ? memory.bookColorPhotos?.[page.fillFrom] : null),
+        colorFills: entry.colorFills ?? page.colorFills ?? null,
+      }
+    : {
+        id: page.id,
+        type: "mission",
+        image: entry.photoUrl || entry.missionImage || page.image,
+        photoUrl: entry.photoUrl || null,
+      };
+  return storedPage(entry.completedPage, fallback);
+}
+
 function pictureBookScene(ctx, memory, page, entry) {
-  const source = ctx.repo.assetUrl(page.image);
-  const fillPhoto = entry?.fillPhoto || (page.fillFrom ? memory.bookColorPhotos?.[page.fillFrom] : null);
-  const colorFills = (page.colorFills ?? []).filter((fill) => memory.bookColorPhotos?.[fill.from]);
+  const completedPage = completedPageFor(ctx, memory, entry, page);
+  const source = resolveImage(ctx, completedPage.image || page.image);
+  const fillPhoto = completedPage.fillPhoto || (page.fillFrom ? memory.bookColorPhotos?.[page.fillFrom] : null);
+  const colorFills = (completedPage.colorFills ?? []).filter((fill) => memory.bookColorPhotos?.[fill.from]);
   return `
     <div class="storybook-scene${colorFills.length ? " has-book-color" : ""}"
       ${colorFills.length ? `data-memory-color data-memory-source="${source}" data-memory-fills='${esc(JSON.stringify(colorFills))}'` : ""}>
@@ -36,10 +77,12 @@ function pictureBookPages(ctx, memory, book, bookmarkButton) {
       </article>`;
       }
       const image = entry.photoUrl || ctx.repo.assetUrl(entry.missionImage) || ctx.repo.assetUrl(page.image);
+      const completedPage = completedPageFor(ctx, memory, entry, page);
+      const completedImage = resolveImage(completedPage.photoUrl || completedPage.image || page.image);
       return `
       <article class="storybook-page storybook-page--mission">
         ${bookmarkButton(index, "写真")}
-        <img class="storybook-mission-image" src="${esc(image)}" alt="">
+        <img class="storybook-mission-image" src="${esc(completedImage || image)}" alt="">
         <p class="storybook-text">${formatJapaneseCopy(page.text)}</p>
         ${page.prompt ? `<p class="storybook-prompt">${formatJapaneseCopy(page.prompt)}</p>` : ""}
       </article>`;
@@ -58,47 +101,32 @@ export const DiaryScreen = {
         aria-label="${bookmarked ? "お気に入りをはずす" : `${esc(label)}をお気に入りに追加`}"
         title="${bookmarked ? "お気に入りをはずす" : "お気に入りに追加"}">${bookmarked ? "★" : "☆"}</button>`;
     };
-    const photoChoice = (photoUrl, blankUrl) => `
-      <div class="photo-choice" data-photo-choice>
-        <div class="photo-scene">
-          <img data-photo-filled src="${photoUrl}" alt="しゃしんを はった えほん">
-          <img data-photo-blank src="${blankUrl}" alt="いろを つけるまえの えほん" hidden>
-        </div>
-        <label class="photo-choice-switch">
-          <span class="photo-choice-side">写真を はる</span>
-          <input type="checkbox" data-photo-blank-toggle aria-label="白いままにする">
-          <span class="photo-choice-slider" aria-hidden="true"></span>
-          <span class="photo-choice-side">白いまま</span>
-        </label>
-        <p class="photo-choice-hint" data-photo-choice-hint>写真を はった じょうたい</p>
-      </div>`;
     const scratchboardEntries = memory.entries.map((e, entryIndex) => {
-      const colorFills = (e.colorFills ?? []).filter((fill) => memory.bookColorPhotos?.[fill.from]);
-      const hasColorFills = colorFills.length > 0;
+      const page = e.originalPage || e.completedPage || {
+        id: e.kind === "story" ? e.image : e.missionId,
+        type: e.kind,
+        image: e.kind === "story" ? e.image : e.missionImage,
+      };
+      const originalPage = originalPageFor(e, page);
+      const originalImage = resolveImage(ctx, originalPage.image);
       // おはなしの挿絵は1枚の絵として見せる（キャプションなし）。
-      // 挿絵に透明な部分（くるま・おうち）があるページは、おはなし画面と同じように
-      // こどもの写真をうしろに敷く。敷かないと、そこだけ色のない絵のままになる。
+      // スクラッチボードでは、完成後の写真・色レイヤーを一切重ねず、元画像だけを見せる。
       if (e.kind === "story") {
         return `
       <div class="diary-entry">
         ${bookmarkButton(entryIndex, "挿絵")}
-        <div class="diary-scene${hasColorFills ? " has-book-color" : ""}"${hasColorFills ? ` data-memory-color data-memory-source="${ctx.repo.assetUrl(e.image)}" data-memory-fills='${esc(JSON.stringify(colorFills))}'` : ""}>
-          ${e.fillPhoto ? `<img class="fill" src="${e.fillPhoto}" alt="">` : ""}
-          <img class="art" src="${ctx.repo.assetUrl(e.image)}" alt="">
-          ${colorFills.map((_, i) => `<img class="book-color-art" data-memory-color-layer data-memory-fill-index="${i}" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="">`).join("")}
+        <div class="diary-scene">
+          <img class="art" src="${esc(originalImage || "")}" alt="">
         </div>
       </div>`;
       }
-      // 写真がないときは、そのミッションの挿絵（撮影画面に出ていた絵）を代わりに見せる
-      const fallback = ctx.repo.assetUrl(e.missionImage) || cover;
+      // ミッションも、写真を貼る前の元ページだけを表示する。
       return `
       <div class="diary-entry">
         ${bookmarkButton(entryIndex, "写真")}
-        ${e.photoUrl
-          ? photoChoice(e.photoUrl, fallback)
-          : `<div class="no-photo"${fallback ? ` style="background-image:url('${fallback}')"` : ""}>
-               <span class="no-photo-label"><span class="camera-icon" aria-hidden="true"></span> しゃしんなし</span>
-             </div>`}
+        <div class="photo-scene scratchboard-original-scene">
+          <img src="${esc(originalImage || cover || "")}" alt="しゃしんを はるまえの えほん">
+        </div>
         <p class="diary-caption">${esc(e.caption)}</p>
       </div>`;
     }).join("") || `<p class="empty">きろくが ありません</p>`;
@@ -179,21 +207,6 @@ export const DiaryScreen = {
         });
         sync();
       };
-    });
-    root.querySelectorAll("[data-photo-choice]").forEach((choice) => {
-      const toggle = choice.querySelector("[data-photo-blank-toggle]");
-      const filled = choice.querySelector("[data-photo-filled]");
-      const blank = choice.querySelector("[data-photo-blank]");
-      const hint = choice.querySelector("[data-photo-choice-hint]");
-      const sync = () => {
-        const showBlank = toggle.checked;
-        filled.hidden = showBlank;
-        blank.hidden = !showBlank;
-        hint.textContent = showBlank
-          ? "いろを つけるまえの、白いままの えほん"
-          : "写真を はった じょうたい";
-      };
-      toggle.addEventListener("change", sync);
     });
     root.querySelectorAll("[data-memory-color]").forEach(async (scene) => {
       const fills = JSON.parse(scene.dataset.memoryFills || "[]");
