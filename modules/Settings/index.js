@@ -254,7 +254,7 @@ export const SettingsScreen = {
           <button type="button" class="settings-reset" data-reset-settings>設定を初期値にもどす</button>
         </section>
 
-        <p class="settings-version">えほえほ web prototype</p>
+        <p class="settings-version">すきのたね web prototype</p>
       </div>`;
   },
 

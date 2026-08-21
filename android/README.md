@@ -1,4 +1,4 @@
-# えほえほ Android
+# すきのたね Android
 
 这个文件夹是由 Capacitor 生成的 Android 原生工程。
 

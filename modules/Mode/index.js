@@ -63,7 +63,7 @@ export const ModeScreen = {
           
         </div>
         <div class="title-logo">
-          <img class="title-icon" src="${icon}" alt="えほえほ" onerror="this.remove()">
+          <img class="title-icon" src="${icon}" alt="すきのたね" onerror="this.remove()">
         </div>
         <p class="title-ask">だれと はじめる？</p>
         <div class="mode-grid">

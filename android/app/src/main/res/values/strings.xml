@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">えほえほ</string>
-    <string name="title_activity_main">えほえほ</string>
+    <string name="app_name">すきのたね</string>
+    <string name="title_activity_main">すきのたね</string>
     <string name="package_name">com.geiot.ehoeho</string>
     <string name="custom_url_scheme">com.geiot.ehoeho</string>
 </resources>

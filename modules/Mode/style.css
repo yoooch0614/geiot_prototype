@@ -73,7 +73,7 @@
 }
 
 /* タイトルの白い表紙プレート */
-/* タイトルは logotitle_ver2.png（「えほえほ」の新しいロゴ入り）そのもの。
+/* タイトルは logotitle_ver2.png（新しいロゴ入り）そのもの。
    ぽんと現れたあと、空にふわふわ浮かびつづける。 */
 .title-logo {
   animation: logo-pop 560ms cubic-bezier(.34, 1.56, .64, 1) both;

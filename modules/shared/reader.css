@@ -214,6 +214,11 @@
   align-self: center; font-family: inherit; font-weight: 700; font-size: 15px; color: #7a877e;
   background: none; border: none; text-decoration: underline; cursor: pointer;
 }
+.final-photo-choice {
+  width: min(100%, 520px); margin: -4px auto 0; padding: 7px 10px 3px;
+  border-radius: 16px; background: #f4f8ee;
+}
+.final-photo-choice .photo-choice-switch { padding-top: 2px; }
 
 @media (max-width: 520px) {
   .guided-camera { padding-left: 8px; padding-right: 8px; }
