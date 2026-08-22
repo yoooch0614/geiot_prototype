@@ -7,8 +7,8 @@
 .teacher-rabbit-stage {
   position: relative;
   z-index: 2;
-  width: min(64vw, 250px);
-  height: min(48vh, 330px);
+  width: min(92vw, 360px);
+  height: min(45vh, 320px);
   margin: -4px auto 0;
   display: flex;
   align-items: flex-end;
@@ -18,7 +18,7 @@
 
 .teacher-rabbit-image {
   display: block;
-  width: 100%;
+  width: min(60vw, 230px);
   height: 100%;
   object-fit: contain;
   filter: drop-shadow(0 10px 12px rgba(58, 74, 63, .18));
@@ -27,19 +27,21 @@
 .teacher-rabbit-speech {
   position: absolute;
   top: 3%;
-  right: -18px;
+  right: 0;
   z-index: 3;
-  padding: 10px 18px;
+  max-width: min(72vw, 270px);
+  padding: 11px 18px;
   border: 3px solid #6bbf59;
   border-radius: 999px;
   color: #3a4a3f;
   background: #fff;
   box-shadow: 0 6px 14px rgba(58, 74, 63, .16);
-  font-size: clamp(22px, 6vw, 30px);
+  font-size: clamp(18px, 4.8vw, 28px);
   font-weight: 900;
-  line-height: 1;
-  white-space: nowrap;
-  transform: rotate(4deg);
+  line-height: 1.35;
+  text-align: center;
+  overflow-wrap: anywhere;
+  transform: rotate(2deg);
   animation: speechPop 0.55s cubic-bezier(.34, 1.56, .64, 1) .35s both;
 }
 
@@ -63,18 +65,8 @@
 }
 
 @keyframes speechPop {
-  0% { opacity: 0; transform: rotate(4deg) scale(.5); }
-  100% { opacity: 1; transform: rotate(4deg) scale(1); }
-}
-
-/* テキストはちょっと遅れてフワッと */
-.achieve .lead {
-  animation: leadIn 0.6s ease-out 0.3s both;
-}
-
-@keyframes leadIn {
-  from { transform: translateY(12px); opacity: 0; }
-  to   { transform: translateY(0); opacity: 1; }
+  0% { opacity: 0; transform: rotate(2deg) scale(.5); }
+  100% { opacity: 1; transform: rotate(2deg) scale(1); }
 }
 
 /* 中心から広がるキラキラ */
@@ -138,4 +130,23 @@
 @keyframes confettiFall {
   0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
   100% { transform: translateY(110vh) rotate(360deg); opacity: 0.85; }
+}
+
+/* 小さい手机屏幕では气泡横向缩小，文字自动换行但不会撑出屏幕。 */
+@media (max-width: 420px) {
+  .teacher-rabbit-stage {
+    width: min(94vw, 360px);
+    height: min(44vh, 300px);
+  }
+
+  .teacher-rabbit-speech {
+    right: 0;
+    max-width: min(72vw, 250px);
+    padding: 10px 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .teacher-rabbit-stage,
+  .teacher-rabbit-speech { animation: none; }
 }
