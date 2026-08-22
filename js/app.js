@@ -311,7 +311,10 @@ document.addEventListener("pointerdown", (e) => {
 function renderLoadingScreen() {
   root.innerHTML = `
     <div class="screen center splash" aria-live="polite">
-      <img class="splash-icon" src="content/assets/logotitle_ver2.png" alt="すきのたね">
+      <video class="splash-video" autoplay muted loop playsinline preload="metadata" poster="content/assets/logotitle_ver2.png">
+        <source src="logo%26title_move_short.mov" type="video/quicktime">
+        <img class="splash-icon" src="content/assets/logotitle_ver2.png" alt="すきのたね">
+      </video>
       <span class="splash-dots"><i></i><i></i><i></i></span>
       <p class="splash-label">じゅんび中…</p>
     </div>`;

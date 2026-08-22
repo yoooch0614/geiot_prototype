@@ -22,6 +22,7 @@
         "もよう"
       ],
       "image": "assets/niji/p2.png",
+      "photoMask": "assets/niji/masks/p2-mask.svg",
       "frame": { "x": 290, "y": 340, "width": 420, "height": 260, "radius": 20 },
       "vehicleColorFrom": "nm1",
       "vehicleRegion": { "x": 0.29, "y": 0.48, "width": 0.43, "height": 0.28 },
@@ -68,6 +69,7 @@
         "形"
       ],
       "image": "assets/niji/p5.png",
+      "photoMask": "assets/niji/masks/p5-mask.svg",
       "fillFrom": "nm1",
       "vehicleColorFrom": "nm1",
       "vehicleRegion": { "x": 0.00, "y": 0.43, "width": 0.37, "height": 0.34 },
@@ -114,6 +116,7 @@
         "自然"
       ],
       "image": "assets/niji/p8.png",
+      "photoMask": "assets/niji/masks/p8-mask.svg",
       "frame": { "x": 60, "y": 680, "width": 1330, "height": 330, "radius": 20 },
       "colorFills": [
         { "from": "nm1", "region": { "x": 0.70, "y": 0.50, "width": 0.27, "height": 0.21 } }

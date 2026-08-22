@@ -1,4 +1,4 @@
-import { playNarration, speakNarration, stopNarration, esc, formatJapaneseCopy, stage, characterLayer, layersMarkup, fillLayer, bookColorLayer, vehicleColorLayer, extractPhotoColor, fillArtworkHoles, recolorVehicleImage, openMissionCamera, completeMissionPhoto, createRepeatableSound } from "../shared/utils.js?v=suki-no-tane-original-completed-pages-20260821";
+import { playNarration, speakNarration, stopNarration, esc, formatJapaneseCopy, stage, characterLayer, layersMarkup, fillLayer, bookColorLayer, vehicleColorLayer, extractPhotoColor, fillArtworkHoles, recolorVehicleImage, openMissionCamera, completeMissionPhoto, createRepeatableSound } from "../shared/utils.js?v=suki-no-tane-mask-files-20260822";
 import { avatarBuddy } from "../shared/avatars.js";
 import { localizeText } from "../shared/i18n.js";
 
@@ -140,7 +140,10 @@ export const StoryScreen = {
       btn.onclick = () => openMissionCamera(ctx, page, {
         // カメラが起動した場合は、点線ガイドと同じ範囲をそのまま保存する。
         onGuidedCapture: async (dataUrl, guide) => {
-          await completeMissionPhoto(ctx, page, dataUrl, { captureWindow: guide.frame });
+          await completeMissionPhoto(ctx, page, dataUrl, {
+            captureWindow: guide.frame,
+            captureMask: guide.mask,
+          });
           ctx.notify?.("しゃしんを 保存したよ！");
           ctx.go("ACHIEVE", { page });
         },

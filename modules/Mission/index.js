@@ -1,4 +1,4 @@
-import { playNarration, esc, formatJapaneseCopy, stage, characterLayer, openMissionCamera, completeMissionPhoto } from "../shared/utils.js?v=suki-no-tane-original-completed-pages-20260821";
+import { playNarration, esc, formatJapaneseCopy, stage, characterLayer, openMissionCamera, completeMissionPhoto } from "../shared/utils.js?v=suki-no-tane-mask-files-20260822";
 
 export const MissionScreen = {
   render(ctx, { page }) {
@@ -22,7 +22,10 @@ export const MissionScreen = {
 
     root.querySelector("[data-shoot]").onclick = () => openMissionCamera(ctx, page, {
       onGuidedCapture: async (dataUrl, guide) => {
-        await completeMissionPhoto(ctx, page, dataUrl, { captureWindow: guide.frame });
+        await completeMissionPhoto(ctx, page, dataUrl, {
+          captureWindow: guide.frame,
+          captureMask: guide.mask,
+        });
         ctx.notify?.("しゃしんを 保存したよ！");
         ctx.go("ACHIEVE", { page });
       },

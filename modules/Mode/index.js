@@ -36,6 +36,7 @@ export const ModeScreen = {
   render(ctx) {
     const cat = ctx.repo.assetUrl("assets/char-cat.webp");
     const icon = ctx.repo.assetUrl("assets/logotitle_ver2.png");
+    const logoMotion = ctx.repo.assetUrl("../logo%26title_move_short.mov");
     const bird = ctx.repo.assetUrl("assets/bird.gif");
     // 1. 歩くきつねのGIFアセットを読み込む
     const fox = ctx.repo.assetUrl("assets/wolk_foxy.gif");
@@ -63,7 +64,10 @@ export const ModeScreen = {
           
         </div>
         <div class="title-logo">
-          <img class="title-icon" src="${icon}" alt="すきのたね" onerror="this.remove()">
+          <video class="title-icon title-video" autoplay muted loop playsinline preload="metadata" poster="${icon}" aria-label="すきのたね">
+            <source src="${logoMotion}" type="video/quicktime">
+            <img src="${icon}" alt="すきのたね">
+          </video>
         </div>
         <p class="title-ask">だれと はじめる？</p>
         <div class="mode-grid">

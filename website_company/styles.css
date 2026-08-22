@@ -225,6 +225,14 @@ blockquote br + span, blockquote br + em,
 .statement-signature { display: flex; flex-direction: column; gap: 4px; margin-top: 43px; color: var(--green-deep); }
 .statement-signature span { font: 700 12px var(--latin); letter-spacing: .2em; }
 .statement-signature small { color: #99a59e; font: 500 10px var(--latin); }
+.statement-motion { display: grid; grid-template-columns: minmax(0, 1.03fr) minmax(0, .97fr); align-items: center; max-width: 760px; margin: 48px auto 0; overflow: hidden; border: 1px solid rgba(29,100,73,.12); border-radius: 26px; background: rgba(255,255,255,.72); box-shadow: 0 16px 36px rgba(37,78,53,.07); text-align: left; }
+.statement-motion-media { min-width: 0; padding: 13px; background: linear-gradient(145deg, #e9f6eb, #f7fbf2); }
+.statement-motion-video { display: block; width: 100%; aspect-ratio: 1 / 1; height: auto; border-radius: 18px; background: #f3f8ef; object-fit: contain; box-shadow: inset 0 0 0 1px rgba(29,100,73,.08); }
+.statement-motion-copy { padding: 24px 28px 25px; }
+.statement-motion-copy .section-label { margin-bottom: 16px; }
+.statement-motion-copy h3 { margin: 0 0 16px; color: var(--ink); font-size: clamp(25px, 3.2vw, 38px); line-height: 1.14; }
+.statement-motion-copy h3 span { color: var(--green-deep); }
+.statement-motion-copy > p:last-child { max-width: 240px; margin: 0; color: var(--muted); font-size: 12px; line-height: 1.85; }
 .origin-note { display: flex; align-items: center; gap: 18px; max-width: 780px; margin: 43px auto 0; padding: 17px 20px; border: 1px solid rgba(29,100,73,.12); border-radius: 20px; background: rgba(255,255,255,.68); box-shadow: 0 12px 30px rgba(37,78,53,.06); text-align: left; }
 .origin-logo-wrap { display: flex; flex: 0 0 190px; align-items: center; }
 .origin-logo { display: block; width: 100%; height: auto; }
@@ -625,6 +633,12 @@ blockquote { position: relative; z-index: 1; margin: 0; color: var(--green-deep)
      vw-capped rather than fixed so it also holds at 360px / 320px. */
   :root[lang="en"] .statement h2, :root[lang="en"] .closing h2 { font-size: min(37px, 9.2vw); }
   .statement-text { font-size: 13px; text-align: left; }
+  .statement-motion { grid-template-columns: 1fr; margin-top: 34px; border-radius: 21px; }
+  .statement-motion-media { padding: 9px; }
+  .statement-motion-video { border-radius: 15px; }
+  .statement-motion-copy { padding: 20px 19px 23px; }
+  .statement-motion-copy h3 { font-size: clamp(26px, 8.2vw, 35px); }
+  .statement-motion-copy > p:last-child { max-width: none; font-size: 12px; }
   .product-section { padding-top: 52px; padding-bottom: 91px; }
   .section-heading { align-items: flex-start; flex-direction: column; gap: 15px; margin-bottom: 30px; }
   .section-heading h2 { font-size: clamp(31px, 9.8vw, 42px); line-height: 1.12; }

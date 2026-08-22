@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1448" height="1086" viewBox="0 0 1448 1086" aria-hidden="true">
+  <defs>
+    <g id="flower" fill="#fff">
+      <ellipse cx="0" cy="-24" rx="18" ry="29"/>
+      <ellipse cx="22.8" cy="-7.4" rx="18" ry="29" transform="rotate(72 22.8 -7.4)"/>
+      <ellipse cx="14.1" cy="19.4" rx="18" ry="29" transform="rotate(144 14.1 19.4)"/>
+      <ellipse cx="-14.1" cy="19.4" rx="18" ry="29" transform="rotate(216 -14.1 19.4)"/>
+      <ellipse cx="-22.8" cy="-7.4" rx="18" ry="29" transform="rotate(288 -22.8 -7.4)"/>
+      <circle cx="0" cy="0" r="16"/>
+    </g>
+  </defs>
+  <use href="#flower" xlink:href="#flower" x="108" y="766"/>
+  <use href="#flower" xlink:href="#flower" x="246" y="732"/>
+  <use href="#flower" xlink:href="#flower" x="428" y="780"/>
+  <use href="#flower" xlink:href="#flower" x="254" y="914"/>
+  <use href="#flower" xlink:href="#flower" x="590" y="874"/>
+  <use href="#flower" xlink:href="#flower" x="800" y="882"/>
+  <use href="#flower" xlink:href="#flower" x="1000" y="900"/>
+  <use href="#flower" xlink:href="#flower" x="1138" y="806"/>
+  <use href="#flower" xlink:href="#flower" x="1284" y="828"/>
+  <use href="#flower" xlink:href="#flower" x="1242" y="952"/>
+</svg>

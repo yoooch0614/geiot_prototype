@@ -1,4 +1,4 @@
-import { stage, composeMissionPhoto, extractPhotoColor } from "../shared/utils.js?v=suki-no-tane-original-completed-pages-20260821";
+import { stage, composeMissionPhoto, extractPhotoColor } from "../shared/utils.js?v=suki-no-tane-mask-files-20260822";
 import { t } from "../shared/i18n.js";
 
 export const PreviewScreen = {
