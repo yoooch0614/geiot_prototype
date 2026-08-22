@@ -207,20 +207,51 @@
   }
 }
 
-/* ---------- テキスト ---------- */
-.complete .lead {
-  font-size: 1.3em;
-  opacity: 1;
-}
-.complete .sub {
-  opacity: 0.85;
+/* ---------- 兔兔老师的完成对话 ---------- */
+.complete .teacher-rabbit-stage--complete {
+  width: min(92vw, 360px);
+  height: min(32vh, 230px);
+  margin: -8px auto 0;
 }
 
-.complete .lead.pop-in {
-  animation: leadIn 0.6s ease-out 0.75s both;
+.complete .teacher-rabbit-stage--complete .teacher-rabbit-image {
+  width: min(50vw, 190px);
 }
-.complete .sub.pop-in {
-  animation: leadIn 0.6s ease-out 0.9s both;
+
+.complete .teacher-rabbit-speech--complete {
+  top: 0;
+  right: 0;
+  max-width: min(78vw, 290px);
+  padding: 10px 14px;
+  font-size: clamp(16px, 4.2vw, 22px);
+  line-height: 1.35;
+  opacity: 1;
+  animation: none;
+}
+
+.complete .teacher-rabbit-speech-title,
+.complete .teacher-rabbit-speech-detail {
+  display: block;
+}
+
+.complete .teacher-rabbit-speech-title {
+  font-weight: 900;
+}
+
+.complete .teacher-rabbit-speech-detail {
+  margin-top: 5px;
+  font-size: .78em;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.complete .teacher-rabbit-speech--complete.pop-in {
+  animation: completeSpeechIn 0.6s ease-out 0.75s both;
+}
+
+@keyframes completeSpeechIn {
+  from { opacity: 0; transform: translateY(12px) rotate(2deg); }
+  to { opacity: 1; transform: translateY(0) rotate(2deg); }
 }
 
 @keyframes leadIn {
@@ -256,4 +287,15 @@
 
 .complete .next-btn:active {
   transform: scale(0.95);
+}
+
+@media (max-width: 420px) {
+  .complete .teacher-rabbit-stage--complete {
+    width: min(94vw, 360px);
+    height: min(31vh, 220px);
+  }
+
+  .complete .teacher-rabbit-speech--complete {
+    max-width: min(76vw, 250px);
+  }
 }

@@ -1,9 +1,13 @@
 import { esc, playCelebrationSound } from "../shared/utils.js";
 import { avatarBuddy } from "../shared/avatars.js";
 
+const TEACHER_RABBIT_ASSET = "content/assets/teacher-rabbit.png";
+
 export const CompleteScreen = {
   render(ctx, { page }) {
     const avatar = ctx.session.getAvatar();
+    const completionTitle = `${avatar.name ? `${esc(avatar.name)}、` : ""}1さつ よめたね！`;
+    const completionDetail = esc(page?.text || "");
     return `
       <div class="screen center complete">
         <div class="rays"></div>
@@ -16,9 +20,14 @@ export const CompleteScreen = {
             <div class="medal-inner"></div>
           </div>
         </div>
+        <div class="teacher-rabbit-stage teacher-rabbit-stage--complete">
+          <div class="teacher-rabbit-speech teacher-rabbit-speech--complete" role="status" aria-live="polite">
+            <span class="teacher-rabbit-speech-title">${completionTitle}</span>
+            ${completionDetail ? `<span class="teacher-rabbit-speech-detail">${completionDetail}</span>` : ""}
+          </div>
+          <img class="teacher-rabbit-image" src="${TEACHER_RABBIT_ASSET}" alt="戴眼镜的白色兔兔老师">
+        </div>
         ${avatarBuddy(avatar, "avatar-buddy--achieve")}
-        <p class="lead">${avatar.name ? `${esc(avatar.name)}、` : ""}1さつ よめたね！</p>
-        <p class="sub">${esc(page?.text || "")}</p>
         <button class="next-btn" data-next>つぎへ ›</button>
       </div>`;
   },
@@ -36,7 +45,7 @@ export const CompleteScreen = {
     requestAnimationFrame(() => {
       root
         .querySelectorAll(
-          ".medal-disc, .medal-tail, .rays, .ribbon-fly, .lead, .sub, .next-btn"
+          ".medal-disc, .medal-tail, .rays, .ribbon-fly, .teacher-rabbit-speech, .next-btn"
         )
         .forEach((el) => el.classList.add("pop-in"));
     });
