@@ -27,15 +27,11 @@ const themeMeta = document.querySelector('meta[name="theme-color"]');
 const repo = new ContentRepository();
 const session = new Session();
 
-// 同じ index.html 会同时被ブラウザ/Web と Capacitor App が使用する。
-// Web 端没有 Capacitor 原生桥接，因此保持静态 Logo；只有原生 App 才启用启动视频。
-const isNativeApp = (() => {
-  const capacitor = window.Capacitor;
-  if (typeof capacitor?.isNativePlatform === "function") {
-    return capacitor.isNativePlatform();
-  }
-  return typeof capacitor?.getPlatform === "function" && capacitor.getPlatform() !== "web";
-})();
+// 同じ index.html は Capacitor App、単独の Web アプリ、website_company の
+// 埋め込みプレビューで共有する。単独の App/Web は動画を再生し、
+// 公式サイト内の埋め込みだけは source=company で静止画にする。
+const isCompanyWebsiteEmbed = new URLSearchParams(window.location.search).get("source") === "company";
+const playSplashAnimation = !isCompanyWebsiteEmbed;
 
 const SPLASH_IMAGE = "content/assets/logotitle_ver2.png";
 const SPLASH_VIDEO = "logo%26title_move_short.mov";
@@ -409,11 +405,11 @@ function waitForSplashVideo(video) {
 }
 
 function renderLoadingScreen() {
-  // 启动视频只在一次 App 启动中创建一次。后续重新进入 MODE 或失败重试都不会重新播放。
+  // 启动视频只在一次 App/Web 启动中创建一次。后续重新进入 MODE 或失败重试都不会重新播放。
   if (!startupSplashStarted) {
     startupSplashStarted = true;
     if (!root.querySelector(".splash")) root.innerHTML = staticSplashMarkup();
-    if (isNativeApp) splashAnimationPromise = waitForSplashVideo(createSplashVideo());
+    if (playSplashAnimation) splashAnimationPromise = waitForSplashVideo(createSplashVideo());
   } else if (!root.querySelector(".splash")) {
     // 网络失败后重试时可以显示静态等待画面，但不重新触发启动动画。
     root.innerHTML = staticSplashMarkup();

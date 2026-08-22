@@ -121,7 +121,8 @@ body[data-animations="off"] *::after {
 }
 
 /* ── 起動スプラッシュ ─────────────────────
-   Web は静止画、Capacitor App は同じ領域で一度だけ提供動画を再生する。
+   単独の Web アプリと Capacitor App は同じ領域で一度だけ動画を再生する。
+   website_company の埋め込みだけは静止画のままにする。
    メディア枠を先に固定して、静止画から動画への切り替えでレイアウトを動かさない。 */
 .splash { gap: 20px; }
 .splash-media {

@@ -17,7 +17,8 @@
   <!-- すべての画面はここに描画される（js/app.js が切り替える）-->
   <main id="app" class="app">
     <!-- 起動中スプラッシュ。最初の画面が描画されると自動的に消える（innerHTML差し替え）-->
-    <!-- 初期表示は Web でも安全な静止画。Capacitor App では js/app.js が同じ領域を一度だけ動画に差し替える。 -->
+    <!-- 初期表示は白画面を防ぐための静止画。単独の App/Web は js/app.js が一度だけ動画に差し替え、
+         website_company の source=company 埋め込みは静止画のままにする。 -->
     <div class="screen center splash" aria-hidden="true">
       <div class="splash-media">
         <img class="splash-icon" src="content/assets/logotitle_ver2.png" alt="すきのたね">
