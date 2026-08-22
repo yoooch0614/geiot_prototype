@@ -34,8 +34,8 @@ const isCompanyWebsiteEmbed = new URLSearchParams(window.location.search).get("s
 const playSplashAnimation = !isCompanyWebsiteEmbed;
 
 const SPLASH_IMAGE = "content/assets/logotitle_ver2.png";
-const SPLASH_VIDEO = "logo%26title_move_short.mov";
-// アセットが壊れている／端末が MOV を再生できない場合に、起動画面を長時間待たせない。
+const SPLASH_VIDEO = "logo%26title_move_short.mp4";
+// アセットが壊れている／端末が動画を再生できない場合に、起動画面を長時間待たせない。
 const SPLASH_VIDEO_TIMEOUT_MS = 5000;
 let startupSplashStarted = false;
 let splashAnimationPromise = Promise.resolve();
@@ -350,7 +350,7 @@ function createSplashVideo() {
 
   const source = document.createElement("source");
   source.src = SPLASH_VIDEO;
-  source.type = "video/quicktime";
+  source.type = "video/mp4";
   video.append(source);
   media.replaceChildren(video);
   return video;

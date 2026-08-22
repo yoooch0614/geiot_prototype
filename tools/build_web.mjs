@@ -14,7 +14,7 @@ const runtimeEntries = [
   "js",
   "modules",
   "content",
-  "logo&title_move_short.mov",
+  "logo&title_move_short.mp4",
 ];
 
 await rm(outputDir, { recursive: true, force: true });
