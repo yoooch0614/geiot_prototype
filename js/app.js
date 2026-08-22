@@ -27,6 +27,24 @@ const themeMeta = document.querySelector('meta[name="theme-color"]');
 const repo = new ContentRepository();
 const session = new Session();
 
+// 同じ index.html 会同时被ブラウザ/Web と Capacitor App が使用する。
+// Web 端没有 Capacitor 原生桥接，因此保持静态 Logo；只有原生 App 才启用启动视频。
+const isNativeApp = (() => {
+  const capacitor = window.Capacitor;
+  if (typeof capacitor?.isNativePlatform === "function") {
+    return capacitor.isNativePlatform();
+  }
+  return typeof capacitor?.getPlatform === "function" && capacitor.getPlatform() !== "web";
+})();
+
+const SPLASH_IMAGE = "content/assets/logotitle_ver2.png";
+const SPLASH_VIDEO = "logo%26title_move_short.mov";
+// アセットが壊れている／端末が MOV を再生できない場合に、起動画面を長時間待たせない。
+const SPLASH_VIDEO_TIMEOUT_MS = 5000;
+let startupSplashStarted = false;
+let splashAnimationPromise = Promise.resolve();
+let cancelSplashAnimation = null;
+
 // 画面遷移だけでなく、ガイドや確認ダイアログなど後から追加される文章にも
 // 日本語の意味単位ごとの改行ルールを適用する。
 const copyObserver = typeof MutationObserver === "function"
@@ -308,20 +326,103 @@ document.addEventListener("pointerdown", (e) => {
   if (e.target.closest("button")) playAudio(repo.assetUrl(CLICK_SOUND));
 }, { capture: true });
 
-function renderLoadingScreen() {
-  root.innerHTML = `
+function staticSplashMarkup() {
+  return `
     <div class="screen center splash" aria-live="polite">
-      <video class="splash-video" autoplay muted loop playsinline preload="metadata" poster="content/assets/logotitle_ver2.png">
-        <source src="logo%26title_move_short.mov" type="video/quicktime">
-        <img class="splash-icon" src="content/assets/logotitle_ver2.png" alt="すきのたね">
-      </video>
+      <div class="splash-media">
+        <img class="splash-icon" src="${SPLASH_IMAGE}" alt="すきのたね">
+      </div>
       <span class="splash-dots"><i></i><i></i><i></i></span>
       <p class="splash-label">じゅんび中…</p>
     </div>`;
 }
 
+function createSplashVideo() {
+  const media = root.querySelector(".splash-media");
+  if (!media) return null;
+
+  const video = document.createElement("video");
+  video.className = "splash-video";
+  video.autoplay = true;
+  video.defaultMuted = true;
+  video.muted = true;
+  video.loop = false;
+  video.playsInline = true;
+  video.preload = "auto";
+  video.poster = SPLASH_IMAGE;
+  video.setAttribute("aria-label", "すきのたね");
+
+  const source = document.createElement("source");
+  source.src = SPLASH_VIDEO;
+  source.type = "video/quicktime";
+  video.append(source);
+  media.replaceChildren(video);
+  return video;
+}
+
+function waitForSplashVideo(video) {
+  if (!video) return Promise.resolve();
+
+  return new Promise((resolve) => {
+    let settled = false;
+    let timeoutId = null;
+
+    const showStaticFallback = () => {
+      if (!video.isConnected) return;
+      const media = video.closest(".splash-media");
+      media?.classList.add("splash-media--fallback");
+      const image = document.createElement("img");
+      image.className = "splash-icon";
+      image.src = SPLASH_IMAGE;
+      image.alt = "すきのたね";
+      video.replaceWith(image);
+    };
+
+    const finish = (fallback = false) => {
+      if (settled) return;
+      settled = true;
+      if (timeoutId !== null) window.clearTimeout(timeoutId);
+      video.removeEventListener("ended", onEnded);
+      video.removeEventListener("error", onError);
+      video.removeEventListener("abort", onError);
+      cancelSplashAnimation = null;
+      if (fallback) showStaticFallback();
+      resolve();
+    };
+
+    const onEnded = () => finish();
+    const onError = () => finish(true);
+    cancelSplashAnimation = () => finish(true);
+
+    video.addEventListener("ended", onEnded, { once: true });
+    video.addEventListener("error", onError, { once: true });
+    video.addEventListener("abort", onError, { once: true });
+    timeoutId = window.setTimeout(() => finish(true), SPLASH_VIDEO_TIMEOUT_MS);
+
+    try {
+      const playResult = video.play();
+      playResult?.catch?.(() => finish(true));
+    } catch (_) {
+      finish(true);
+    }
+  });
+}
+
+function renderLoadingScreen() {
+  // 启动视频只在一次 App 启动中创建一次。后续重新进入 MODE 或失败重试都不会重新播放。
+  if (!startupSplashStarted) {
+    startupSplashStarted = true;
+    if (!root.querySelector(".splash")) root.innerHTML = staticSplashMarkup();
+    if (isNativeApp) splashAnimationPromise = waitForSplashVideo(createSplashVideo());
+  } else if (!root.querySelector(".splash")) {
+    // 网络失败后重试时可以显示静态等待画面，但不重新触发启动动画。
+    root.innerHTML = staticSplashMarkup();
+  }
+  return splashAnimationPromise;
+}
+
 async function boot() {
-  renderLoadingScreen();
+  const startupAnimation = renderLoadingScreen();
   try {
     // コンテンツの読み込みと、保存済みデータ（思い出・読みかけの本）の復元を並行で待つ。
     // session.restore() は失敗しても例外を出さない（保存が効かないだけで動く）。
@@ -336,9 +437,11 @@ async function boot() {
     ]);
     ctx.bigFiveData = loadedBigFiveData;
   } catch (err) {
+    cancelSplashAnimation?.();
     showServerHint(err);
     return;
   }
+  await startupAnimation;
   // 鳴らす場面で取得待ちにならないよう、いつでも鳴りうる音は先に読み込んでおく。
   preloadAudio(
     [CLICK_SOUND, HOME_BGM, HOME_NIGHT_BGM, "assets/page_sound.mp3", ...CELEBRATION_SOUNDS].map((s) => repo.assetUrl(s))

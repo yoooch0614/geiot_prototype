@@ -11,18 +11,17 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=suki-no-tane-original-completed-pages-20260821">
+  <link rel="stylesheet" href="css/style.css?v=suki-no-tane-app-web-splash-20260822">
 </head>
 <body class="night-theme">
   <!-- すべての画面はここに描画される（js/app.js が切り替える）-->
   <main id="app" class="app">
     <!-- 起動中スプラッシュ。最初の画面が描画されると自動的に消える（innerHTML差し替え）-->
-    <!-- 起動中もタイトル画面と同じ新しいロゴを表示する。ファビコン／ホーム画面用は従来のアイコンを使う。 -->
+    <!-- 初期表示は Web でも安全な静止画。Capacitor App では js/app.js が同じ領域を一度だけ動画に差し替える。 -->
     <div class="screen center splash" aria-hidden="true">
-      <video class="splash-video" autoplay muted loop playsinline preload="metadata" poster="content/assets/logotitle_ver2.png">
-        <source src="logo%26title_move_short.mov" type="video/quicktime">
+      <div class="splash-media">
         <img class="splash-icon" src="content/assets/logotitle_ver2.png" alt="すきのたね">
-      </video>
+      </div>
       <span class="splash-dots"><i></i><i></i><i></i></span>
       <p class="splash-label">じゅんび中…</p>
     </div>
@@ -35,6 +34,6 @@
   <!-- ページめくり演出（本物の紙をめくるような効果）。CDNを使わず同梱しているので、
        Wi-Fiがオフラインでも（serve.py経由なら）動く。 -->
   <script src="js/vendor/page-flip.browser.js"></script>
-  <script type="module" src="js/app.js?v=diary-scratchboard-canonical-source-20260821"></script>
+  <script type="module" src="js/app.js?v=suki-no-tane-startup-media-20260822"></script>
 </body>
 </html>

@@ -14,7 +14,6 @@ const runtimeEntries = [
   "js",
   "modules",
   "content",
-  "logo&title_move_long.mov",
   "logo&title_move_short.mov",
 ];
 
