@@ -268,8 +268,9 @@ body.menu-open .mobile-menu { display: flex; }
 .step:hover { transform: translateY(-6px); box-shadow: var(--shadow-md); }
 .step-media { aspect-ratio: 4 / 3; background: var(--cream); overflow: hidden; position: relative; }
 .step-media img { width: 100%; height: 100%; object-fit: cover; }
-.step-media.is-icon { display: grid; place-items: center; background: radial-gradient(120% 120% at 30% 20%, #eaf3e6, #f4efe4); }
+.step-media.is-icon { display: grid; place-items: center; background: #EFEBE0; }
 .step-media.is-icon span { font-size: 3.4rem; }
+.step-media.is-icon .step-mark { width: 82%; height: 82%; object-fit: contain; mix-blend-mode: multiply; }
 .step-body { padding: 26px 26px 30px; }
 .step-num { font-family: var(--serif); font-size: 0.92rem; font-weight: 700; color: var(--orange); letter-spacing: 0.14em; }
 .step-body h3 { font-size: 1.24rem; margin-top: 8px; }
@@ -431,6 +432,19 @@ body.menu-open .mobile-menu { display: flex; }
 .member-photo { width: 92px; height: 92px; border-radius: 50%; object-fit: cover; margin: 0 auto 15px; display: block; border: 3px solid #fff; box-shadow: 0 6px 18px rgba(60,50,40,0.14); }
 .member .member-catch { font-size: 0.82rem; font-weight: 700; color: var(--orange); line-height: 1.4; min-height: 2.3em; display: flex; align-items: center; justify-content: center; }
 .member .name { font-family: var(--serif); font-size: 1.06rem; margin-top: 6px; }
+.member-roles { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 10px; }
+.role-chip { font-size: 0.68rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; letter-spacing: 0.04em; background: rgba(46,125,78,0.12); color: var(--green); white-space: nowrap; }
+.role-chip.dev { background: rgba(46,125,78,0.12); color: var(--green); }
+.role-chip.book { background: rgba(232,136,94,0.16); color: #c96a3f; }
+.role-chip.analysis { background: rgba(35,32,28,0.08); color: var(--ink-soft); }
+
+.team-origin { max-width: 760px; margin: 0 auto clamp(36px, 5vw, 52px); text-align: center; background: var(--surface); border: 1px solid var(--line-2); border-radius: var(--radius); padding: clamp(24px, 3vw, 34px) clamp(24px, 4vw, 44px); box-shadow: var(--shadow-sm); }
+.origin-label { display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.18em; color: var(--green); margin-bottom: 12px; }
+.origin-text { color: var(--ink-soft); font-size: clamp(0.95rem, 1.3vw, 1.05rem); line-height: 1.95; }
+.origin-text b { color: var(--ink); font-weight: 700; }
+
+.team-legend { margin-top: 30px; text-align: center; font-size: 0.82rem; color: var(--ink-soft); line-height: 2.2; }
+.team-legend .role-chip { margin-right: 4px; }
 .team-foot { display: flex; align-items: center; gap: 18px; margin-top: 34px; flex-wrap: wrap; color: var(--ink-soft); font-size: 0.86rem; }
 .team-foot img { height: 34px; width: auto; opacity: .85; }
 

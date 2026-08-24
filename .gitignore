@@ -32,3 +32,6 @@ android/ehoeho-debug.apk
 
 # Large source PV (hosted externally on YouTube/Vimeo, embedded on site)
 website_company/assets/geiot-pv.mp4
+
+# 素材一式（動画・写真・pptx など大容量。リポジトリ内に置くが git 管理はしない）
+/ドキュメント/
