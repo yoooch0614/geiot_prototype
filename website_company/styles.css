@@ -348,7 +348,7 @@ body.menu-open .mobile-menu { display: flex; }
    ========================================================= */
 .story { background: #F8F5EE; }
 .story-inner { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: clamp(28px, 4.5vw, 60px); align-items: center; }
-.story-media img { width: 100%; border-radius: var(--radius); box-shadow: var(--shadow-md); background: #fff; }
+.story-media img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; object-position: center top; border-radius: var(--radius); box-shadow: var(--shadow-md); background: #fff; }
 .story h2 { font-family: var(--serif); font-size: clamp(1.9rem, 4.6vw, 3rem); line-height: 1.44; margin-top: 18px; }
 .story-text { margin-top: 26px; color: var(--ink-soft); font-size: clamp(1.02rem, 1.5vw, 1.14rem); line-height: 2; }
 .story-note {
