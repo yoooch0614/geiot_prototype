@@ -29,3 +29,6 @@ android/ehoeho-debug.apk
 
 # Claude Code のローカル設定（個人環境ごとの許可設定なので共有しない）
 .claude/settings.local.json
+
+# Large source PV (hosted externally on YouTube/Vimeo, embedded on site)
+website_company/assets/geiot-pv.mp4
