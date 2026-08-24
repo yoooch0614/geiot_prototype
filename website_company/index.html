@@ -32,7 +32,7 @@
                           → 空のときは data-youtube-id をそのまま背景にも使います。
   動画IDだけを入れてください（例：https://youtu.be/XXXX → "XXXX"）。
 -->
-<body data-youtube-id="qicz-2TiqfI" data-youtube-bg-id="">
+<body data-youtube-id="qicz-2TiqfI" data-youtube-bg-id="AYPwFIpP588">
 
   <div class="progress" data-progress></div>
 
@@ -77,8 +77,7 @@
           <span class="l2">いくつもの未来へ。</span>
         </h1>
         <p class="hero-sub">
-          絵本で遊びながら、子どもの「好き」を見つける。<br />
-          その一つひとつを、次の遊びや学びへつなぐアプリです。
+          絵本で遊びながら、子どもの「好き」を見つけるアプリ。
         </p>
         <div class="hero-actions">
           <a class="btn btn-primary" href="#demo">まずは触ってみる <span class="arw" aria-hidden="true">↗</span></a>
@@ -102,18 +101,16 @@
 
     <!-- ============ Story / origin ============ -->
     <section class="section story" id="story">
-      <div class="wrap story-inner reveal">
-        <span class="eyebrow">わたしの場合</span>
-        <h2>3歳のころ、<br /><span class="mark">ドラム</span>に夢中だった。</h2>
-        <p class="story-text">
-          叩けば、音が鳴る。ただそれが楽しくて、いつも手を動かしていた。
-          「音楽教室に通いたい」——そう言い出せないまま、その“好き”は、
-          いつのまにか記憶の奥へしまわれていった。
-        </p>
-        <p class="story-note">
-          もし、あのとき誰かが気づいてくれていたら。<br />
-          <b>——すきのたねは、その“もし”から生まれました。</b>
-        </p>
+      <div class="wrap story-inner">
+        <div class="story-media reveal">
+          <img src="./assets/story-drum.png" alt="ドラムに夢中な子どもと、それを見守る親のイラスト" loading="lazy" />
+        </div>
+        <div class="story-copy reveal d1">
+          <span class="eyebrow">わたしの場合</span>
+          <h2>3歳のころ、<br /><span class="mark">ドラム</span>に夢中だった。</h2>
+          <p class="story-text">「音楽教室に通いたい」——そう言えないまま、その“好き”は記憶の奥へ。</p>
+          <p class="story-note"><b>すきのたねは、その“もし”から生まれました。</b></p>
+        </div>
       </div>
     </section>
 
@@ -123,27 +120,22 @@
         <div class="section-head reveal">
           <span class="eyebrow">保護者の声</span>
           <h2>子育ての不安は、<br /><span class="mark">「将来」</span>と<span class="mark-o">「教育」</span>に集まっていた。</h2>
-          <p class="lead">3〜6歳の保護者へのヒアリングで見えてきたのは、我が子の“これから”への想いでした。</p>
+          <p class="lead">見えてきたのは、我が子の“これから”への想いでした。</p>
         </div>
         <div class="worry-layout">
           <div class="worry-chart reveal d1">
             <p class="chart-title">子育てで不安に感じること</p>
-            <div class="bar-row">
-              <span class="bar-label">将来面</span>
-              <span class="bar-track"><span class="bar-fill" style="--v:48%; --c:var(--green);"></span></span>
-              <span class="bar-val">48.0<small>%</small></span>
+            <div class="donut-wrap">
+              <div class="donut" style="--seg: conic-gradient(var(--green) 0 48%, var(--orange) 48% 90.5%, var(--ink-faint) 90.5% 100%);">
+                <div class="donut-hole"><span class="donut-n">n=127</span></div>
+              </div>
+              <ul class="donut-legend">
+                <li><span class="dot" style="background: var(--green);"></span>将来面 <b>48.0%</b></li>
+                <li><span class="dot" style="background: var(--orange);"></span>教育面 <b>42.5%</b></li>
+                <li><span class="dot" style="background: var(--ink-faint);"></span>その他 <b>9.4%</b></li>
+              </ul>
             </div>
-            <div class="bar-row">
-              <span class="bar-label">教育面</span>
-              <span class="bar-track"><span class="bar-fill" style="--v:42.5%; --c:var(--orange);"></span></span>
-              <span class="bar-val">42.5<small>%</small></span>
-            </div>
-            <div class="bar-row">
-              <span class="bar-label">その他</span>
-              <span class="bar-track"><span class="bar-fill" style="--v:9.4%; --c:var(--ink-faint);"></span></span>
-              <span class="bar-val">9.4<small>%</small></span>
-            </div>
-            <p class="chart-note">n=127 ／ 3〜6歳の保護者へのヒアリング調査</p>
+            <p class="chart-note">3〜6歳の保護者へのヒアリング調査</p>
           </div>
           <div class="worry-voices">
             <blockquote class="quote-card reveal d2">
@@ -184,9 +176,8 @@
           <span class="eyebrow">すきのたねとは</span>
           <h2>遊びながら、<span class="mark">個性</span>がわかる。</h2>
           <p class="lead">
-            性格診断テスト（MBTIなど）は、子どもには少し難しい。
-            すきのたねは、デジタル絵本で遊ぶだけ。読んで・選んで・試すうちに、
-            子ども自身も気づいていない「好き」の入り口が見えてきます。
+            むずかしい診断テストはいりません。絵本で遊ぶうちに、
+            子ども自身も気づかない「好き」が見えてきます。
           </p>
         </div>
         <div class="steps">
@@ -195,7 +186,7 @@
             <div class="step-body">
               <span class="step-num">STEP 01</span>
               <h3>絵本を読む・選ぶ</h3>
-              <p>物語のなかで岐路を選択。「どっちにする？」の一つひとつに、その子らしさが宿ります。</p>
+              <p>「どっちにする？」の選択に、その子らしさが宿る。</p>
             </div>
           </article>
           <article class="step reveal d2">
@@ -203,7 +194,7 @@
             <div class="step-body">
               <span class="step-num">STEP 02</span>
               <h3>ミッションに挑戦</h3>
-              <p>お絵描き・色あて・お手伝い・写真。頭と身体をつかう遊びで、絵本の世界を体験します。</p>
+              <p>お絵描き・色あて・お手伝い・写真。頭と身体をつかう遊び。</p>
             </div>
           </article>
           <article class="step reveal d3">
@@ -211,7 +202,7 @@
             <div class="step-body">
               <span class="step-num">STEP 03</span>
               <h3>個性が見えてくる</h3>
-              <p>好きな色・好きなこと・おすすめの習い事まで。遊んだ記録が、その子の“たね”になります。</p>
+              <p>好きな色・こと・習い事まで。記録が、その子の“たね”に。</p>
             </div>
           </article>
         </div>
@@ -232,21 +223,21 @@
               <span class="ben-no">01</span>
               <div>
                 <h3>“個性の気づき”へ</h3>
-                <p>親も、子ども自身も知らなかった一面に出会う。個性を知り、伸ばすためのきっかけになります。</p>
+                <p>親も子も知らなかった一面に出会う。個性を伸ばすきっかけに。</p>
               </div>
             </div>
             <div class="ben-item reveal d2">
               <span class="ben-no">02</span>
               <div>
                 <h3>「見る学習」から「探す学習」へ</h3>
-                <p>与えられて覚えるのではなく、自分で試して見つける。能動的に動く子どもへ。</p>
+                <p>与えられて覚えるより、自分で試して見つける。能動的な子どもへ。</p>
               </div>
             </div>
             <div class="ben-item reveal d3">
               <span class="ben-no">03</span>
               <div>
                 <h3>ミッションが会話の入り口に</h3>
-                <p>「今日は何をしたの？」が自然に生まれる。親子のコミュニケーションが増えていきます。</p>
+                <p>「今日は何したの？」が自然に生まれ、親子の会話が増える。</p>
               </div>
             </div>
           </div>
@@ -303,8 +294,7 @@
           <span class="eyebrow">アンケート</span>
           <h2>あなたの声を、<br /><span class="mark-o">たね</span>にしたい。</h2>
           <p class="lead">
-            触ってみて感じたこと、お子さまの反応、「こうだったらいいのに」。
-            どんな一言も、すきのたねを育てる栄養になります。数分のご協力をお願いします。
+            触って感じたこと、お子さまの反応。どんな一言も、すきのたねを育てる栄養になります。
           </p>
           <a class="btn btn-primary" href="https://docs.google.com/forms/d/e/1FAIpQLSd4EE4ZgD2ctJlHaIvnnaFmQsADt-3CVF2nbQztkBvytKT-eg/viewform" target="_blank" rel="noopener">
             フォームを開く <span class="arw" aria-hidden="true">↗</span>
@@ -322,7 +312,7 @@
         <div class="section-head reveal">
           <span class="eyebrow">チーム</span>
           <h2>絵本好きが集まった、<br />8人のチームです。</h2>
-          <p class="lead">アプリ・アルゴリズム実装／絵本コンテンツ開発／子どもの特性分析。それぞれの得意を持ち寄って、すきのたねをつくっています。</p>
+          <p class="lead">それぞれの得意を持ち寄って、すきのたねをつくっています。</p>
         </div>
         <div class="team-grid">
           <div class="member reveal d1"><span class="role">PICTUPATH</span><p class="name">アンドリュー</p><p class="tag">ウンウェーチー</p></div>
