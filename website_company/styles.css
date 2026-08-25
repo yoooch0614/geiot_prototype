@@ -437,6 +437,8 @@ body.menu-open .mobile-menu { display: flex; }
 .role-chip.dev { background: rgba(46,125,78,0.12); color: var(--green); }
 .role-chip.book { background: rgba(232,136,94,0.16); color: #c96a3f; }
 .role-chip.analysis { background: rgba(35,32,28,0.08); color: var(--ink-soft); }
+.role-chip.video { background: rgba(63,125,140,0.14); color: #3a7688; }
+.role-chip.finance { background: rgba(176,138,46,0.16); color: #93701f; }
 
 .team-origin { max-width: 760px; margin: 0 auto clamp(36px, 5vw, 52px); text-align: center; background: var(--surface); border: 1px solid var(--line-2); border-radius: var(--radius); padding: clamp(24px, 3vw, 34px) clamp(24px, 4vw, 44px); box-shadow: var(--shadow-sm); }
 .origin-label { display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.18em; color: var(--green); margin-bottom: 12px; }
