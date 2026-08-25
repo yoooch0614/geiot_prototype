@@ -69,6 +69,41 @@ export function askResume(ctx, bookId, root) {
   dialog.onclick = (event) => { if (event.target === dialog) dialog.remove(); };
 }
 
+// にじいろピクニック以外はまだ制作中。「あそびかた」風に、かわいく知らせる。
+function showComingSoon(ctx, bookId, root) {
+  const book = ctx.repo.book(bookId);
+  const title = book?.title ?? "この えほん";
+  const cover = book?.cover;
+  const dialog = document.createElement("div");
+  dialog.className = "coming-soon";
+  dialog.innerHTML = `
+    <div class="coming-card">
+      <div class="coming-cover">
+        ${cover ? `<img src="${ctx.repo.assetUrl(cover)}" alt="" draggable="false">` : ""}
+        <span class="coming-badge">じゅんびちゅう</span>
+        <span class="coming-seed" aria-hidden="true">🌱</span>
+      </div>
+      <p class="coming-title">${esc(title)}</p>
+      <p class="coming-sub">この えほんは いま つくっているよ。<br>もうすこし まっててね！</p>
+      <div class="coming-actions">
+        <button class="big-next" data-play-niji>「にじいろピクニック」で あそぶ</button>
+        <button class="tapdone" data-cancel>とじる</button>
+      </div>
+    </div>`;
+  root.appendChild(dialog);
+  dialog.querySelector("[data-play-niji]").onclick = () => {
+    dialog.remove();
+    if (ctx.session.hasResume?.("book-niji")) {
+      askResume(ctx, "book-niji", root);
+    } else {
+      ctx.session.startBook("book-niji");
+      ctx.showPage();
+    }
+  };
+  dialog.querySelector("[data-cancel]").onclick = () => dialog.remove();
+  dialog.onclick = (event) => { if (event.target === dialog) dialog.remove(); };
+}
+
 function chunk(arr, size) {
   const out = [];
   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
@@ -98,12 +133,14 @@ function bookCard(ctx, b, { labelType = "age" } = {}) {
     : `${esc(age)}さい`;
   // 読みかけの本には「つづきから」バッジを出す（こどもの本棚のみ）
   const resume = labelType === "age" && ctx.session.hasResume?.(b.id);
+  const soon = labelType === "age" && b.id !== "book-niji"; // 制作中の絵本（こども選択画面のみ）
   return `
-    <button class="book-card" data-book="${b.id}">
+    <button class="book-card${soon ? " book-card--soon" : ""}" data-book="${b.id}">
       <div class="book-cover">
         <img src="${ctx.repo.assetUrl(cover)}" alt="" draggable="false">
         <span class="book-age-badge">${badgeText}</span>
         ${resume ? `<span class="book-resume-badge">つづきから</span>` : ""}
+        ${soon ? `<span class="book-soon-badge">じゅんびちゅう</span>` : ""}
       </div>
       <span class="book-title">${esc(title)}</span>
     </button>`;
@@ -223,6 +260,8 @@ export const SelectScreen = {
         const bookId = b.dataset.book;
         if ((ctx.session.mode === "parent" || _p?.view === "memories") && memory) {
           ctx.go("DIARY", { memory, fromPlay: false, view: _p?.view });
+        } else if (ctx.session.mode !== "parent" && _p?.view !== "memories" && bookId !== "book-niji") {
+          showComingSoon(ctx, bookId, root);   // にじいろピクニック以外はまだ制作中
         } else if (ctx.session.hasResume(bookId)) {
           askResume(ctx, bookId, root);   // 読みかけがある本は、つづきか最初かをたずねる
         } else {
