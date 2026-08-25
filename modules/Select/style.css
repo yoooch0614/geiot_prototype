@@ -346,17 +346,6 @@
   to   { opacity: 1; scale: 1; translate: 0 0; }
 }
 
-/* ===== 制作中の絵本（こども選択画面） ===== */
-.book-card--soon .book-cover img { filter: grayscale(.45) brightness(.96); opacity: .72; }
-.book-card--soon .book-title { color: #8a958d; }
-.book-soon-badge {
-  position: absolute; left: 50%; top: 50%; translate: -50% -50%;
-  background: rgba(46, 63, 52, .82); color: #fff;
-  font-size: 12px; font-weight: 900; letter-spacing: .04em;
-  padding: 6px 12px; border-radius: 999px; white-space: nowrap;
-  box-shadow: 0 4px 12px rgba(30, 40, 34, .3);
-}
-
 /* ===== 「じゅんびちゅう」ポップアップ ===== */
 .coming-soon {
   position: fixed; inset: 0; z-index: 20;

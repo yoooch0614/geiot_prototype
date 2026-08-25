@@ -133,14 +133,12 @@ function bookCard(ctx, b, { labelType = "age" } = {}) {
     : `${esc(age)}さい`;
   // 読みかけの本には「つづきから」バッジを出す（こどもの本棚のみ）
   const resume = labelType === "age" && ctx.session.hasResume?.(b.id);
-  const soon = labelType === "age" && b.id !== "book-niji"; // 制作中の絵本（こども選択画面のみ）
   return `
-    <button class="book-card${soon ? " book-card--soon" : ""}" data-book="${b.id}">
+    <button class="book-card" data-book="${b.id}">
       <div class="book-cover">
         <img src="${ctx.repo.assetUrl(cover)}" alt="" draggable="false">
         <span class="book-age-badge">${badgeText}</span>
         ${resume ? `<span class="book-resume-badge">つづきから</span>` : ""}
-        ${soon ? `<span class="book-soon-badge">じゅんびちゅう</span>` : ""}
       </div>
       <span class="book-title">${esc(title)}</span>
     </button>`;
