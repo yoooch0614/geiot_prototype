@@ -353,11 +353,12 @@ body.menu-open .mobile-menu { display: flex; }
 .story h2 { font-family: var(--serif); font-size: clamp(1.9rem, 4.6vw, 3rem); line-height: 1.44; margin-top: 18px; }
 .story-text { margin-top: 26px; color: var(--ink-soft); font-size: clamp(1.02rem, 1.5vw, 1.14rem); line-height: 2; }
 .story-emphasis {
-  margin-top: 24px; padding: 22px 24px;
+  margin-top: 24px; padding: 22px 26px;
   font-family: var(--serif); font-weight: 700; color: var(--ink);
   font-size: clamp(1.24rem, 2.2vw, 1.6rem); line-height: 1.85;
-  background: linear-gradient(180deg, rgba(111,179,95,0.10), rgba(232,136,94,0.08));
-  border-radius: 16px; border-left: 4px solid var(--green);
+  background: var(--surface);
+  border: 1px solid var(--line-2); border-left: 4px solid var(--green);
+  border-radius: 16px; box-shadow: var(--shadow-sm);
 }
 .story-note {
   margin-top: 30px; padding-left: 24px; border-left: 3px solid var(--leaf);
