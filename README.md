@@ -1,160 +1,97 @@
-# すきのたね / Ehoeho
+# すきのたね（プロトタイプ）
 
-絵本で遊びながら、子どもの「好き」を見つけるアプリのプロトタイプです。
-HTML / CSS / JavaScript + JSON + Python で作られており、絵本・ミッション・撮影・達成演出・絵本日記・ギャラリーまでの体験を再現しています。
+geiotで提案するアプリケーションのプロトタイプ制作。
+前回 Flutter で作った絵本アプリを **HTML / CSS / JS + JSON + Python** に置き換えた web 版。
+Flutter版のコアループ（モード選択 → 絵本選択 → 物語 → ミッション → 撮影 → 達成演出 → 絵本日記 → ギャラリー）をそのまま再現している。
+
+三層分離は前回と同じ：**コンテンツ**（JSON+アセット）／**ロジック**／**プレゼンテーション**。
 
 ## Website
 
 - [Web App オンライン体験](https://yoooch0614.github.io/geiot_prototype/)
 - [製品紹介サイト](https://yoooch0614.github.io/geiot_prototype/website_company/)
 
-## 日本語
+---
 
-### ローカルで動かす
+## うごかす（PCで見る）
 
-プロジェクトのルートで実行します。
+このフォルダで:
 
 ```bash
 python3 serve.py
 ```
 
-ブラウザで <http://localhost:8000> を開いてください。
-JSONを読み込むため、`index.html` を直接ダブルクリックせず、必ずサーバー経由で開きます。
+表示された `http://localhost:8000` をブラウザで開く。
 
-同じ Wi-Fi の iPad / iPhone で見る場合は、PCで表示された `http://<PCのIP>:8000` を Safari で開きます。
+> ダブルクリックで index.html を直接開くと、ブラウザの制約で JSON を読めない。
+> かならず上のサーバー経由で開くこと（Python標準機能だけでOK）。
 
-### Android APK を作る
+## 同じ Wi-Fi の iPad / iPhone で見る
 
-Node.js 22 以上と、Android SDK を含む Android Studio が必要です。
+1. PC と iPad を **同じ Wi-Fi** につなぐ
+2. PCで `python3 serve.py` を実行
+3. 表示される `http://<PCのIP>:8000` を **iPad の Safari** で開く
+4. Safariの共有 →「ホーム画面に追加」でアプリっぽく使える（PWA）
 
-```bash
-npm install
-npm run android:apk
-```
+写真撮影はまずアプリ内カメラ（絵本の型付き取景）を試し、権限・HTTPS・端末の都合で使えない場合はファイル入力（`<input capture>`）へフォールバックする。後者は **http のままでも動く**（`getUserMedia` と違い HTTPS 不要）。
 
-生成された debug APK は次の場所に保存されます。
+---
 
-```text
-android/ehoeho-debug.apk
-```
+## いじる場所（＝馴染みの言語だけ）
 
-APKにはウェブアプリと `content/` のリソースが含まれるため、実行時に `serve.py` は不要です。
-ウェブやコンテンツを変更した後は、もう一度 `npm run android:apk` を実行します。
-
-Android Studioでネイティブプロジェクトを開く場合：
-
-```bash
-npm run android:init
-npm run android:open
-```
-
-デフォルトの Android パッケージ名は `com.geiot.ehoeho` です。初回の Android プロジェクト作成前に `capacitor.config.json` で変更できます。
-`android/` はネイティブプロジェクト、`www/` は同期時に作られる一時フォルダーです。`www/` は直接編集しません。
-
-### 主な編集場所
-
-| やりたいこと | ファイル | 形式 |
+| やりたいこと | 触るファイル | 言語 |
 |---|---|---|
-| 絵本・ミッションの内容 | `content/books/<book>.json` | JSON |
-| 絵本の一覧 | `content/library.json` | JSON |
-| 画像・音声の差し替え | `content/assets/` | 画像 / 音声 |
-| 画面の構成 | `js/screens.js` / `css/style.css` | JavaScript / CSS |
-| 画面のつなぎ | `js/app.js` | JavaScript |
-| 設定と保存ロジック | `js/Settings.js` / `js/Session.js` | JavaScript |
+| 絵本・ミッションの中身 | `content/books/<絵本>.json`（1冊1ファイル） | JSON |
+| 絵本の並び順・追加 | `content/library.json`（索引） | JSON |
+| イラスト・音声の差し替え | `content/assets/` | 画像/音声 |
+| 各画面の見た目・構成 | `js/screens.js` / `css/style.css` | JS / CSS |
+| 画面のつなぎ（ルーター） | `js/app.js` | JS |
 | コンテンツ検証 | `tools/validate_content.py` | Python |
-| 製品紹介サイト | `website_company/` | HTML / CSS / JavaScript |
-| 設計記録（ADR） | `adr/` | Markdown |
+| Big Five 5因子職業データの更新 | `tools/build_big5_scores.py` → `content/occupation-big5.json` | Python / JSON |
+| 職業名の日本語表示名更新 | `tools/translate_work_style_titles.py` → `content/work-style-titles-ja.json` | Python / JSON |
+| サーバー起動 | `serve.py` | Python |
+| チーム・プロダクト紹介サイト | `website_company/index.html` | HTML / CSS / JS |
 
-### 画面の流れ
+`js/ContentRepository.js` / `js/Session.js` はロジック層。基本さわらなくていい。
 
-`MODE`（こども / おうちのひと） → `PIN` → `PARENT` → `HOME` → `SELECT` → `STORY` → `MISSION` → `PREVIEW` → `ACHIEVE` → `COMPLETE` → `DIARY` / `GALLERY`
+---
 
-ミッションは写真撮影が基本です。カメラが使えない場合は、ファイル入力または「できた！」ボタンにフォールバックします。
+## 画面（Flutter版の再現）
 
-### Big Five について
+`MODE`（こども/おうちのひと選択）→ `PIN`（おうちのひとゲート, プロト用 **0000**）→ `PARENT`（レポートのモック）
+`HOME`（えほん/おもいで）→ `SELECT`（絵本選択）→ `STORY`（物語）→ `MISSION`（撮る/できた）→ `PREVIEW`（これにする/もう一回）→ `ACHIEVE`（達成演出・シール）→ `COMPLETE` → `DIARY`（絵本日記）→ `GALLERY`（思い出）
 
-親モードでは、ミッションの発達領域と写真の色を使って、Big Five 5因子の参考表示を行います。
-これは診断や職業適性判定ではなく、遊びや体験を振り返るためのプロトタイプ機能です。
+- ミッション達成は **写真撮影** が基本。カメラを使わないときは「できた！」でタップ達成（フォールバック）。
+- ストリークは「外で活動した日数」に付き、途切れても没収しない（健全設計）。
+- ミッションには `developmentDomains`（発達領域タグ）を持たせてある（Stage 3 分析の布石）。
 
-### 設計記録
+### Big Five（ビッグファイブ・5因子）参考演算
 
-- [ADR-001: アプリ設定・保護・フィードバック](adr/ADR-001-app-completion.md)
-- [ADR-002: ミッション達成数に応じたアバター解放](adr/ADR-002-avatar-mission-unlocks.md)
-
-## English
-
-### Overview
-
-Ehoeho (`すきのたね`) is a prototype app that helps children discover what they like through interactive picture books.
-It is built with HTML, CSS, JavaScript, JSON, and Python, and reproduces the flow from book selection and missions to photo capture, achievement feedback, diary, and gallery.
-
-### Run locally
-
-From the project root, run:
+`occupation_big5_scores.xlsx` は全891職業の O/C/Ex/A/ES 参照データ。起動時にはブラウザ用に
+変換した `content/occupation-big5.json` を読み込む。Excel から再生成するには次を実行する。
 
 ```bash
-python3 serve.py
+python3 tools/build_big5_scores.py
 ```
 
-Open <http://localhost:8000> in a browser.
-The app should be opened through the local server because it loads JSON files and ES modules.
-
-To use it on an iPad or iPhone on the same Wi-Fi network, open the `http://<PC-IP>:8000` address shown by the server in Safari.
-
-### Build the Android APK
-
-Install Node.js 22 or newer and Android Studio with the Android SDK.
+表示軸は `O 開放性`、`C 誠実性`、`Ex 外向性`、`A 協調性`、`ES 情緒安定性` の5つ。
+ES は Big Five の Neuroticism（神経症傾向）を反対方向から示す軸として扱っている。
+厳密な心理検査ではなく、
+遊びや体験を振り返るためのプロトタイプ参考表示。
+職業名は `content/work-style-titles-ja.json` の日本語表示名を優先し、元の英語名も小さく併記する。
+職業リストが変わった場合は、必要に応じて次を実行する。
 
 ```bash
-npm install
-npm run android:apk
+python3 tools/translate_work_style_titles.py
 ```
 
-The debug APK is generated at:
+親モードの分析画面では、絵本ミッションの `developmentDomains` と、アップロード写真から
+抽出した `vehicleColor` を5軸へ集計し、全職業の5因子参照値との近さから参考候補を
+表示する。写真の色は色相ごとの参考重みで加算するが、ミッションタグより弱くしている。これは
+遊びや体験の振り返り用のプロトタイプで、診断・評価・将来の職業適性判定ではない。
 
-```text
-android/ehoeho-debug.apk
-```
+---
 
-The APK contains the web app and the `content/` resources, so `serve.py` is not needed at runtime.
-Run `npm run android:apk` again after changing the web app or content.
+## 設計記録（ADR）
 
-To open the native project in Android Studio:
-
-```bash
-npm run android:init
-npm run android:open
-```
-
-The default Android application ID is `com.geiot.ehoeho`. Change it in `capacitor.config.json` before creating the Android project for the first time.
-`android/` is the native project. `www/` is a temporary synchronization directory and should not be edited directly.
-
-### Main project areas
-
-| Task | Location | Format |
-|---|---|---|
-| Edit books and missions | `content/books/<book>.json` | JSON |
-| Change book order | `content/library.json` | JSON |
-| Replace images or audio | `content/assets/` | Images / audio |
-| Change screen structure | `js/screens.js` / `css/style.css` | JavaScript / CSS |
-| Change routing | `js/app.js` | JavaScript |
-| Change settings and session logic | `js/Settings.js` / `js/Session.js` | JavaScript |
-| Validate content | `tools/validate_content.py` | Python |
-| Edit the product website | `website_company/` | HTML / CSS / JavaScript |
-| Read architecture decisions | `adr/` | Markdown |
-
-### Screen flow
-
-`MODE` (child / parent) → `PIN` → `PARENT` → `HOME` → `SELECT` → `STORY` → `MISSION` → `PREVIEW` → `ACHIEVE` → `COMPLETE` → `DIARY` / `GALLERY`
-
-Photo capture is the normal mission flow. If the camera is unavailable, the app falls back to file input or the “Done!” button.
-
-### Big Five note
-
-Parent mode shows an exploratory Big Five profile based on mission development domains and colors extracted from uploaded photos.
-It is a prototype for reflecting on play and experiences, not a psychological diagnosis or a career aptitude assessment.
-
-### Architecture Decision Records
-
-- [ADR-001: App settings, protection, and feedback](adr/ADR-001-app-completion.md)
-- [ADR-002: Avatar unlocks based on completed missions](adr/ADR-002-avatar-mission-unlocks.md)
+設計上の判断は [`adr/README.md`](adr/README.md) と、その中の ADR ファイルにまとめている。
