@@ -136,23 +136,55 @@ export const StoryScreen = {
       };
     });
 
+    // 先把前面任务的照片填入当前章节所有页面。之前这里在 PageFlip 初始化后
+    // 直接异步处理，孩子马上点击下一次拍照时，旧照片可能还没有显示出来，
+    // 看起来就像要等新照片完成后才一起反馈。
+    const bookColorLayersReady = Promise.all(
+      [...root.querySelectorAll("[data-book-color-art]")].map(async (overlay) => {
+        try {
+          const tone = overlay.dataset.bookColorTone || "transparent";
+          const region = JSON.parse(overlay.dataset.bookColorRegion);
+          const filled = tone === "dark"
+            ? await recolorVehicleImage(overlay.dataset.bookColorSource, overlay.dataset.bookColorValue || null, region, "dark")
+            : await fillArtworkHoles(overlay.dataset.bookColorSource, overlay.dataset.bookColorPhoto, Number(overlay.dataset.bookColorScale) || 1, region);
+          if (filled) {
+            overlay.src = filled;
+            overlay.style.opacity = "1";
+          } else {
+            overlay.remove();
+          }
+        } catch (_) {
+          overlay.remove();
+        }
+      }),
+    );
+
     root.querySelectorAll("[data-shoot]").forEach((btn) => {
       const idx = Number(btn.dataset.shoot);
       const page = pages[idx];
-      btn.onclick = () => openMissionCamera(ctx, page, {
-        // カメラが起動した場合は、点線ガイドと同じ範囲をそのまま保存する。
-        onGuidedCapture: async (dataUrl, guide) => {
-          await completeMissionPhoto(ctx, page, dataUrl, {
-            captureWindow: guide.frame,
-            captureMask: guide.mask,
-            captureFullMask: guide.fullMask,
-          });
-          ctx.notify?.("しゃしんを 保存したよ！");
-          ctx.go("ACHIEVE", { page });
-        },
-        // 権限・HTTPS・端末非対応などでカメラが起動しない場合だけ、従来の手動調整へ。
-        onFallback: (dataUrl) => ctx.go("PREVIEW", { page, dataUrl }),
+      btn.disabled = true;
+      bookColorLayersReady.finally(() => {
+        if (btn.isConnected) btn.disabled = false;
       });
+      btn.onclick = async () => {
+        btn.disabled = true;
+        await bookColorLayersReady;
+        if (!btn.isConnected) return;
+        openMissionCamera(ctx, page, {
+          // カメラが起動した場合は、点線ガイドと同じ範囲をそのまま保存する。
+          onGuidedCapture: async (dataUrl, guide) => {
+            await completeMissionPhoto(ctx, page, dataUrl, {
+              captureWindow: guide.frame,
+              captureMask: guide.mask,
+              captureFullMask: guide.fullMask,
+            });
+            ctx.notify?.("しゃしんを 保存したよ！");
+            ctx.go("ACHIEVE", { page });
+          },
+          // 権限・HTTPS・端末非対応などでカメラが起動しない場合だけ、従来の手動調整へ。
+          onFallback: (dataUrl) => ctx.go("PREVIEW", { page, dataUrl }),
+        });
+      };
     });
     root.querySelector("[data-finish]")?.addEventListener("click", () => ctx.advance());
 
@@ -239,19 +271,6 @@ export const StoryScreen = {
     });
 
     flip.loadFromHTML(bookEl.querySelectorAll(".flip-page"));
-    root.querySelectorAll("[data-book-color-art]").forEach(async (overlay) => {
-      const tone = overlay.dataset.bookColorTone || "transparent";
-      const region = JSON.parse(overlay.dataset.bookColorRegion);
-      const filled = tone === "dark"
-        ? await recolorVehicleImage(overlay.dataset.bookColorSource, overlay.dataset.bookColorValue || null, region, "dark")
-        : await fillArtworkHoles(overlay.dataset.bookColorSource, overlay.dataset.bookColorPhoto, Number(overlay.dataset.bookColorScale) || 1, region);
-      if (filled) {
-        overlay.src = filled;
-        overlay.style.opacity = "1";
-      } else {
-        overlay.remove();
-      }
-    });
     root.querySelectorAll("[data-vehicle-art]").forEach(async (overlay) => {
       let color = overlay.dataset.vehicleColor;
       if (!color && overlay.dataset.vehiclePhoto) {
