@@ -9,10 +9,10 @@ const PARENT_GUIDE_STEPS = [
     number: "1",
     image: "assets/cover-nono.png",
     type: "tap",
-    target: "ほん",
-    title: "おもいでを ひらく",
-    action: "本棚の ほんを タッチ",
-    text: "かんせいした えほんと しゃしんを みられます",
+    target: "絵本",
+    title: "思い出を確認",
+    action: "本棚の絵本を選択",
+    text: "完成した絵本と写真を確認できます",
     focus: "[data-book]",
   },
   {
@@ -20,9 +20,9 @@ const PARENT_GUIDE_STEPS = [
     image: "assets/scene-cheer.svg",
     type: "tap",
     target: "活動履歴",
-    title: "活動履歴を みる",
-    action: "「活動履歴」を タッチ",
-    text: "あそんだ日と ミッションの数を みられます",
+    title: "活動履歴を確認",
+    action: "「活動履歴」を選択",
+    text: "活動日数とミッションの達成状況を確認できます",
     focus: '[data-go="PARENT"]',
   },
   {
@@ -30,9 +30,9 @@ const PARENT_GUIDE_STEPS = [
     image: "assets/scene-meadow.svg",
     type: "tap",
     target: "分析",
-    title: "特性分析を みる",
-    action: "「子どもの特性分析」を タッチ",
-    text: "こどもの あそびの ようすを みられます",
+    title: "特性分析を確認",
+    action: "「子どもの特性分析」を選択",
+    text: "お子さまの活動傾向を確認できます",
     focus: '[data-go="ANALYSIS"]',
   },
 ];
@@ -182,25 +182,30 @@ function parentBooks(ctx) {
 export const SelectScreen = {
   render(ctx, params = {}) {
     const isMemoryView = params.view === "memories";
-    const isParent = ctx.session.mode === "parent" || isMemoryView;
+    const isParentMode = ctx.session.mode === "parent";
+    const isParent = isParentMode || isMemoryView;
     const books = isParent ? parentBooks(ctx) : ctx.repo.books;
     const hasContentError = !isParent && (ctx.repo.errors?.length ?? 0) > 0;
     const pages = books.length ? chunk(books, BOOKS_PER_SHELF) : [];
     const dots = pages
       .map((_, i) => `<button class="shelf-dot" data-dot="${i}" aria-label="${i + 1}ばんめの たな"></button>`)
       .join("");
-    const parentActions = isParent && !isMemoryView ? `
+    const parentActions = isParentMode ? `
       <div class="select-toolbar">
         <button class="select-action" data-go="PARENT">活動履歴</button>
         <button class="select-action" data-go="ANALYSIS">子どもの特性分析</button>
         <button class="select-action" data-parent-guide>操作方法</button>
       </div>` : "";
+    const memoryActions = isMemoryView ? `
+      <div class="select-toolbar select-toolbar--memory">
+        <button class="select-action select-action--collection" data-go="COLLECTION">🏡 コレクションルーム</button>
+      </div>` : "";
     const emptyState = books.length === 0 ? `
       <div class="select-empty">
         ${hasContentError
           ? "<p>えほんを よみこめませんでした。</p><p>もういちど ためしてみてね。</p>"
-          : isParent
-            ? "<p>まだ こどもが つくった えほんは ありません。</p><p>えほんを よんで できたら、ここに すぐ あらわれます。</p>"
+          : isParentMode
+            ? "<p>お子さまが作成した絵本はまだありません。</p><p>絵本を完成すると、ここに表示されます。</p>"
             : "<p>まだ えほんが ありません。</p><p>読み込みが おわるまで まってみてね。</p>"}
         ${hasContentError ? '<button class="select-action" type="button" data-retry-content>もういちど</button>' : ""}
       </div>` : "";
@@ -220,9 +225,10 @@ export const SelectScreen = {
           <span class="sky-shape sky-shape--sparkle" style="bottom:16%;left:9%;animation-delay:1.2s"></span>
           <span class="sky-shape sky-shape--star" style="bottom:12%;right:11%;animation-delay:.5s"></span>
         </div>
-        <button class="back" data-back>‹ もどる</button>
-        <h2 class="section-title select-title">${isParent ? "おもいで" : "どの えほんを よむ？"}</h2>
+        <button class="back" data-back>‹ ${isParentMode ? "戻る" : "もどる"}</button>
+        <h2 class="section-title select-title">${isParentMode ? "思い出" : isMemoryView ? "おもいで" : "どの えほんを よむ？"}</h2>
         ${parentActions}
+        ${memoryActions}
         ${contentWarning}
         ${emptyState || `<div class="shelf-pager" data-pager>${pages.map((p) => shelfPage(ctx, p, badgeType)).join("")}</div>${pages.length > 1 ? `<div class="shelf-dots" data-dots>${dots}</div>` : ""}`}
       </div>`;
@@ -245,9 +251,12 @@ export const SelectScreen = {
     });
     const showParentGuide = () => openGuide(ctx, root, {
       steps: PARENT_GUIDE_STEPS,
-      kicker: "おうちのひとへ",
+      kicker: "保護者向け",
       title: "操作方法",
-      finalLabel: "わかった！",
+      finalLabel: "閉じる",
+      backLabel: "‹ 戻る",
+      nextLabel: "次へ ›",
+      laterLabel: "後で",
       onComplete: () => ctx.session.markParentGuideSeen(),
     });
     root.querySelector("[data-parent-guide]")?.addEventListener("click", showParentGuide);

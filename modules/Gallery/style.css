@@ -1,4 +1,18 @@
 /* おもいで画面 ── 1回のきろくを1枚のカードに、しゃしんは全部ならべる */
+.gallery-collection-launch {
+  align-self: center;
+  padding: 9px 16px;
+  border: 1px solid rgba(231, 149, 105, .42);
+  border-radius: 999px;
+  color: #7f5b35;
+  background: linear-gradient(135deg, #fff8df, #ffe7c5);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 900;
+  box-shadow: 0 3px 0 rgba(207, 139, 84, .2);
+  cursor: pointer;
+}
+.gallery-collection-launch:active { transform: translateY(2px); }
 .memory-list { display: flex; flex-direction: column; gap: 16px; }
 .memory-list .memory-card { width: 100%; }
 .memory-photos {

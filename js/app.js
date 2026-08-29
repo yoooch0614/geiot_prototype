@@ -7,13 +7,13 @@
 import { ContentRepository } from "./ContentRepository.js";
 import { Session } from "./Session.js?v=suki-no-tane-original-completed-pages-20260821";
 import { Settings } from "./Settings.js";
-import { Screens } from "./screens.js?v=diary-scratchboard-canonical-source-20260821";
+import { Screens } from "./screens.js?v=suki-no-tane-camera-fix-20260829-v2";
 import {
   unlockAudio, preloadAudio, playAudio, playBgm, stopBgm,
   stabilizeJapaneseText,
   setEmbeddedAudioEnabled,
   CELEBRATION_SOUNDS, CLICK_SOUND, HOME_BGM, HOME_NIGHT_BGM,
-} from "../modules/shared/utils.js";
+} from "../modules/shared/utils.js?v=suki-no-tane-camera-fix-20260829-v2";
 import { loadBigFiveData } from "../modules/Analysis/workStyles.js";
 import { localizeText, localizeUi, t } from "../modules/shared/i18n.js";
 
@@ -442,7 +442,16 @@ async function boot() {
   preloadAudio(
     [CLICK_SOUND, HOME_BGM, HOME_NIGHT_BGM, "assets/page_sound.mp3", ...CELEBRATION_SOUNDS].map((s) => repo.assetUrl(s))
   );
-  go("MODE");
+  // 起動完了を「今日のログイン」として一度だけ記録する。同日再起動では
+  // streak を増やさず、未開封のプレゼントがある場合だけ同じ地図を再表示する。
+  const login = session.recordDailyLogin();
+  // 本番の起動フローはそのままに、local preview 用の画面直リンクも用意する。
+  // 例：?screen=login / ?screen=collection（room も同じ）。
+  const previewScreen = new URLSearchParams(window.location.search).get("screen");
+  if (previewScreen === "login") return go("LOGIN_REWARD", { returnTo: "MODE", ...login });
+  if (previewScreen === "collection" || previewScreen === "room") return go("COLLECTION");
+  if (login.shouldShow) go("LOGIN_REWARD", login);
+  else go("MODE");
 }
 
 // file:// / 通信エラーのとき用の案内（白画面を防ぐ）

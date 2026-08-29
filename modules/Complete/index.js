@@ -6,7 +6,7 @@ const TEACHER_RABBIT_ASSET = "content/assets/teacher-rabbit.png";
 export const CompleteScreen = {
   render(ctx, { page }) {
     const avatar = ctx.session.getAvatar();
-    const completionTitle = `${avatar.name ? `${esc(avatar.name)}、` : ""}1さつ よめたね！`;
+    const completionTitle = `${avatar.name ? `${esc(avatar.name)}、` : ""}1冊読めたね！`;
     const completionDetail = esc(page?.text || "");
     return `
       <div class="screen center complete">
@@ -27,8 +27,17 @@ export const CompleteScreen = {
           </div>
           <img class="teacher-rabbit-image" src="${TEACHER_RABBIT_ASSET}" alt="戴眼镜的白色兔兔老师">
         </div>
+        <section class="book-reward" data-book-reward aria-label="絵本を読んだごほうび">
+          <p class="book-reward-copy" data-book-reward-copy>ごほうびの はこが とどいたよ！</p>
+          <button class="book-reward-box" type="button" data-book-gift aria-label="ごほうびをひらく">🎁</button>
+          <div class="book-reward-reveal" data-book-reward-reveal hidden>
+            <span class="book-reward-label">新しいアイテムをゲット！</span>
+            <span class="book-reward-item"><span data-book-reward-image aria-hidden="true"></span><strong data-book-reward-name></strong></span>
+          </div>
+          <p class="book-reward-hint" data-book-reward-hint>タッチして あけてね</p>
+        </section>
         ${avatarBuddy(avatar, "avatar-buddy--achieve")}
-        <button class="next-btn" data-next>つぎへ ›</button>
+        <button class="next-btn" data-next hidden>つぎへ ›</button>
       </div>`;
   },
   mount(ctx, params = {}, root) {
@@ -39,6 +48,32 @@ export const CompleteScreen = {
     // 1さつ読み終えたお祝いの音。メダルの登場演出と合わせて鳴らす。
     playCelebrationSound(ctx);
     ctx.notify?.("えほん日記を 保存したよ！");
+
+    const reward = memory?.reward;
+    const gift = root.querySelector("[data-book-gift]");
+    const reveal = root.querySelector("[data-book-reward-reveal]");
+    const rewardImage = root.querySelector("[data-book-reward-image]");
+    const rewardName = root.querySelector("[data-book-reward-name]");
+    const rewardCopy = root.querySelector("[data-book-reward-copy]");
+    const rewardHint = root.querySelector("[data-book-reward-hint]");
+    const next = root.querySelector("[data-next]");
+    if (reward) {
+      rewardImage.textContent = reward.image || "🎁";
+      rewardName.textContent = reward.name || "すてきな アイテム";
+      gift.onclick = () => {
+        gift.disabled = true;
+        gift.classList.add("is-open");
+        gift.textContent = reward.image || "🎁";
+        rewardCopy.textContent = reward.isNew ? "よく がんばったね！" : "また あえたね！";
+        rewardHint.hidden = true;
+        reveal.hidden = false;
+        next.hidden = false;
+        ctx.notify?.("新しいアイテムを ゲット！");
+      };
+    } else {
+      root.querySelector("[data-book-reward]")?.remove();
+      next.hidden = false;
+    }
 
     // 初期状態はCSS側で「すでに見えている」のがデフォルト。
     // ここでは登場演出用のクラスを1フレーム後に付与するだけ。

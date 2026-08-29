@@ -356,6 +356,14 @@ export function openCamera(ctx, onPicked) {
 const CAMERA_CANVAS_WIDTH = 800;
 const CAMERA_CANVAS_HEIGHT = 600;
 
+// カメラ・Mask・完成画像のすべてが共有する論理キャンバス。
+// CSS の表示幅や devicePixelRatio はこの座標系の外側で吸収するため、
+// 端末ごとに x/y を書き換える必要がない。
+const CAMERA_COORDINATE_SPACE = {
+  width: CAMERA_CANVAS_WIDTH,
+  height: CAMERA_CANVAS_HEIGHT,
+};
+
 function loadImageElement(src) {
   return new Promise((resolve, reject) => {
     const image = new Image();
@@ -429,6 +437,75 @@ function missionFrameForCanvas(image, frame, width = CAMERA_CANVAS_WIDTH, height
   };
 }
 
+function repeatGroupsFor(repeatGroups) {
+  const groups = Array.isArray(repeatGroups)
+    ? repeatGroups
+    : repeatGroups && typeof repeatGroups === "object" ? [repeatGroups] : [];
+  return groups.map((group) => {
+    const instances = (group.instances ?? [])
+      .filter((instance) => instance && typeof instance === "object")
+      .map((instance, index) => ({
+        ...instance,
+        groupId: instance.groupId || group.groupId || `repeat-${index}`,
+      }))
+      .filter((instance) => [instance.x, instance.y, instance.width, instance.height]
+        .every((value) => Number.isFinite(Number(value))) && Number(instance.width) > 0 && Number(instance.height) > 0);
+    const representative = typeof group.representative === "string"
+      ? instances.find((instance) => instance.id === group.representative)
+      : instances[0];
+    return { ...group, instances, representative };
+  }).filter((group) => group.instances.length && group.representative);
+}
+
+// Mask の白い部分全体を「撮影する範囲」にする。
+// 代表の1軒・1輪だけを切り出すと、撮影時の個数と完成後の個数が合わないため、
+// 車は1台、家は3軒、花は10輪という実際の Mask 全体をそのまま使う。
+function maskBounds(mask, fallbackFrame = null) {
+  if (!mask?.width || !mask?.height) return fallbackFrame;
+  const data = mask.getContext("2d").getImageData(0, 0, mask.width, mask.height).data;
+  let minX = mask.width;
+  let minY = mask.height;
+  let maxX = -1;
+  let maxY = -1;
+  for (let y = 0; y < mask.height; y++) {
+    for (let x = 0; x < mask.width; x++) {
+      if (data[(y * mask.width + x) * 4 + 3] < 16) continue;
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x);
+      maxY = Math.max(maxY, y);
+    }
+  }
+  if (maxX < minX || maxY < minY) return fallbackFrame;
+  return {
+    x: minX,
+    y: minY,
+    width: maxX - minX + 1,
+    height: maxY - minY + 1,
+    radius: Number(fallbackFrame?.radius) || 24,
+  };
+}
+
+function logicalCanvasContext(canvas, width, height) {
+  const ratio = Math.max(1, Math.min(3, Number(window.devicePixelRatio) || 1));
+  canvas.width = Math.round(width * ratio);
+  canvas.height = Math.round(height * ratio);
+  canvas.style.aspectRatio = `${width} / ${height}`;
+  canvas.dataset.coordinateScale = String(ratio);
+  const context = canvas.getContext("2d");
+  context.setTransform(ratio, 0, 0, ratio, 0, 0);
+  return context;
+}
+
+function beginLogicalDraw(context, width, height) {
+  const ratio = Number(context.canvas.dataset.coordinateScale) || 1;
+  context.setTransform(1, 0, 0, 1, 0, 0);
+  context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+  context.setTransform(ratio, 0, 0, ratio, 0, 0);
+  context.imageSmoothingEnabled = true;
+  return { width, height, ratio };
+}
+
 // 写真の形は各ページが明示的に持つ Mask 画像から作る。
 // Mask は「写真を見せる部分が白、それ以外が透明」の画像で、背景絵の色は見ない。
 async function loadMissionMask(maskUrl, width = CAMERA_CANVAS_WIDTH, height = CAMERA_CANVAS_HEIGHT) {
@@ -444,17 +521,24 @@ async function loadMissionMask(maskUrl, width = CAMERA_CANVAS_WIDTH, height = CA
 }
 
 // ミッションページの画像から、カメラの点線ガイドに必要な情報を作る。
-export async function createMissionGuide(backgroundUrl, frame, maskUrl = null) {
+export async function createMissionGuide(backgroundUrl, frame, maskUrl = null, repeatGroups = []) {
   try {
     const [image, mask] = await Promise.all([
       loadImageElement(backgroundUrl),
       loadMissionMask(maskUrl),
     ]);
+    const normalizedGroups = repeatGroupsFor(repeatGroups);
+    const fallbackFrame = missionFrameForCanvas(image, frame);
+    const mappedFrame = maskBounds(mask, fallbackFrame);
     return {
       width: CAMERA_CANVAS_WIDTH,
       height: CAMERA_CANVAS_HEIGHT,
-      frame: missionFrameForCanvas(image, frame),
+      // frame と mask は同じ全体範囲を指す。これで撮影時と填色時の位置・大きさが一致する。
+      frame: mappedFrame,
+      fullMask: mask,
+      // Mask 全体を表示するので、家3軒・花10輪も撮影画面にそのまま出る。
       mask,
+      repeatGroups: normalizedGroups,
     };
   } catch (error) {
     // このページが Mask を指定しているのに読めない場合、矩形ガイドを見せず
@@ -468,13 +552,15 @@ export async function createMissionGuide(backgroundUrl, frame, maskUrl = null) {
       height: CAMERA_CANVAS_HEIGHT,
       frame: { x: 200, y: 150, width: 400, height: 300, radius: 24 },
       mask: null,
+      fullMask: null,
+      repeatGroups: repeatGroupsFor(repeatGroups),
     };
   }
 }
 
 function drawCameraGuide(context, guide) {
   const { width, height, frame, mask } = guide;
-  context.clearRect(0, 0, width, height);
+  beginLogicalDraw(context, width, height);
   context.fillStyle = "rgba(12, 24, 42, .62)";
   context.fillRect(0, 0, width, height);
 
@@ -536,6 +622,47 @@ function stopCameraStream(stream) {
   stream?.getTracks?.().forEach((track) => track.stop());
 }
 
+// 撮影画面で見えていた範囲だけを、後の「色・もよう」用の写真として保存する。
+// 元の写真全体をそのまま使うと、ガイドの外側まで別の絵へ引き伸ばされて
+// 実際に撮った位置と、絵本にはめ込まれた位置がずれて見える。
+async function cropCameraPhoto(photoUrl, window) {
+  if (!photoUrl || !window) return photoUrl;
+  try {
+    const image = await loadImageElement(photoUrl);
+    const sourceWidth = image.naturalWidth || image.width;
+    const sourceHeight = image.naturalHeight || image.height;
+    const x = Number(window.x);
+    const y = Number(window.y);
+    const width = Number(window.width);
+    const height = Number(window.height);
+    if (![x, y, width, height, sourceWidth, sourceHeight].every(Number.isFinite) || width <= 0 || height <= 0) {
+      return photoUrl;
+    }
+
+    const scaleX = sourceWidth / CAMERA_COORDINATE_SPACE.width;
+    const scaleY = sourceHeight / CAMERA_COORDINATE_SPACE.height;
+    const left = clamp(x, 0, CAMERA_COORDINATE_SPACE.width) * scaleX;
+    const top = clamp(y, 0, CAMERA_COORDINATE_SPACE.height) * scaleY;
+    const right = clamp(x + width, 0, CAMERA_COORDINATE_SPACE.width) * scaleX;
+    const bottom = clamp(y + height, 0, CAMERA_COORDINATE_SPACE.height) * scaleY;
+    const cropWidth = Math.max(1, Math.round(right - left));
+    const cropHeight = Math.max(1, Math.round(bottom - top));
+    if (right <= left || bottom <= top) return photoUrl;
+
+    const crop = document.createElement("canvas");
+    crop.width = cropWidth;
+    crop.height = cropHeight;
+    crop.getContext("2d").drawImage(
+      image,
+      left, top, right - left, bottom - top,
+      0, 0, cropWidth, cropHeight,
+    );
+    return crop.toDataURL("image/jpeg", 0.92);
+  } catch (_) {
+    return photoUrl;
+  }
+}
+
 // まず getUserMedia の取景画面を試し、使えない環境だけ従来のファイル入力へ戻す。
 // アプリ内カメラで撮った写真は guide.frame の範囲だけをそのまま保存するため、
 // 撮影後に指で移動・拡大するプレビューは表示しない。
@@ -567,7 +694,8 @@ export function openMissionCamera(ctx, page, { onGuidedCapture, onFallback } = {
   const status = modal.querySelector("[data-camera-status]");
   const shutter = modal.querySelector("[data-camera-shutter]");
   const maskUrl = page?.photoMask ? ctx.repo.assetUrl(page.photoMask) : null;
-  const guidePromise = createMissionGuide(backgroundUrl, page?.frame, maskUrl);
+  const repeatGroups = page?.repeatGroups || [];
+  const guidePromise = createMissionGuide(backgroundUrl, page?.frame, maskUrl, repeatGroups);
   let guide = null;
   let stream = null;
   let closed = false;
@@ -630,7 +758,8 @@ export function openMissionCamera(ctx, page, { onGuidedCapture, onFallback } = {
     try {
       guide = await guidePromise;
       if (closed) return;
-      drawCameraGuide(overlay.getContext("2d"), guide);
+      const overlayContext = logicalCanvasContext(overlay, guide.width, guide.height);
+      drawCameraGuide(overlayContext, guide);
       if (closed) return;
       stream = await requestStream();
       if (closed || fallbackStarted) {
@@ -687,14 +816,18 @@ export function openMissionCamera(ctx, page, { onGuidedCapture, onFallback } = {
 // アプリ内カメラで撮影した写真を、点線ガイドと同じ範囲で絵本に保存する。
 // 手動フォールバックの PreviewScreen は従来どおり独自に合成する。
 export async function completeMissionPhoto(ctx, page, dataUrl, placement = {}) {
+  // 後続ページの色ぬりにも、撮影時の点線内だけを使う。
+  const textureUrl = await cropCameraPhoto(dataUrl, placement.captureWindow);
   const [vehicleColor, composedUrl] = await Promise.all([
-    extractPhotoColor(dataUrl),
+    extractPhotoColor(textureUrl),
     composeMissionPhoto(ctx.repo.assetUrl(page.image), dataUrl, page.frame, {
       ...placement,
       guided: true,
       scale: 1,
       dx: 0,
       dy: 0,
+      repeatGroups: placement.repeatGroups || page.repeatGroups || [],
+      captureFullMask: placement.captureFullMask || null,
     }),
   ]);
   ctx.session.completeMission({
@@ -704,7 +837,7 @@ export async function completeMissionPhoto(ctx, page, dataUrl, placement = {}) {
     photoUrl: composedUrl,
     missionImage: page.image,
     vehicleColor,
-    vehicleSourceUrl: dataUrl,
+    vehicleSourceUrl: textureUrl,
     vehicleTextureScale: 1,
   });
   return composedUrl;
@@ -949,18 +1082,35 @@ export async function fillArtworkHoles(artUrl, textureUrl, textureScale = 1, reg
       visit(x - 1, y); visit(x + 1, y); visit(x, y - 1); visit(x, y + 1);
     }
 
+    // region の中に実際にある透明部分だけの外接矩形を求める。
+    // 設定上の region に余白があっても、撮影時の範囲と実際に色が入る形の範囲を
+    // 同じにするため、写真はこの矩形へ合わせる。
+    let fillLeft = right;
+    let fillTop = bottom;
+    let fillRight = -1;
+    let fillBottom = -1;
+    for (let y = top; y < bottom; y++) {
+      for (let x = left; x < right; x++) {
+        const p = y * canvas.width + x;
+        if (!transparent(x, y) || outside[p]) continue;
+        fillLeft = Math.min(fillLeft, x);
+        fillTop = Math.min(fillTop, y);
+        fillRight = Math.max(fillRight, x + 1);
+        fillBottom = Math.max(fillBottom, y + 1);
+      }
+    }
+    if (fillRight < fillLeft || fillBottom < fillTop) return null;
+
     const textureCanvas = document.createElement("canvas");
     textureCanvas.width = canvas.width; textureCanvas.height = canvas.height;
     const textureContext = textureCanvas.getContext("2d");
-    // 写真は「塗る範囲（region）」を必ず覆う大きさまで強制的に引き伸ばす。
-    // キャンバス全体を基準にすると、絵の端にある車などは写真の端（背景）ばかりを
-    // 拾ってしまい、選んだ色や柄が乗らないことがあった。縮小方向のscaleでも
-    // region が覆えなくなる（＝すき間が黒く残る）ことがないよう、下限は覆える倍率にする。
-    const cover = Math.max((right - left) / texture.naturalWidth, (bottom - top) / texture.naturalHeight);
+    // 写真は「実際に色が入る形」を必ず覆う大きさまで引き伸ばす。
+    // region 全体を基準にすると余白の分だけ写真の位置・大きさがずれる。
+    const cover = Math.max((fillRight - fillLeft) / texture.naturalWidth, (fillBottom - fillTop) / texture.naturalHeight);
     const factor = Math.max(cover, cover * Math.min(2, Number(textureScale) || 1));
     const width = texture.naturalWidth * factor;
     const height = texture.naturalHeight * factor;
-    textureContext.drawImage(texture, (left + right - width) / 2, (top + bottom - height) / 2, width, height);
+    textureContext.drawImage(texture, (fillLeft + fillRight - width) / 2, (fillTop + fillBottom - height) / 2, width, height);
     const textureData = textureContext.getImageData(0, 0, canvas.width, canvas.height).data;
     const output = context.createImageData(canvas.width, canvas.height);
     for (let y = top; y < bottom; y++) {
@@ -1170,7 +1320,30 @@ export async function composeMissionPhoto(backgroundUrl, photoUrl, frame, placem
     // 背景はカメラプレビューと同じ object-fit: cover で全面に敷く。
     // ガイド・撮影画像・完成画像の3つで同じ座標変換を使うため、端末比率によるずれを防ぐ。
     drawCoverImage(context, background, canvas.width, canvas.height);
-    const targetFrame = missionFrameForCanvas(background, frame, canvas.width, canvas.height);
+    const configuredFrame = missionFrameForCanvas(background, frame, canvas.width, canvas.height);
+    const loadedFullMask = !placement.captureFullMask && placement.maskUrl
+      ? await loadMissionMask(placement.maskUrl, canvas.width, canvas.height).catch(() => null)
+      : null;
+    const availableFullMask = placement.captureFullMask || loadedFullMask || null;
+    const availableCaptureMask = placement.captureMask || availableFullMask || null;
+    // 最終的な写真の枠も Mask 全体から求める。frame に余白があっても、
+    // カメラの点線と実際に色が入る形が同じ範囲になる。
+    const targetFrame = maskBounds(availableFullMask || availableCaptureMask, configuredFrame);
+
+    const drawImageToFrame = (destination, image, sourceX, sourceY, sourceWidth, sourceHeight, target, rotation = 0) => {
+      destination.save();
+      const radians = (Number(rotation) || 0) * Math.PI / 180;
+      if (radians) {
+        destination.translate(target.x + target.width / 2, target.y + target.height / 2);
+        destination.rotate(radians);
+        destination.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight,
+          -target.width / 2, -target.height / 2, target.width, target.height);
+      } else {
+        destination.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight,
+          target.x, target.y, target.width, target.height);
+      }
+      destination.restore();
+    };
 
     if (placement.guided) {
       // アプリ内カメラの800x600画像から、取景中の点線範囲だけを同じ座標へ移す。
@@ -1180,31 +1353,23 @@ export async function composeMissionPhoto(backgroundUrl, photoUrl, frame, placem
       const sourceY = sourceWindow.y * photo.naturalHeight / canvas.height;
       const sourceWidth = sourceWindow.width * photo.naturalWidth / canvas.width;
       const sourceHeight = sourceWindow.height * photo.naturalHeight / canvas.height;
+      // 取景時に表示したマスクをそのまま完成画像へ移す。
+      // sourceWindow と targetFrame が異なる場合も、マスクを同じ変換で移動する。
+      const sourceMask = availableCaptureMask;
       const photoLayer = document.createElement("canvas");
       photoLayer.width = canvas.width;
       photoLayer.height = canvas.height;
       const photoContext = photoLayer.getContext("2d");
-      photoContext.drawImage(
-        photo,
-        sourceX, sourceY, sourceWidth, sourceHeight,
-        targetFrame.x, targetFrame.y, targetFrame.width, targetFrame.height,
-      );
-
-      // 取景時に表示したマスクをそのまま完成画像へ移す。
-      // sourceWindow と targetFrame が異なる場合も、マスクを同じ変換で移動する。
-      // 相机打开时已经加载了当前页的 Mask。ここで別の形を推測せず、同じ Mask だけを使う。
-      const sourceMask = placement.captureMask || null;
+      drawImageToFrame(photoContext, photo, sourceX, sourceY, sourceWidth, sourceHeight, targetFrame);
       if (sourceMask) {
         const targetMask = document.createElement("canvas");
         targetMask.width = canvas.width;
         targetMask.height = canvas.height;
         const targetMaskContext = targetMask.getContext("2d");
         targetMaskContext.imageSmoothingEnabled = false;
-        targetMaskContext.drawImage(
-          sourceMask,
+        drawImageToFrame(targetMaskContext, sourceMask,
           sourceWindow.x, sourceWindow.y, sourceWindow.width, sourceWindow.height,
-          targetFrame.x, targetFrame.y, targetFrame.width, targetFrame.height,
-        );
+          targetFrame);
         photoContext.globalCompositeOperation = "destination-in";
         photoContext.drawImage(targetMask, 0, 0, canvas.width, canvas.height);
       } else {
@@ -1250,33 +1415,55 @@ export async function composeMissionPhoto(backgroundUrl, photoUrl, frame, placem
     const photoX = Math.max(0, Math.min(canvas.width - width,
       targetFrame.x + (targetFrame.width - width) / 2 + moveX));
 
+    // フォールバックの写真選択でも、Mask があれば同じ全体範囲へクリップする。
+    // 代表の1個を複製せず、撮影カメラと同じ個数の形だけを残す。
+    const photoLayer = availableCaptureMask ? document.createElement("canvas") : null;
+    if (photoLayer) {
+      photoLayer.width = canvas.width;
+      photoLayer.height = canvas.height;
+    }
+    const photoContext = photoLayer?.getContext("2d") || context;
     if (isCharacter) {
       // キャラクターは白い額縁を付けずそのまま背景に立たせる。
       // frame の下端に足をそろえる（＝地面に立っているように見える）。
       const photoY = Math.max(0, Math.min(canvas.height - height,
         targetFrame.y + (targetFrame.height - height) + moveY));
-      context.drawImage(subject, photoX, photoY, width, height);
+      photoContext.drawImage(subject, photoX, photoY, width, height);
     } else {
       // ふつうの写真（不透明）は、白いフチの「貼った写真」として背景の上に乗せる。
       // 白いフチは frame 全体ではなく写真のまわりだけに付け、背景が隠れないようにする。
       const photoY = Math.max(0, Math.min(canvas.height - height,
         targetFrame.y + (targetFrame.height - height) / 2 + moveY));
-      context.save();
-      context.shadowColor = "rgba(30, 45, 35, .28)";
-      context.shadowBlur = 22;
-      context.shadowOffsetY = 10;
-      context.fillStyle = "#fff";
-      context.beginPath();
-      roundedRect(context, photoX - 10, photoY - 10, width + 20, height + 20, targetFrame.radius + 8);
-      context.fill();
-      context.restore();
+      photoContext.save();
+      photoContext.shadowColor = "rgba(30, 45, 35, .28)";
+      photoContext.shadowBlur = 22;
+      photoContext.shadowOffsetY = 10;
+      photoContext.fillStyle = "#fff";
+      photoContext.beginPath();
+      roundedRect(photoContext, photoX - 10, photoY - 10, width + 20, height + 20, targetFrame.radius + 8);
+      photoContext.fill();
+      photoContext.restore();
 
-      context.save();
-      context.beginPath();
-      roundedRect(context, photoX, photoY, width, height, targetFrame.radius);
-      context.clip();
-      context.drawImage(photo, photoX, photoY, width, height);
-      context.restore();
+      photoContext.save();
+      photoContext.beginPath();
+      roundedRect(photoContext, photoX, photoY, width, height, targetFrame.radius);
+      photoContext.clip();
+      photoContext.drawImage(photo, photoX, photoY, width, height);
+      photoContext.restore();
+    }
+
+    if (photoLayer) {
+      const targetMask = document.createElement("canvas");
+      targetMask.width = canvas.width;
+      targetMask.height = canvas.height;
+      const targetMaskContext = targetMask.getContext("2d");
+      targetMaskContext.imageSmoothingEnabled = false;
+      drawImageToFrame(targetMaskContext, availableCaptureMask,
+        targetFrame.x, targetFrame.y, targetFrame.width, targetFrame.height,
+        targetFrame);
+      photoContext.globalCompositeOperation = "destination-in";
+      photoContext.drawImage(targetMask, 0, 0, canvas.width, canvas.height);
+      context.drawImage(photoLayer, 0, 0);
     }
 
     return canvas.toDataURL("image/jpeg", 0.9);

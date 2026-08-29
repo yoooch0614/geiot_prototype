@@ -86,6 +86,11 @@ export const HomeScreen = {
         ${avatarLaunch(ctx)}
         <h1 class="brand">なにして あそぶ？</h1>
         ${dailyMissionCard(ctx)}
+        <button class="login-map-launch" type="button" data-login-map>
+          <span class="login-map-launch-icon" aria-hidden="true">🗺️</span>
+          <span><strong>まちの おさんぽ</strong><small>れんぞく ${ctx.session.getLoginStatus().streak || 0} 日</small></span>
+          <span aria-hidden="true">›</span>
+        </button>
         <div class="mode-grid">
           <button class="mode-card mode-card--child" data-go="SELECT">
             <span class="mode-icon mode-icon--book" aria-hidden="true"></span><span>えほん</span>
@@ -103,6 +108,7 @@ export const HomeScreen = {
   },
   mount(ctx, _p, root) {
     root.querySelector("[data-back]").onclick = () => ctx.go("MODE");
+    root.querySelector("[data-login-map]").onclick = () => ctx.go("LOGIN_REWARD", { returnTo: "HOME" });
     root.querySelectorAll("[data-go]").forEach((b) => {
       b.onclick = () => ctx.go(b.dataset.go, b.dataset.view ? { view: b.dataset.view } : {});
     });

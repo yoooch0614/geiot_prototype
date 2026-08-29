@@ -2,6 +2,9 @@
   position: relative;
   overflow: hidden;
   background: radial-gradient(circle at 50% 42%, #fff7e0 0%, transparent 65%);
+  justify-content: flex-start;
+  padding-top: max(18px, env(safe-area-inset-top));
+  padding-bottom: max(22px, env(safe-area-inset-bottom));
 }
 
 /* ---------- 背景の光の放射 ---------- */
@@ -209,24 +212,37 @@
 
 /* ---------- 兔兔老师的完成对话 ---------- */
 .complete .teacher-rabbit-stage--complete {
-  width: min(92vw, 360px);
-  height: min(32vh, 230px);
-  margin: -8px auto 0;
+  width: min(94vw, 520px);
+  height: auto;
+  min-height: 0;
+  margin: -2px auto 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
 }
 
 .complete .teacher-rabbit-stage--complete .teacher-rabbit-image {
-  width: min(50vw, 190px);
+  order: 2;
+  width: clamp(138px, 32vw, 190px);
+  height: clamp(150px, 23vh, 210px);
+  flex: 0 0 auto;
 }
 
 .complete .teacher-rabbit-speech--complete {
-  top: 0;
-  right: 0;
-  max-width: min(78vw, 290px);
-  padding: 10px 14px;
+  position: relative;
+  order: 1;
+  align-self: center;
+  inset: auto;
+  width: min(100%, 350px);
+  max-width: 100%;
+  padding: 10px 16px;
   font-size: clamp(16px, 4.2vw, 22px);
   line-height: 1.35;
   opacity: 1;
   animation: none;
+  transform: none;
 }
 
 .complete .teacher-rabbit-speech-title,
@@ -249,9 +265,65 @@
   animation: completeSpeechIn 0.6s ease-out 0.75s both;
 }
 
+/* 气泡永远在兔兔上方，尖角指向身体上方的空白处，不会盖住脸。 */
+.complete .teacher-rabbit-speech--complete::after {
+  left: 50%;
+  bottom: -11px;
+  border-top: 0;
+  border-left: 0;
+  border-right: 3px solid #6bbf59;
+  border-bottom: 3px solid #6bbf59;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+/* 读完一本书的第二段成就：先看到礼物箱，再打开它。 */
+.book-reward {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: min(92vw, 350px);
+  margin: -3px auto 0;
+  padding: 8px 14px 11px;
+  border: 2px solid rgba(255, 210, 63, .65);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, .92);
+  box-shadow: 0 5px 14px rgba(58, 74, 63, .12);
+}
+.book-reward-copy, .book-reward-hint { margin: 0; font-weight: 900; }
+.book-reward-copy { color: #806b46; font-size: 13px; }
+.book-reward-hint { color: #a17b45; font-size: 11px; }
+.book-reward-box {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 49px;
+  padding: 0;
+  border: 0;
+  border-radius: 15px;
+  background: #ffe48d;
+  font-size: 32px;
+  cursor: pointer;
+  box-shadow: 0 5px 0 #e3b541;
+  animation: book-gift-breathe 1.2s ease-in-out infinite alternate;
+}
+.book-reward-box:active { transform: translateY(4px); box-shadow: 0 1px 0 #e3b541; }
+.book-reward-box.is-open { background: #fff4c4; box-shadow: 0 2px 0 #e3b541; animation: book-gift-open .45s cubic-bezier(.34,1.56,.64,1); }
+.book-reward-reveal { display: flex; flex-direction: column; align-items: center; gap: 2px; animation: book-reward-reveal .42s ease both; }
+.book-reward-reveal[hidden] { display: none; }
+.book-reward-label { color: #ff7a5c; font-size: 14px; font-weight: 900; }
+.book-reward-item { display: inline-flex; align-items: center; gap: 7px; color: #3a4a3f; font-size: 15px; }
+.book-reward-item span { font-size: 28px; }
+.book-reward-item strong { font-weight: 900; }
+@keyframes book-gift-breathe { to { transform: translateY(-3px) rotate(2deg); } }
+@keyframes book-gift-open { 0% { scale: .82; rotate: -4deg; } 70% { scale: 1.12; rotate: 3deg; } 100% { scale: 1; rotate: 0deg; } }
+@keyframes book-reward-reveal { from { opacity: 0; translate: 0 8px; scale: .8; } to { opacity: 1; translate: 0 0; scale: 1; } }
+
 @keyframes completeSpeechIn {
-  from { opacity: 0; transform: translateY(12px) rotate(2deg); }
-  to { opacity: 1; transform: translateY(0) rotate(2deg); }
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes leadIn {
@@ -267,7 +339,7 @@
 
 /* ---------- つぎへボタン ---------- */
 .complete .next-btn {
-  margin-top: 28px;
+  margin-top: 6px;
   padding: 14px 32px;
   font-size: 1.05em;
   font-weight: bold;
@@ -289,13 +361,32 @@
   transform: scale(0.95);
 }
 
+.complete .next-btn[hidden] { display: none; }
+
 @media (max-width: 420px) {
   .complete .teacher-rabbit-stage--complete {
-    width: min(94vw, 360px);
-    height: min(31vh, 220px);
+    width: min(95vw, 380px);
+    gap: 5px;
   }
 
   .complete .teacher-rabbit-speech--complete {
-    max-width: min(76vw, 250px);
+    width: min(92vw, 320px);
+    padding-left: 12px;
+    padding-right: 12px;
   }
+  .complete .teacher-rabbit-stage--complete .teacher-rabbit-image {
+    width: 145px;
+    height: 158px;
+  }
+  .book-reward {
+    width: min(92vw, 330px);
+  }
+  .complete .next-btn {
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .book-reward-box { animation: none; }
 }

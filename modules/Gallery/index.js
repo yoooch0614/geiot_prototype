@@ -1,4 +1,4 @@
-import { esc, fillArtworkHoles, recolorVehicleImage } from "../shared/utils.js";
+import { esc, fillArtworkHoles, recolorVehicleImage } from "../shared/utils.js?v=suki-no-tane-camera-fix-20260829-v2";
 
 export const GalleryScreen = {
   render(ctx) {
@@ -15,7 +15,7 @@ export const GalleryScreen = {
             ? `<div class="memory-photos">${photos
                 .map((p) => p.entry
                   ? `<span class="memory-photo memory-story-scene"${p.entry.colorFills?.length ? ` data-memory-color data-memory-source="${ctx.repo.assetUrl(p.entry.image)}" data-memory-fills='${esc(JSON.stringify(p.entry.colorFills))}'` : ""}>
-                      ${p.entry.fillPhoto ? `<img class="fill" src="${p.entry.fillPhoto}" alt="">` : ""}
+                      ${m.bookId !== "book-niji" && p.entry.fillPhoto ? `<img class="fill" src="${p.entry.fillPhoto}" alt="">` : ""}
                       <img class="art" src="${ctx.repo.assetUrl(p.entry.image)}" alt="">
                       ${(p.entry.colorFills || []).map((_, i) => `<img class="book-color-art" data-memory-color-layer data-memory-fill-index="${i}" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="">`).join("")}
                     </span>`
@@ -34,11 +34,13 @@ export const GalleryScreen = {
       <div class="screen">
         <button class="back" data-back>‹ もどる</button>
         <h2 class="section-title">おもいで</h2>
+        <button class="gallery-collection-launch" type="button" data-collection>🏡 コレクションルーム</button>
         <div class="memory-list">${cards}</div>
       </div>`;
   },
   mount(ctx, _p, root) {
     root.querySelector("[data-back]").onclick = () => ctx.go("HOME");
+    root.querySelector("[data-collection]")?.addEventListener("click", () => ctx.go("COLLECTION", { returnTo: "GALLERY" }));
     root.querySelectorAll("[data-mem]").forEach((b) => {
       b.onclick = () => {
         const memory = ctx.session.memories.find((m) => m.id === b.dataset.mem);

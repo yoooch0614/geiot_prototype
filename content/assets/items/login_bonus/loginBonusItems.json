@@ -1,0 +1,172 @@
+[
+  {
+    "id": "001",
+    "name": "黄色帽子",
+    "type": "hat",
+    "file": "001_yellow_hat.png",
+    "source": "login_bonus",
+    "placement": "avatar",
+    "slot": "hat"
+  },
+  {
+    "id": "002",
+    "name": "红色帽子",
+    "type": "hat",
+    "file": "002_red_hat.png",
+    "source": "login_bonus",
+    "placement": "avatar",
+    "slot": "hat"
+  },
+  {
+    "id": "003",
+    "name": "蓝色帽子",
+    "type": "hat",
+    "file": "003_blue_hat.png",
+    "source": "login_bonus",
+    "placement": "avatar",
+    "slot": "hat"
+  },
+  {
+    "id": "004",
+    "name": "黄色上衣",
+    "type": "clothes",
+    "file": "004_yellow_shirt.png",
+    "source": "login_bonus",
+    "placement": "avatar",
+    "slot": "clothes"
+  },
+  {
+    "id": "005",
+    "name": "蓝色上衣",
+    "type": "clothes",
+    "file": "005_blue_shirt.png",
+    "source": "login_bonus",
+    "placement": "avatar",
+    "slot": "clothes"
+  },
+  {
+    "id": "006",
+    "name": "红色上衣",
+    "type": "clothes",
+    "file": "006_red_shirt.png",
+    "source": "login_bonus",
+    "placement": "avatar",
+    "slot": "clothes"
+  },
+  {
+    "id": "007",
+    "name": "小背包",
+    "type": "back",
+    "file": "007_small_backpack.png",
+    "source": "login_bonus",
+    "placement": "avatar",
+    "slot": "back"
+  },
+  {
+    "id": "008",
+    "name": "星星手持棒",
+    "type": "held",
+    "file": "008_star_wand.png",
+    "source": "login_bonus",
+    "placement": "avatar",
+    "slot": "held"
+  },
+  {
+    "id": "009",
+    "name": "小熊玩偶",
+    "type": "plush",
+    "file": "009_teddy_bear.png",
+    "source": "login_bonus",
+    "placement": "avatar",
+    "slot": "plush"
+  },
+  {
+    "id": "010",
+    "name": "相机",
+    "type": "held",
+    "file": "010_camera.png",
+    "source": "login_bonus",
+    "placement": "avatar",
+    "slot": "held"
+  },
+  {
+    "id": "011",
+    "name": "木制小椅子",
+    "type": "furniture",
+    "file": "011_wood_chair.png",
+    "source": "login_bonus",
+    "placement": "floor"
+  },
+  {
+    "id": "012",
+    "name": "木制小桌子",
+    "type": "furniture",
+    "file": "012_wood_table.png",
+    "source": "login_bonus",
+    "placement": "floor"
+  },
+  {
+    "id": "013",
+    "name": "小沙发",
+    "type": "furniture",
+    "file": "013_small_sofa.png",
+    "source": "login_bonus",
+    "placement": "floor"
+  },
+  {
+    "id": "014",
+    "name": "地毯",
+    "type": "decor",
+    "file": "014_rug.png",
+    "source": "login_bonus",
+    "placement": "floor"
+  },
+  {
+    "id": "015",
+    "name": "盆栽",
+    "type": "furniture",
+    "file": "015_potted_plant.png",
+    "source": "login_bonus",
+    "placement": "floor"
+  },
+  {
+    "id": "016",
+    "name": "小书架",
+    "type": "furniture",
+    "file": "016_small_bookshelf.png",
+    "source": "login_bonus",
+    "placement": "floor"
+  },
+  {
+    "id": "017",
+    "name": "台灯",
+    "type": "furniture",
+    "file": "017_table_lamp.png",
+    "source": "login_bonus",
+    "placement": "shelf"
+  },
+  {
+    "id": "018",
+    "name": "墙壁挂画",
+    "type": "decor",
+    "file": "018_wall_picture.png",
+    "source": "login_bonus",
+    "placement": "wall"
+  },
+  {
+    "id": "019",
+    "name": "玩具箱",
+    "type": "furniture",
+    "file": "019_toy_box.png",
+    "source": "login_bonus",
+    "placement": "floor"
+  },
+  {
+    "id": "020",
+    "name": "小床",
+    "type": "furniture",
+    "file": "020_small_bed.png",
+    "source": "login_bonus",
+    "placement": "floor"
+  }
+]

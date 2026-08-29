@@ -15,6 +15,15 @@
  *     → 読みかけの本は「つづきから」再開できる（撮った写真も残る）。
  */
 import { Storage } from "./Storage.js";
+import {
+  BOOK_REWARD_CATALOG,
+  LEGACY_LOGIN_REWARD_CATALOG,
+  LOGIN_REWARD_CATALOG,
+  REWARD_CATALOG,
+  localDateKey,
+  rewardDefinition,
+  rewardRecord,
+} from "../modules/shared/rewards.js";
 
 const STORAGE_KEY = "ehon.session.v2";
 const MEMORIES_KEY = "memories.v1"; // IndexedDB: 完成した絵本日記（写真つき）
@@ -23,9 +32,16 @@ const MAX_MEMORIES = 30;            // 端末容量の保険。古い思い出�
 const DEFAULT_PIN = "0000";         // おうちのひとゲートの初期PIN
 const PIN_MAX_FAILURES = 3;
 const PIN_LOCK_MS = 30 * 1000;
+const WEARABLE_TYPES = ["hat", "clothes", "accessory", "held", "back", "plush"];
 
 function today() {
-  return new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  return localDateKey(); // YYYY-MM-DD（端末のローカル日付）
+}
+
+function yesterday() {
+  const date = new Date();
+  date.setDate(date.getDate() - 1);
+  return localDateKey(date);
 }
 
 export class Session {
@@ -50,6 +66,16 @@ export class Session {
     // bookId が null なら「どの絵本でもOK」、指定があればその絵本だけがクリア対象。
     this.dailyMission = { enabled: true, bookId: null };
     this.missionDoneDays = {};     // { "YYYY-MM-DD": 読み終えた絵本のタイトル }
+    // ログインボーナス。ログイン日は端末内のローカル日付で判定し、
+    // 同じ日に何度アプリを開いても streak を増やさない。
+    this.lastLoginDate = null;
+    this.loginStreak = 0;
+    this.mapPosition = 0;
+    this.pendingLoginRewardIds = [];
+    // collection room に並ぶ「すでに手に入れた」アイテム。
+    this.claimedRewards = [];
+    // Avatar に身につけているごほうび（帽子・服・アクセサリー等）。
+    this.equippedRewardIds = [];
     // こどもの「じぶんアバター」（オリジナルキャラクター）。
     // animal は modules/shared/avatars.js のID（"custom" ならパーツ組み立て）。
     // parts はカスタム時のパーツ選択、paint はいろぬり（PNGデータURL）、
@@ -116,6 +142,121 @@ export class Session {
   markGuideSeen() { this.guideSeen = true; this._save(); }
   hasSeenParentGuide() { return this.parentGuideSeen; }
   markParentGuideSeen() { this.parentGuideSeen = true; this._save(); }
+
+  // ── ログインボーナス / コレクション ────────────────
+  // 起動時に一度だけ呼ぶ。新しい日なら一歩進み、5日目ごとのプレゼントを
+  // pending にしてから保存する。プレゼントを開く操作は画面側で行う。
+  recordDailyLogin() {
+    const date = today();
+    if (this.lastLoginDate === date) {
+      return {
+        isNewDay: false,
+        date,
+        streak: this.loginStreak,
+        position: this.mapPosition,
+        pendingReward: this.getPendingLoginReward(),
+        shouldShow: this.pendingLoginRewardIds.length > 0,
+      };
+    }
+
+    this.loginStreak = this.lastLoginDate === yesterday()
+      ? Math.max(0, this.loginStreak) + 1
+      : 1;
+    this.lastLoginDate = date;
+    this.mapPosition = ((this.loginStreak - 1) % 20) + 1;
+    if (this.loginStreak % 5 === 0) {
+      // 目录没有的里程碑暂时不重复发旧物品；以后加入 021、022 后会自动接上。
+      const reward = LOGIN_REWARD_CATALOG[this.loginStreak / 5 - 1];
+      if (reward && !this.pendingLoginRewardIds.includes(reward.id)) {
+        this.pendingLoginRewardIds.push(reward.id);
+      }
+    }
+    this._save();
+    return {
+      isNewDay: true,
+      date,
+      streak: this.loginStreak,
+      position: this.mapPosition,
+      pendingReward: this.getPendingLoginReward(),
+      shouldShow: true,
+    };
+  }
+
+  getLoginStatus() {
+    return {
+      lastLoginDate: this.lastLoginDate,
+      streak: this.loginStreak,
+      position: this.mapPosition,
+      pendingReward: this.getPendingLoginReward(),
+    };
+  }
+
+  getPendingLoginReward() {
+    return rewardDefinition(this.pendingLoginRewardIds[0]);
+  }
+
+  claimPendingLoginReward() {
+    const rewardId = this.pendingLoginRewardIds.shift();
+    const definition = rewardDefinition(rewardId);
+    if (!definition) {
+      this._save();
+      return null;
+    }
+    const reward = this._grantReward(definition, "login_bonus", today());
+    this._save();
+    return reward;
+  }
+
+  getRewards() {
+    return this.claimedRewards.map((reward) => ({ ...reward }));
+  }
+
+  // 未获得项目也返回 collection room 可用的数据结构，UI 因此不需要另行维护
+  // 一份「问号物品」列表。
+  getCollectionItems() {
+    const obtained = new Map(this.claimedRewards.map((reward) => [reward.id, reward]));
+    const knownIds = new Set(REWARD_CATALOG.map((definition) => definition.id));
+    const legacyObtained = this.claimedRewards
+      .filter((reward) => !knownIds.has(reward.id))
+      .map((reward) => LEGACY_LOGIN_REWARD_CATALOG.find((definition) => definition.id === reward.id))
+      .filter(Boolean);
+    return [...REWARD_CATALOG, ...legacyObtained].map((definition) => ({
+      ...definition,
+      obtained: obtained.has(definition.id),
+      obtainedDate: obtained.get(definition.id)?.obtainedDate || null,
+      source: obtained.get(definition.id)?.source || null,
+      equipped: this.equippedRewardIds.includes(definition.id),
+    }));
+  }
+
+  _grantReward(definition, source, obtainedDate = today(), referenceId = null) {
+    const existing = this.claimedRewards.find((reward) => reward.id === definition?.id);
+    if (existing) return { ...existing, isNew: false };
+    const reward = rewardRecord(definition, source, obtainedDate, referenceId);
+    if (!reward) return null;
+    this.claimedRewards.unshift(reward);
+    // 新しく身につけられるごほうびは、受け取った瞬間に Avatar へ反映する。
+    // 同じ種類の道具だけを自動で入れ替え、コレクション画面から後で外せる。
+    if (WEARABLE_TYPES.includes(definition.type)) {
+      this.equippedRewardIds = this.equippedRewardIds
+        .filter((id) => rewardDefinition(id)?.type !== definition.type);
+      this.equippedRewardIds.push(definition.id);
+    }
+    return { ...reward, isNew: true };
+  }
+
+  // 絵本を読み終えるたび、まだ持っていない本由来アイテムをひとつ選ぶ。
+  // カタログを一周した後も「ごほうびを受け取った」演出は残し、既存アイテムを
+  // 重複保存しないことで部屋が散らからないようにする。
+  _grantBookReward(memoryId, bookId) {
+    const next = BOOK_REWARD_CATALOG.find((definition) =>
+      !this.claimedRewards.some((reward) => reward.id === definition.id)
+    );
+    const definition = next || BOOK_REWARD_CATALOG[
+      this.memories.length % BOOK_REWARD_CATALOG.length
+    ];
+    return this._grantReward(definition, "book", today(), `${bookId}:${memoryId}`);
+  }
 
   // ── 絵本プレイ ───────────────────────
   // 同じ本の「読みかけ」が保存されていれば、そこから再開する
@@ -294,7 +435,9 @@ export class Session {
   getAvatar() {
     return { ...this.avatar, parts: this.avatar.parts ? { ...this.avatar.parts } : null };
   }
+  hasAvatar() { return Boolean(this.avatar?.animal); }
   setAvatar({ animal = this.avatar.animal, color = this.avatar.color, name = this.avatar.name, parts = this.avatar.parts, paint = this.avatar.paint } = {}) {
+    const hadAvatar = this.hasAvatar();
     const safeName = String(name ?? "").trim().slice(0, 8);
     this.avatar = {
       animal: animal || null,
@@ -303,7 +446,31 @@ export class Session {
       parts: Session._sanitizeParts(parts),
       paint: Session._sanitizePaint(paint),
     };
+    // 先にごほうびを受け取っていた場合も、最初の Avatar 作成時に
+    // 各カテゴリーの最新アイテムを一度だけ身につける。
+    if (!hadAvatar && this.avatar.animal && this.equippedRewardIds.length === 0) {
+      const equippedTypes = new Set();
+      this.claimedRewards.forEach((reward) => {
+        if (!WEARABLE_TYPES.includes(reward.type) || equippedTypes.has(reward.type)) return;
+        equippedTypes.add(reward.type);
+        this.equippedRewardIds.push(reward.id);
+      });
+    }
     this._save();
+  }
+  toggleRewardEquip(rewardId) {
+    const definition = rewardDefinition(rewardId);
+    const wearable = WEARABLE_TYPES.includes(definition?.type);
+    if (!definition || !wearable || !this.claimedRewards.some((reward) => reward.id === definition.id)) return false;
+    if (this.equippedRewardIds.includes(definition.id)) {
+      this.equippedRewardIds = this.equippedRewardIds.filter((id) => id !== definition.id);
+    } else {
+      // 每一种身分类别只保留一件，换装时自动替换同类别的旧道具。
+      this.equippedRewardIds = this.equippedRewardIds.filter((id) => rewardDefinition(id)?.type !== definition.type);
+      this.equippedRewardIds.push(definition.id);
+    }
+    this._save();
+    return true;
   }
   // いろぬりは canvas の PNG データURL だけを受け付ける（他の形式やURLは保存しない）。
   // localStorage を圧迫しないよう、長さにも上限を置く。
@@ -341,6 +508,12 @@ export class Session {
       missionDoneDays: { ...this.missionDoneDays },
       completedMissionCount: this.completedMissionCount,
       avatar: { ...this.avatar },
+      equippedRewardIds: [...this.equippedRewardIds],
+      lastLoginDate: this.lastLoginDate,
+      loginStreak: this.loginStreak,
+      mapPosition: this.mapPosition,
+      pendingLoginRewardIds: [...this.pendingLoginRewardIds],
+      claimedRewards: this.claimedRewards,
       resume: this._savedRun,
       settings: { ...settings },
     };
@@ -377,7 +550,12 @@ export class Session {
           id: page.id,
           type: "story",
           image: page.image,
-          fillPhoto: page.fillFrom ? (done.get(page.fillFrom)?.photoUrl ?? null) : null,
+          // book-niji は各ページの透明部分へ、撮影ガイド内の写真を直接描く。
+          // ミッションページの完成画像（別ページの絵）を下に敷くと、絵ごとの
+          // 車・家の位置の違いで写真がずれて見えるため保存しない。
+          fillPhoto: book.id === "book-niji"
+            ? null
+            : page.fillFrom ? (done.get(page.fillFrom)?.photoUrl ?? null) : null,
           colorFills: page.colorFills ?? null,
         };
         entries.push({
@@ -433,6 +611,11 @@ export class Session {
         : null,
       entries,
     };
+    // 絵本完了のごほうびは、完了した瞬間に collection room へ保存する。
+    // Complete 画面ではこの記録を「プレゼントを開ける」演出として見せるので、
+    // 途中でリロードしても獲得アイテムが消えない。
+    const bookReward = this._grantBookReward(memory.id, book.id);
+    memory.reward = bookReward ? { ...bookReward } : null;
     this.memories.unshift(memory);               // ギャラリー（写真つき）
     if (this.memories.length > MAX_MEMORIES) this.memories.length = MAX_MEMORIES;
     this.memoryLog.unshift({                      // 親レポート（メタのみ・保存）
@@ -464,6 +647,12 @@ export class Session {
     this.missionDoneDays = {}; // ミッションの設定（dailyMission）は親の意図なので残す
     this.completedMissionCount = 0;
     this.lastMissionCompletion = null;
+    this.lastLoginDate = null;
+    this.loginStreak = 0;
+    this.mapPosition = 0;
+    this.pendingLoginRewardIds = [];
+    this.claimedRewards = [];
+    this.equippedRewardIds = [];
     this.avatar = { animal: null, color: "green", name: null, parts: null, paint: null };
     this.memories = [];
     this.bookmarks = [];
@@ -508,6 +697,12 @@ export class Session {
         missionDoneDays: this.missionDoneDays,
         completedMissionCount: this.completedMissionCount,
         avatar: this.avatar,
+        equippedRewardIds: this.equippedRewardIds,
+        lastLoginDate: this.lastLoginDate,
+        loginStreak: this.loginStreak,
+        mapPosition: this.mapPosition,
+        pendingLoginRewardIds: this.pendingLoginRewardIds,
+        claimedRewards: this.claimedRewards,
         bookmarks: this.bookmarks,
         welcomeGuideSeen: this.welcomeGuideSeen,
         guideSeen: this.guideSeen,
@@ -535,6 +730,43 @@ export class Session {
         this.missionDoneDays = s.missionDoneDays;
       }
       this.completedMissionCount = Math.max(0, Math.floor(Number(s.completedMissionCount) || 0));
+      this.lastLoginDate = typeof s.lastLoginDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s.lastLoginDate)
+        ? s.lastLoginDate : null;
+      this.loginStreak = Math.max(0, Math.floor(Number(s.loginStreak) || 0));
+      this.mapPosition = Math.max(0, Math.min(20, Math.floor(Number(s.mapPosition) || 0)));
+      this.pendingLoginRewardIds = Array.isArray(s.pendingLoginRewardIds)
+        ? s.pendingLoginRewardIds.filter((id) => Boolean(rewardDefinition(id)))
+        : [];
+      // 旧备份没有 claimedRewards，配列が壊れていてもアプリはそのまま使える。
+      this.claimedRewards = Array.isArray(s.claimedRewards)
+        ? s.claimedRewards.filter((reward) => reward && typeof reward.id === "string" && Boolean(rewardDefinition(reward.id)))
+          .map((reward) => ({
+            ...rewardDefinition(reward.id),
+            ...reward,
+            obtained: true,
+            obtainedDate: reward.obtainedDate || null,
+            source: reward.source === "book"
+              ? "book"
+              : reward.source === "login_bonus" ? "login_bonus" : "login",
+          }))
+        : [];
+      const claimedIds = new Set(this.claimedRewards.map((reward) => reward.id));
+      if (Array.isArray(s.equippedRewardIds)) {
+        this.equippedRewardIds = s.equippedRewardIds.filter((id) => {
+          const definition = rewardDefinition(id);
+      return claimedIds.has(id) && WEARABLE_TYPES.includes(definition?.type);
+        });
+      } else {
+        // 新字段加入前已经获得的可穿戴奖励也要能出现在自己的 Avatar 上。
+        const migratedTypes = new Set();
+        this.equippedRewardIds = this.claimedRewards
+          .filter((reward) => {
+            if (!WEARABLE_TYPES.includes(reward.type) || migratedTypes.has(reward.type)) return false;
+            migratedTypes.add(reward.type);
+            return true;
+          })
+          .map((reward) => reward.id);
+      }
       if (s.avatar && typeof s.avatar === "object") {
         const savedName = String(s.avatar.name ?? "").trim().slice(0, 8);
         this.avatar = {

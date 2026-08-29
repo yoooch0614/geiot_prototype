@@ -1,9 +1,10 @@
-import { stage, composeMissionPhoto, extractPhotoColor } from "../shared/utils.js?v=suki-no-tane-mask-files-20260822";
+import { stage, composeMissionPhoto, extractPhotoColor } from "../shared/utils.js?v=suki-no-tane-camera-fix-20260829-v2";
 import { t } from "../shared/i18n.js";
 
 export const PreviewScreen = {
   render(ctx, { page, dataUrl }) {
     const backgroundUrl = ctx.repo.assetUrl(page.image);
+    const hasRepeatObjects = (page.repeatGroups?.length ?? 0) > 0;
     return stage(`
       <div class="screen reader">
         <p class="lead">しゃしんを うごかしてね</p>
@@ -12,6 +13,7 @@ export const PreviewScreen = {
           <img class="photo-movable" data-photo src="${dataUrl}" alt="とったしゃしん" draggable="false">
         </div>
         <p class="drag-hint">☝ ゆびで うごかす　🔍 おおきさも かえられるよ</p>
+        ${hasRepeatObjects ? `<p class="repeat-hint">この範囲の かたちと かずに、そのまま いろづけするよ。</p>` : ""}
         <div class="photo-zoom" aria-label="しゃしんのおおきさ">
           <button type="button" class="zoom-button" data-zoom-out aria-label="ちいさくする">−</button>
           <input data-zoom type="range" min="0.6" max="2" step="0.05" value="1" aria-label="しゃしんの大きさ">
@@ -91,6 +93,8 @@ export const PreviewScreen = {
             dy: offsetY / rect.height,
             scale: zoom,
             removeBackground: false,
+            repeatGroups: page.repeatGroups || [],
+            maskUrl: page.photoMask ? ctx.repo.assetUrl(page.photoMask) : null,
           },
         );
         ctx.session.completeMission({

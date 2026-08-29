@@ -8,17 +8,17 @@ export const PinScreen = {
     const lockedSeconds = Math.ceil(ctx.session.getPinLockRemaining() / 1000);
     return `
       <div class="screen center">
-        <button class="back" data-back>‹ もどる</button>
+        <button class="back" data-back>‹ 戻る</button>
         <div class="pin-card">
-          <p class="pin-label">あんしょうばんごうを いれてね</p>
+          <p class="pin-label">暗証番号を入力してください</p>
           <div class="pin-dots" id="pin-dots"></div>
           <div class="keypad">
             ${keys.map((k) => k === ""
               ? `<span></span>`
               : `<button class="key" data-key="${k}"${lockedSeconds ? " disabled" : ""}>${k}</button>`).join("")}
           </div>
-          <p class="pin-status${lockedSeconds ? " is-locked" : ""}" data-pin-status role="status" aria-live="polite">${lockedSeconds ? `3回つづけてまちがえたので、${lockedSeconds}秒まってね` : ""}</p>
-          <p class="pin-hint">プロト用 <strong>0000</strong></p>
+          <p class="pin-status${lockedSeconds ? " is-locked" : ""}" data-pin-status role="status" aria-live="polite">${lockedSeconds ? `3回連続で間違えたため、${lockedSeconds}秒後に再入力してください` : ""}</p>
+          <p class="pin-hint">プロトタイプ用 <strong>0000</strong></p>
         </div>
       </div>`;
   },
@@ -41,12 +41,12 @@ export const PinScreen = {
       buttons.forEach((button) => { button.disabled = locked; });
       status.classList.toggle("is-locked", locked);
       if (locked) {
-        status.textContent = localizeText(`3回つづけてまちがえたので、${Math.ceil(remaining / 1000)}秒まってね`);
+        status.textContent = localizeText(`3回連続で間違えたため、${Math.ceil(remaining / 1000)}秒後に再入力してください`);
         if (!pinLockTimer) pinLockTimer = window.setInterval(syncLockState, 250);
       } else if (pinLockTimer) {
         window.clearInterval(pinLockTimer);
         pinLockTimer = null;
-        status.textContent = localizeText("もう一度ためしてね");
+        status.textContent = localizeText("もう一度入力してください");
       }
     };
     draw();
@@ -75,7 +75,7 @@ export const PinScreen = {
               draw();
               syncLockState();
             } else {
-              status.textContent = localizeText(`PINがちがいます（あと${ctx.session.pinAttemptsLeft()}回）`);
+              status.textContent = localizeText(`PINが一致しません（残り${ctx.session.pinAttemptsLeft()}回）`);
               setTimeout(() => {
                 if (!ctx.session.isPinLocked()) status.textContent = "";
               }, 900);

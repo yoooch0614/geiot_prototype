@@ -1,4 +1,4 @@
-import { playNarration, speakNarration, stopNarration, esc, formatJapaneseCopy, stage, characterLayer, layersMarkup, fillLayer, bookColorLayer, vehicleColorLayer, extractPhotoColor, fillArtworkHoles, recolorVehicleImage, openMissionCamera, completeMissionPhoto, createRepeatableSound } from "../shared/utils.js?v=suki-no-tane-mask-files-20260822";
+import { playNarration, speakNarration, stopNarration, esc, formatJapaneseCopy, stage, characterLayer, layersMarkup, fillLayer, bookColorLayer, vehicleColorLayer, extractPhotoColor, fillArtworkHoles, recolorVehicleImage, openMissionCamera, completeMissionPhoto, createRepeatableSound } from "../shared/utils.js?v=suki-no-tane-camera-fix-20260829-v2";
 import { avatarBuddy } from "../shared/avatars.js";
 import { localizeText } from "../shared/i18n.js";
 
@@ -30,7 +30,9 @@ function pageMarkup(ctx, page, { index, globalIndex, showFinish }) {
       aria-label="${bookmarked ? "しおりをはずす" : "しおりに追加"}">${bookmarked ? "★" : "☆"}</button>`;
   const scene = `
     <div class="scene">
-      ${fillLayer(ctx, page)}
+      <!-- book-niji uses each page's own transparent shape below instead of the
+           previous mission composite, so the captured photo keeps its position. -->
+      ${ctx.session.bookId === "book-niji" ? "" : fillLayer(ctx, page)}
       <img class="art" src="${img}" alt="" onerror="this.style.opacity=0">
       ${ctx.session.bookId === "book-niji" ? bookColorLayer(ctx, page) : vehicleColorLayer(ctx, page)}
       ${characterLayer(character)}
@@ -143,6 +145,7 @@ export const StoryScreen = {
           await completeMissionPhoto(ctx, page, dataUrl, {
             captureWindow: guide.frame,
             captureMask: guide.mask,
+            captureFullMask: guide.fullMask,
           });
           ctx.notify?.("しゃしんを 保存したよ！");
           ctx.go("ACHIEVE", { page });

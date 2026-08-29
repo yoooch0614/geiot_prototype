@@ -7,6 +7,9 @@ export function openGuide(ctx, root, {
   kicker = "かんたん 3ステップ",
   title = "あそびかた",
   finalLabel = "はじめよう！",
+  backLabel = "‹ もどる",
+  nextLabel = "つぎへ ›",
+  laterLabel = "あとで",
   onComplete = () => {},
 } = {}) {
   if (root.querySelector("[data-guide-modal]") || !steps?.length) return;
@@ -36,10 +39,10 @@ export function openGuide(ctx, root, {
         ${steps.map((_, i) => `<span data-guide-dot="${i}"></span>`).join("")}
       </div>
       <div class="guide-actions">
-        <button class="guide-prev" type="button" data-guide-prev>‹ もどる</button>
-        <button class="guide-next" type="button" data-guide-next>つぎへ ›</button>
+        <button class="guide-prev" type="button" data-guide-prev>${backLabel}</button>
+        <button class="guide-next" type="button" data-guide-next>${nextLabel}</button>
       </div>
-      <button class="guide-later" type="button" data-guide-close>あとで</button>
+      <button class="guide-later" type="button" data-guide-close>${laterLabel}</button>
     </div>`;
   root.appendChild(modal);
   localizeUi(modal);
@@ -95,7 +98,7 @@ export function openGuide(ctx, root, {
     });
     dots.forEach((dot, i) => dot.classList.toggle("is-active", i === index));
     prev.hidden = index === 0;
-    next.textContent = localizeText(index === stepEls.length - 1 ? finalLabel : "つぎへ ›");
+    next.textContent = localizeText(index === stepEls.length - 1 ? finalLabel : nextLabel);
     syncFocus();
   }
 

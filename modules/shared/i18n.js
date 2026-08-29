@@ -98,27 +98,27 @@ const STRINGS = {
   "privacy.prototype": { ja: "このプロトタイプについて", en: "About this prototype", "zh-Hans": "关于这个原型" },
   "privacy.photo": { ja: "写真を撮るとき", en: "When taking photos", "zh-Hans": "拍照时" },
 
-  "parent.title": { ja: "おうちのひと レポート", en: "Parent report", "zh-Hans": "家长报告" },
-  "parent.week": { ja: "今週 あそんだ日", en: "Days played this week", "zh-Hans": "本周活动天数" },
-  "parent.total": { ja: "これまで あそんだ日", en: "Days played overall", "zh-Hans": "累计活动天数" },
-  "parent.log": { ja: "きろく", en: "Records", "zh-Hans": "记录" },
-  "parent.dailyMission": { ja: "きょうのミッション", en: "Today's mission", "zh-Hans": "今天的任务" },
+  "parent.title": { ja: "活動レポート", en: "Activity report", "zh-Hans": "活动报告" },
+  "parent.week": { ja: "今週の活動日数", en: "Active days this week", "zh-Hans": "本周活动天数" },
+  "parent.total": { ja: "累計活動日数", en: "Total active days", "zh-Hans": "累计活动天数" },
+  "parent.log": { ja: "活動履歴", en: "Activity history", "zh-Hans": "活动记录" },
+  "parent.dailyMission": { ja: "今日のミッション", en: "Today's mission", "zh-Hans": "今天的任务" },
 
-  "analysis.title": { ja: "お子さまの せいちょうメモ", en: "Child growth memo", "zh-Hans": "孩子成长记录" },
-  "analysis.filterKicker": { ja: "きろくを えらぶ", en: "Choose records", "zh-Hans": "选择记录" },
-  "analysis.filterTitle": { ja: "いつの記録を見る？", en: "Which records do you want to see?", "zh-Hans": "想查看哪个时间段的记录？" },
+  "analysis.title": { ja: "お子さまの成長レポート", en: "Child growth report", "zh-Hans": "孩子成长报告" },
+  "analysis.filterKicker": { ja: "記録を選択", en: "Choose records", "zh-Hans": "选择记录" },
+  "analysis.filterTitle": { ja: "表示する期間", en: "Report period", "zh-Hans": "显示期间" },
   "analysis.all": { ja: "すべて", en: "All", "zh-Hans": "全部" },
   "analysis.allMonths": { ja: "すべての月", en: "All months", "zh-Hans": "所有月份" },
   "analysis.allDays": { ja: "すべての日", en: "All days", "zh-Hans": "所有日期" },
-  "analysis.byMonth": { ja: "月ごと", en: "By month", "zh-Hans": "按月" },
-  "analysis.byDay": { ja: "日にちごと", en: "By day", "zh-Hans": "按日" },
-  "analysis.completedBooks": { ja: "できたえほん", en: "Books completed", "zh-Hans": "完成的绘本" },
-  "analysis.completedMissions": { ja: "できたミッション", en: "Missions completed", "zh-Hans": "完成的任务" },
-  "analysis.activeDays": { ja: "活動した日", en: "Active days", "zh-Hans": "活动天数" },
-  "analysis.traits": { ja: "お子さまの とくちょう", en: "Child profile", "zh-Hans": "孩子特性" },
-  "analysis.workStyles": { ja: "Big Five と職業の つながり", en: "Big Five and work styles", "zh-Hans": "Big Five 与职业风格" },
-  "analysis.next": { ja: "おすすめの つぎの一歩", en: "A recommended next step", "zh-Hans": "推荐的下一步" },
-  "analysis.history": { ja: "活動履歴（実際の記録）", en: "Activity history", "zh-Hans": "活动记录" },
+  "analysis.byMonth": { ja: "月別", en: "By month", "zh-Hans": "按月" },
+  "analysis.byDay": { ja: "日別", en: "By day", "zh-Hans": "按日" },
+  "analysis.completedBooks": { ja: "完成した絵本", en: "Books completed", "zh-Hans": "完成的绘本" },
+  "analysis.completedMissions": { ja: "達成したミッション", en: "Missions completed", "zh-Hans": "完成的任务" },
+  "analysis.activeDays": { ja: "活動日数", en: "Active days", "zh-Hans": "活动天数" },
+  "analysis.traits": { ja: "お子さまの特徴", en: "Child profile", "zh-Hans": "孩子特性" },
+  "analysis.workStyles": { ja: "Big Fiveと職業傾向の関連", en: "Big Five and work styles", "zh-Hans": "Big Five 与职业风格" },
+  "analysis.next": { ja: "次の活動の提案", en: "Suggested next activity", "zh-Hans": "下一项活动建议" },
+  "analysis.history": { ja: "活動履歴（実績）", en: "Activity history", "zh-Hans": "活动记录" },
   "analysis.favoriteColor": { ja: "好きな色", en: "Favorite colors", "zh-Hans": "喜欢的颜色" },
   "analysis.personality": { ja: "性格", en: "Personality", "zh-Hans": "性格" },
   "analysis.favoriteThings": { ja: "好きなこと", en: "Favorite things", "zh-Hans": "喜欢的事情" },
@@ -152,6 +152,60 @@ const exactTranslations = {
   "つかいかた": { en: "How to use", "zh-Hans": "使用方法" },
   "あそびかた": { en: "How to play", "zh-Hans": "玩法" },
   "はじめよう！": { en: "Let's start!", "zh-Hans": "开始吧！" },
+  "‹ 戻る": { en: "‹ Back", "zh-Hans": "‹ 返回" },
+  "次へ ›": { en: "Next ›", "zh-Hans": "下一步 ›" },
+  "後で": { en: "Later", "zh-Hans": "以后再看" },
+  "お子さまの成長レポート": { en: "Child growth report", "zh-Hans": "孩子成长报告" },
+  "お子さまのこれまでの活動状況をまとめています。": { en: "A summary of your child's activity so far.", "zh-Hans": "汇总孩子目前的活动情况。" },
+  "レポートを保存": { en: "Save report", "zh-Hans": "保存报告" },
+  "専門家に共有する場合は、PNGまたはPDFで保存してください。": { en: "Save as PNG or PDF when sharing with a specialist.", "zh-Hans": "与专家分享时，请保存为 PNG 或 PDF。" },
+  "記録を選択": { en: "Choose records", "zh-Hans": "选择记录" },
+  "表示する期間": { en: "Report period", "zh-Hans": "显示期间" },
+  "月別": { en: "By month", "zh-Hans": "按月" },
+  "月を選択": { en: "Choose a month", "zh-Hans": "选择月份" },
+  "日別": { en: "By day", "zh-Hans": "按日" },
+  "日を選択": { en: "Choose a day", "zh-Hans": "选择日期" },
+  "月または日を選択すると、その期間の集計と活動履歴を表示します。": { en: "Choose a month or day to see the totals and activity history for that period.", "zh-Hans": "选择月份或日期后，可查看该期间的统计和活动记录。" },
+  "お子さまのBig Five 5因子参考プロフィール": { en: "Child Big Five five-factor reference profile", "zh-Hans": "孩子 Big Five 五维参考档案" },
+  "Big Fiveと職業傾向の関連": { en: "Big Five and work-style tendencies", "zh-Hans": "Big Five 与职业倾向的关联" },
+  "次の活動の提案": { en: "Suggested next activity", "zh-Hans": "下一项活动建议" },
+  "絵本を毎日少しずつ読むことで、無理なく継続できます。": { en: "Reading a little every day can help build a sustainable routine.", "zh-Hans": "每天阅读一点，有助于轻松坚持。" },
+  "初めての絵本も、お子さまのペースで進めてみてください。": { en: "For a new picture book, please proceed at your child's pace.", "zh-Hans": "第一次阅读绘本时，也请按照孩子的节奏进行。" },
+  "活動履歴（実績）": { en: "Activity history (actual results)", "zh-Hans": "活动记录（实际成果）" },
+  "活動記録はまだありません。": { en: "There are no activity records yet.", "zh-Hans": "目前还没有活动记录。" },
+  "すべての絵本": { en: "All picture books", "zh-Hans": "所有绘本" },
+  "今日のミッション": { en: "Today's mission", "zh-Hans": "今天的任务" },
+  "お子さまのホーム画面に「1日1冊読む」という目標を表示します。対象の絵本はここで変更できます。": { en: "Show a goal to read one picture book a day on your child's home screen. Choose the book here.", "zh-Hans": "在孩子主页显示每天阅读一本绘本的目标，并在这里选择绘本。" },
+  "読む絵本": { en: "Picture book to read", "zh-Hans": "要读的绘本" },
+  "ミッションで読む絵本": { en: "Picture book for the mission", "zh-Hans": "任务要读的绘本" },
+  "活動記録はまだありません。お子さまモードで活動すると、ここに表示されます。": { en: "There are no activity records yet. They will appear here when your child uses Child mode.", "zh-Hans": "目前还没有活动记录。孩子使用儿童模式后，记录会显示在这里。" },
+  "活動レポート": { en: "Activity report", "zh-Hans": "活动报告" },
+  "今週の活動日数": { en: "Active days this week", "zh-Hans": "本周活动天数" },
+  "累計活動日数": { en: "Total active days", "zh-Hans": "累计活动天数" },
+  "※ ストリークはアプリ外で活動した日数を数えます。中断しても記録は失われません。": { en: "※ The streak counts days of activity outside the app. Records are not lost when activity is interrupted.", "zh-Hans": "※ 连续记录按应用外的活动天数计算。中断也不会丢失记录。" },
+  "⚙ 設定": { en: "⚙ Settings", "zh-Hans": "⚙ 设置" },
+  "デモ用：記録をリセット": { en: "Demo: reset records", "zh-Hans": "演示：重置记录" },
+  "暗証番号を入力してください": { en: "Enter your PIN", "zh-Hans": "请输入密码" },
+  "プロトタイプ用": { en: "Prototype", "zh-Hans": "原型" },
+  "もう一度入力してください": { en: "Please enter it again", "zh-Hans": "请再次输入" },
+  "保護者向け": { en: "For parents", "zh-Hans": "家长指南" },
+  "思い出を確認": { en: "Review memories", "zh-Hans": "查看回忆" },
+  "本棚の絵本を選択": { en: "Select a picture book on the shelf", "zh-Hans": "选择书架上的绘本" },
+  "完成した絵本と写真を確認できます": { en: "Review completed picture books and photos", "zh-Hans": "查看完成的绘本和照片" },
+  "活動履歴を確認": { en: "Review activity history", "zh-Hans": "查看活动记录" },
+  "「活動履歴」を選択": { en: "Select “Activity history”", "zh-Hans": "选择“活动记录”" },
+  "活動日数とミッションの達成状況を確認できます": { en: "Review active days and mission completion status", "zh-Hans": "查看活动天数和任务完成情况" },
+  "特性分析を確認": { en: "Review the child profile", "zh-Hans": "查看孩子特性" },
+  "「子どもの特性分析」を選択": { en: "Select “Child profile”", "zh-Hans": "选择“孩子特性分析”" },
+  "お子さまの活動傾向を確認できます": { en: "Review your child's activity tendencies", "zh-Hans": "查看孩子的活动倾向" },
+  "絵本": { en: "Picture book", "zh-Hans": "绘本" },
+  "思い出": { en: "Memories", "zh-Hans": "回忆" },
+  "お子さまが作成した絵本はまだありません。": { en: "Your child has not completed a picture book yet.", "zh-Hans": "孩子还没有完成绘本。" },
+  "絵本を完成すると、ここに表示されます。": { en: "Completed picture books will appear here.", "zh-Hans": "完成的绘本会显示在这里。" },
+  "活動記録がないため、参考値を表示しています。写真をアップロードすると色の傾向も反映されます。": { en: "There is no activity record yet, so reference values are shown. Uploaded photo colors will also be reflected.", "zh-Hans": "目前没有活动记录，因此显示参考值。上传照片的颜色倾向也会反映出来。" },
+  "絵本の達成記録から、現在の活動傾向を集計しています。": { en: "Current activity tendencies are calculated from completed picture-book records.", "zh-Hans": "根据完成绘本的记录统计当前活动倾向。" },
+  "ミッションを「すべての絵本」に変更しました": { en: "Mission changed to “All picture books”", "zh-Hans": "任务已改为《所有绘本》" },
+  "閉じる": { en: "Close", "zh-Hans": "关闭" },
   "おうちのひと レポート": { en: "Parent report", "zh-Hans": "家长报告" },
   "Big Five（ビッグファイブ・5因子）": { en: "Big Five (five factors)", "zh-Hans": "Big Five（五个维度）" },
   "Big Five（デモ表示）": { en: "Big Five (demo)", "zh-Hans": "Big Five（演示）" },
@@ -352,6 +406,19 @@ function translatePattern(value, language) {
     ? `Today: ${match[1]} / ${match[2]} days completed`
     : `今天：${match[1]} / 累计完成 ${match[2]} 天`;
 
+  match = value.match(/^今日：(.+) ／ 累計 (\d+)日達成$/);
+  if (match) {
+    const today = match[1] === "達成済み 🎉"
+      ? (language === "en" ? "Completed 🎉" : "已完成 🎉")
+      : (language === "en" ? "Not completed" : "未完成");
+    return language === "en"
+      ? `Today: ${today} / ${match[2]} days completed`
+      : `今天：${today} / 累计完成 ${match[2]} 天`;
+  }
+
+  match = value.match(/^(\d+)件達成$/);
+  if (match) return language === "en" ? `${match[1]} completed` : `完成 ${match[1]} 项`;
+
   match = value.match(/^『(.+)』を よもう！$/);
   if (match) return language === "en" ? `Read “${match[1]}”!` : `一起读《${match[1]}》！`;
 
@@ -365,10 +432,30 @@ function translatePattern(value, language) {
     ? `Incorrect PIN (${match[1]} attempts left)`
     : `PIN 不正确（还剩 ${match[1]} 次）`;
 
+  match = value.match(/^PINが一致しません（残り(\d+)回）$/);
+  if (match) return language === "en"
+    ? `PINs do not match (${match[1]} attempts left)`
+    : `PIN 不一致（还剩 ${match[1]} 次）`;
+
+  match = value.match(/^3回連続で間違えたため、(\d+)秒後に再入力してください$/);
+  if (match) return language === "en"
+    ? `Three incorrect attempts. Please try again in ${match[1]} seconds.`
+    : `连续输错 3 次，请在 ${match[1]} 秒后重新输入。`;
+
   match = value.match(/^ミッションを『(.+)』にしました$/);
   if (match) return language === "en"
     ? `Mission changed to “${match[1]}”`
     : `任务已改为《${match[1]}》`;
+
+  match = value.match(/^ミッションを『(.+)』に変更しました$/);
+  if (match) return language === "en"
+    ? `Mission changed to “${match[1]}”`
+    : `任务已改为《${match[1]}》`;
+
+  match = value.match(/^今日のミッションを(有効|無効)にしました$/);
+  if (match) return language === "en"
+    ? `Today's mission ${match[1] === "有効" ? "enabled" : "disabled"}`
+    : `今天的任务已${match[1] === "有効" ? "开启" : "关闭"}`;
 
   match = value.match(/^(.+)、やったね！$/);
   if (match) return language === "en" ? `${match[1]}, well done!` : `${match[1]}，做得好！`;

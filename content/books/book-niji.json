@@ -78,7 +78,18 @@
         { "from": "nm1", "region": { "x": 0.00, "y": 0.43, "width": 0.37, "height": 0.34 } },
         { "from": "nm2", "region": { "x": 0.34, "y": 0.25, "width": 0.65, "height": 0.46 } }
       ],
-      "frame": { "x": 294, "y": 211, "width": 691, "height": 328, "radius": 20 }
+      "frame": { "x": 294, "y": 211, "width": 691, "height": 328, "radius": 20 },
+      "repeatGroups": [
+        {
+          "groupId": "house",
+          "representative": "house-1",
+          "instances": [
+            { "id": "house-1", "groupId": "house", "x": 376, "y": 224, "width": 187, "height": 277, "rotation": 0 },
+            { "id": "house-2", "groupId": "house", "x": 555, "y": 262, "width": 179, "height": 239, "rotation": 0 },
+            { "id": "house-3", "groupId": "house", "x": 758, "y": 291, "width": 212, "height": 232, "rotation": 0 }
+          ]
+        }
+      ]
     },
     {
       "id": "n4",
@@ -118,6 +129,24 @@
       "image": "assets/niji/p8.png",
       "photoMask": "assets/niji/masks/p8-mask.svg",
       "frame": { "x": 60, "y": 680, "width": 1330, "height": 330, "radius": 20 },
+      "repeatGroups": [
+        {
+          "groupId": "flower",
+          "representative": "flower-1",
+          "instances": [
+            { "id": "flower-1", "groupId": "flower", "x": 64, "y": 710, "width": 88, "height": 110, "rotation": 0 },
+            { "id": "flower-2", "groupId": "flower", "x": 202, "y": 676, "width": 88, "height": 110, "rotation": 0 },
+            { "id": "flower-3", "groupId": "flower", "x": 384, "y": 724, "width": 88, "height": 110, "rotation": 0 },
+            { "id": "flower-4", "groupId": "flower", "x": 210, "y": 858, "width": 88, "height": 110, "rotation": 0 },
+            { "id": "flower-5", "groupId": "flower", "x": 546, "y": 818, "width": 88, "height": 110, "rotation": 0 },
+            { "id": "flower-6", "groupId": "flower", "x": 756, "y": 826, "width": 88, "height": 110, "rotation": 0 },
+            { "id": "flower-7", "groupId": "flower", "x": 956, "y": 846, "width": 88, "height": 110, "rotation": 0 },
+            { "id": "flower-8", "groupId": "flower", "x": 1094, "y": 752, "width": 88, "height": 110, "rotation": 0 },
+            { "id": "flower-9", "groupId": "flower", "x": 1240, "y": 774, "width": 88, "height": 110, "rotation": 0 },
+            { "id": "flower-10", "groupId": "flower", "x": 1198, "y": 898, "width": 88, "height": 110, "rotation": 0 }
+          ]
+        }
+      ],
       "colorFills": [
         { "from": "nm1", "region": { "x": 0.70, "y": 0.50, "width": 0.27, "height": 0.21 } }
       ]

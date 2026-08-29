@@ -50,6 +50,13 @@
   margin: 4px 0 8px; position: relative; z-index: 1;
   flex: 0 0 auto;
 }
+.select-toolbar--memory { margin-top: -2px; margin-bottom: 0; }
+.select-action--collection {
+  color: #7f5b35;
+  border-color: rgba(231, 149, 105, .42);
+  background: linear-gradient(135deg, #fff8df, #ffe7c5);
+  box-shadow: 0 3px 0 rgba(207, 139, 84, .2);
+}
 .select-action {
   font-family: inherit; font-size: 20px; font-weight: 700; color: var(--ink);
   background: rgba(255,255,255,.92); border: 1px solid rgba(107,191,89,.25);

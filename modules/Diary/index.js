@@ -1,4 +1,4 @@
-import { esc, formatJapaneseCopy, fillArtworkHoles, recolorVehicleImage } from "../shared/utils.js";
+import { esc, formatJapaneseCopy, fillArtworkHoles, recolorVehicleImage } from "../shared/utils.js?v=suki-no-tane-camera-fix-20260829-v2";
 import { avatarBuddy } from "../shared/avatars.js";
 import { localizeText } from "../shared/i18n.js";
 
@@ -56,7 +56,11 @@ function completedPageFor(ctx, memory, entry, page) {
 function pictureBookScene(ctx, memory, page, entry) {
   const completedPage = completedPageFor(ctx, memory, entry, page);
   const source = resolveImage(ctx, completedPage.image || page.image);
-  const fillPhoto = completedPage.fillPhoto || (page.fillFrom ? memory.bookColorPhotos?.[page.fillFrom] : null);
+  // book-niji は colorFills が各ページ自身の透明部分へ写真を入れる。
+  // 別ページの完成画像を下に重ねると、撮影した位置と絵の位置がずれる。
+  const fillPhoto = memory.bookId === "book-niji"
+    ? null
+    : completedPage.fillPhoto || (page.fillFrom ? memory.bookColorPhotos?.[page.fillFrom] : null);
   const colorFills = (completedPage.colorFills ?? []).filter((fill) => memory.bookColorPhotos?.[fill.from]);
   return `
     <div class="storybook-scene${colorFills.length ? " has-book-color" : ""}"

@@ -2,20 +2,20 @@ import { esc } from "../shared/utils.js";
 import { buildBigFiveAnalysis } from "./workStyles.js";
 
 const ANALYSIS_TRAITS = [
-  { icon: "palette", label: "好きな色", value: "写真の色を記録すると反映" },
-  { icon: "smile", label: "性格", value: "こうきしんおうせいで、やさしい" },
-  { icon: "star", label: "好きなこと", value: "どうぶつ・のりもの・おえかき" },
+  { icon: "palette", label: "好きな色", value: "写真の色を記録すると結果に反映されます" },
+  { icon: "smile", label: "性格", value: "好奇心旺盛で、思いやりがあります" },
+  { icon: "star", label: "好きなこと", value: "動物・乗り物・お絵かき" },
   { icon: "book", label: "習い事の提案", value: "図工教室・リトミック" },
 ];
 
 const COLOR_FAMILY_LABELS = {
-  red: "あか系",
+  red: "赤系",
   orange: "オレンジ系",
-  yellow: "きいろ系",
-  green: "みどり系",
-  cyan: "みずいろ系",
-  blue: "あお系",
-  purple: "むらさき系",
+  yellow: "黄色系",
+  green: "緑系",
+  cyan: "水色系",
+  blue: "青系",
+  purple: "紫系",
   pink: "ピンク系",
 };
 
@@ -147,7 +147,7 @@ function buildExportSvg(report, analysis) {
   const padding = 80;
   const chartCard = { x: padding, y: 390, width: 720, height: 650 };
   const traitsCard = { x: 850, y: 390, width: 670, height: 650 };
-  const historyRows = report.log.length ? report.log : [{ date: "", bookTitle: "まだ活動記録がありません", count: 0 }];
+  const historyRows = report.log.length ? report.log : [{ date: "", bookTitle: "活動記録はまだありません", count: 0 }];
   const historyY = 1080;
   const historyHeight = 110 + historyRows.length * 58;
   const height = historyY + historyHeight + 100;
@@ -187,7 +187,7 @@ function buildExportSvg(report, analysis) {
     return `<line x1="${padding + 30}" y1="${y + 20}" x2="${width - padding - 30}" y2="${y + 20}" class="export-divider" />
       <text x="${padding + 35}" y="${y}" class="export-history-date">${xmlEscape(item.date)}</text>
       ${svgLines(item.bookTitle, padding + 210, y, 38, 24, "export-history-book")}
-      <text x="${width - padding - 35}" y="${y}" class="export-history-count" text-anchor="end">${item.count ? `${item.count}こ たっせい` : ""}</text>`;
+      <text x="${width - padding - 35}" y="${y}" class="export-history-count" text-anchor="end">${item.count ? `${item.count}件達成` : ""}</text>`;
   }).join("");
   const dateLabel = new Intl.DateTimeFormat("ja-JP", { year: "numeric", month: "long", day: "numeric" }).format(new Date());
 
@@ -217,34 +217,34 @@ function buildExportSvg(report, analysis) {
         .footnote { font-size: 17px; fill: #7a877e; }
       </style>
       <rect width="${width}" height="${height}" fill="#f3f7ee" />
-      <text x="${padding}" y="90" class="title">お子さまの せいちょうメモ</text>
-      <text x="${padding}" y="132" class="subtitle">専門家に相談するときの共有用レポート　${xmlEscape(dateLabel)}　対象：${xmlEscape(report.periodLabel)}</text>
+      <text x="${padding}" y="90" class="title">お子さまの成長レポート</text>
+      <text x="${padding}" y="132" class="subtitle">専門家に相談する際の共有用レポート　${xmlEscape(dateLabel)}　対象：${xmlEscape(report.periodLabel)}</text>
       <rect x="${padding}" y="168" width="${width - padding * 2}" height="64" rx="18" fill="#e8f3e1" />
-      <text x="${padding + 28}" y="208" class="subtitle">活動の記録と現在のメモを、相談時に見せやすい形にまとめています。</text>
+      <text x="${padding + 28}" y="208" class="subtitle">活動記録と現在の傾向を、相談時に共有しやすい形にまとめています。</text>
 
       <rect x="${padding}" y="260" width="460" height="100" rx="20" fill="#ffffff" />
       <rect x="570" y="260" width="460" height="100" rx="20" fill="#ffffff" />
       <rect x="1060" y="260" width="460" height="100" rx="20" fill="#ffffff" />
       <text x="${padding + 230}" y="315" class="stat-value" text-anchor="middle">${report.completedCount}</text>
-      <text x="${padding + 230}" y="343" class="stat-label" text-anchor="middle">完成したえほん</text>
+      <text x="${padding + 230}" y="343" class="stat-label" text-anchor="middle">完成した絵本</text>
       <text x="800" y="315" class="stat-value" text-anchor="middle">${report.missionCount}</text>
-      <text x="800" y="343" class="stat-label" text-anchor="middle">できたミッション</text>
+      <text x="800" y="343" class="stat-label" text-anchor="middle">達成したミッション</text>
       <text x="1290" y="315" class="stat-value" text-anchor="middle">${report.activityDays}</text>
-      <text x="1290" y="343" class="stat-label" text-anchor="middle">活動した日</text>
+      <text x="1290" y="343" class="stat-label" text-anchor="middle">活動日数</text>
 
       <rect x="${chartCard.x}" y="${chartCard.y}" width="${chartCard.width}" height="${chartCard.height}" rx="24" fill="#ffffff" />
-      <text x="${chartCard.x + 32}" y="440" class="card-title">Big Five（${analysis.source === "activity" ? "活動から集計" : "デモ表示"}）</text>
+      <text x="${chartCard.x + 32}" y="440" class="card-title">Big Five（${analysis.source === "activity" ? "活動データの集計" : "参考値"}）</text>
       ${rings}${axisLines}<polygon points="${polygon}" class="export-polygon" />${labels}
       <circle cx="${center.x}" cy="${center.y}" r="5" fill="#6c7b70" />
 
       <rect x="${traitsCard.x}" y="${traitsCard.y}" width="${traitsCard.width}" height="${traitsCard.height}" rx="24" fill="#ffffff" />
-      <text x="${traitsCard.x + 32}" y="440" class="card-title">お子さまの Big Five メモ</text>
+      <text x="${traitsCard.x + 32}" y="440" class="card-title">お子さまの特徴</text>
       ${traitRows}
 
       <rect x="${padding}" y="${historyY}" width="${width - padding * 2}" height="${historyHeight}" rx="24" fill="#ffffff" />
-      <text x="${padding + 32}" y="${historyY + 58}" class="card-title">活動履歴（実際の記録）</text>
+      <text x="${padding + 32}" y="${historyY + 58}" class="card-title">活動履歴（実績）</text>
       ${historyMarkup}
-      <text x="${padding}" y="${height - 42}" class="footnote">※ Big Five と職業候補は遊びや体験を振り返るための参考表示です。診断・評価ではありません。</text>
+      <text x="${padding}" y="${height - 42}" class="footnote">※ Big Five と職業候補は、遊びや体験を振り返るための参考情報です。診断・評価を行うものではありません。</text>
     </svg>`,
   };
 }
@@ -376,8 +376,8 @@ export const AnalysisScreen = {
 
     const uploadedColorSummary = colorSummary(analysis.evidence);
     const bigFiveSource = analysis.source === "activity"
-      ? `えほんの達成記録${uploadedColorSummary ? `とアップロード写真の色（${uploadedColorSummary}）` : ""}から、今の活動傾向を集計しています。`
-      : "活動記録がまだないため、デモ値で計算しています。写真をアップロードすると色も結果に反映されます。";
+      ? `絵本の達成記録${uploadedColorSummary ? `とアップロード写真の色（${uploadedColorSummary}）` : ""}から、現在の活動傾向を集計しています。`
+      : "活動記録がないため、参考値を表示しています。写真をアップロードすると色の傾向も反映されます。";
     const occupationMatches = analysis.matches.length
       ? `<ol class="analysis-work-style-list">${analysis.matches.map((match) => `
           <li>
@@ -388,21 +388,21 @@ export const AnalysisScreen = {
 
     return `
       <div class="screen parent analysis-screen">
-        <button class="back" data-back>‹ もどる</button>
-        <h2 class="parent-title">お子さまの せいちょうメモ</h2>
-        <p class="note">親モード向けに、今までの活動の様子を かんたんに まとめました。</p>
-        <div class="analysis-export-actions" aria-label="レポートを書き出す">
+        <button class="back" data-back>‹ 戻る</button>
+        <h2 class="parent-title">お子さまの成長レポート</h2>
+        <p class="note">お子さまのこれまでの活動状況をまとめています。</p>
+        <div class="analysis-export-actions" aria-label="レポートを保存">
           <button type="button" class="analysis-export-button" data-export-png>PNGで保存</button>
           <button type="button" class="analysis-export-button" data-export-pdf>PDFで保存</button>
         </div>
-        <p class="analysis-export-note">専門家にわたすときは、PNGまたはPDFを保存してお使いください。</p>
+        <p class="analysis-export-note">専門家に共有する場合は、PNGまたはPDFで保存してください。</p>
         <div class="analysis-card analysis-filter-card" aria-labelledby="analysis-filter-title">
           <div class="analysis-filter-heading">
             <div class="analysis-filter-heading-copy">
               <span class="analysis-filter-icon" aria-hidden="true"></span>
               <div>
-                <p class="analysis-filter-kicker">きろくを えらぶ</p>
-                <h3 id="analysis-filter-title" class="log-title">いつの記録を見る？</h3>
+                <p class="analysis-filter-kicker">記録を選択</p>
+                <h3 id="analysis-filter-title" class="log-title">表示する期間</h3>
                 <p class="analysis-filter-summary">${esc(report.periodLabel)}</p>
               </div>
             </div>
@@ -418,11 +418,11 @@ export const AnalysisScreen = {
             <label class="analysis-filter-choice analysis-filter-choice--month${filters.month ? " is-active" : ""}">
               <span class="analysis-filter-choice-mark" aria-hidden="true">月</span>
               <span class="analysis-filter-choice-copy">
-                <strong>月ごと</strong>
+                <strong>月別</strong>
                 <small>${esc(filters.month ? formatMonthValue(filters.month) : "すべての月")}</small>
               </span>
               <span class="analysis-filter-choice-arrow" aria-hidden="true">›</span>
-              <select class="analysis-filter-select" data-analysis-month aria-label="月を選ぶ">
+              <select class="analysis-filter-select" data-analysis-month aria-label="月を選択">
                 ${optionMarkup("", "すべての月", !filters.month)}
                 ${months.map((month) => optionMarkup(month, formatMonthValue(month), month === filters.month)).join("")}
               </select>
@@ -430,28 +430,28 @@ export const AnalysisScreen = {
             <label class="analysis-filter-choice analysis-filter-choice--day${filters.day ? " is-active" : ""}">
               <span class="analysis-filter-choice-mark" aria-hidden="true">日</span>
               <span class="analysis-filter-choice-copy">
-                <strong>日にちごと</strong>
+                <strong>日別</strong>
                 <small>${esc(filters.day ? formatDayValue(filters.day) : "すべての日")}</small>
               </span>
               <span class="analysis-filter-choice-arrow" aria-hidden="true">›</span>
-              <select class="analysis-filter-select" data-analysis-day aria-label="日にちを選ぶ">
+              <select class="analysis-filter-select" data-analysis-day aria-label="日を選択">
                 ${optionMarkup("", "すべての日", !filters.day)}
                 ${days.map((day) => optionMarkup(day, formatDayValue(day), day === filters.day)).join("")}
               </select>
             </label>
           </div>
-          <p class="analysis-filter-help">月または日にちを選ぶと、数字と活動履歴がその期間に切り替わります。</p>
+          <p class="analysis-filter-help">月または日を選択すると、その期間の集計と活動履歴を表示します。</p>
         </div>
         <div class="stat-row">
-          <div class="stat"><b>${completedCount}</b><span>できたえほん</span></div>
-          <div class="stat"><b>${missionCount}</b><span>できたミッション</span></div>
-          <div class="stat"><b>${report.activityDays}</b><span>活動した日</span></div>
+          <div class="stat"><b>${completedCount}</b><span>完成した絵本</span></div>
+          <div class="stat"><b>${missionCount}</b><span>達成したミッション</span></div>
+          <div class="stat"><b>${report.activityDays}</b><span>活動日数</span></div>
         </div>
         <div class="analysis-card analysis-chart-card">
             <h3 class="log-title">Big Five（ビッグファイブ・5因子）</h3>
           <div class="analysis-chart-wrap" style="width:${size}px;height:${size}px;">
             <div class="analysis-chart-glow" style="clip-path: polygon(${clipPercent}); background: conic-gradient(from 0deg, ${gradientStops});"></div>
-            <svg viewBox="0 0 ${size} ${size}" class="analysis-chart" role="img" aria-label="子どもの Big Five 5因子参考プロフィール">
+            <svg viewBox="0 0 ${size} ${size}" class="analysis-chart" role="img" aria-label="お子さまのBig Five 5因子参考プロフィール">
               ${rings}
               ${axesLines}
               <polygon points="${polygonPoints}" class="analysis-polygon" />
@@ -463,26 +463,26 @@ export const AnalysisScreen = {
           </div>
         </div>
         <div class="analysis-card analysis-traits-card">
-          <h3 class="log-title">お子さまの とくちょう</h3>
+          <h3 class="log-title">お子さまの特徴</h3>
           <div class="trait-list">${traitsMarkup}</div>
         </div>
         <div class="analysis-card analysis-work-style-card">
-          <h3 class="log-title">Big Five と職業の つながり</h3>
+          <h3 class="log-title">Big Fiveと職業傾向の関連</h3>
           <p class="analysis-work-style-source">${esc(bigFiveSource)}</p>
           ${occupationMatches}
-          <p class="analysis-work-style-note">※ 将来の職業診断ではなく、遊びや体験と仕事の スタイルのつながりを見る参考表示です。</p>
+          <p class="analysis-work-style-note">※ 将来の職業適性を診断するものではなく、遊びや体験と仕事のスタイルの関係を確認するための参考情報です。</p>
         </div>
         <div class="analysis-card analysis-next-card">
-          <h3 class="log-title">おすすめの つぎの一歩</h3>
-          <p class="analysis-lead">${streak > 0 ? "毎日 ちょっとずつ えほんを よむと、もっと たのしく つづけられます" : "はじめての えほんでも、ゆっくり すすめると きっと つながります"}</p>
+          <h3 class="log-title">次の活動の提案</h3>
+          <p class="analysis-lead">${streak > 0 ? "絵本を毎日少しずつ読むことで、無理なく継続できます。" : "初めての絵本も、お子さまのペースで進めてみてください。"}</p>
         </div>
         <div class="analysis-card analysis-history">
-          <h3 class="log-title">活動履歴（実際の記録）</h3>
+          <h3 class="log-title">活動履歴（実績）</h3>
           <ul class="analysis-history-list">${report.log.length
-            ? report.log.map((item) => `<li><span>${esc(item.date)}</span><b>${esc(item.bookTitle)}</b><em>${item.count}こ たっせい</em></li>`).join("")
-            : "<li class=\"analysis-history-empty\">まだ活動記録がありません。</li>"}</ul>
+            ? report.log.map((item) => `<li><span>${esc(item.date)}</span><b>${esc(item.bookTitle)}</b><em>${item.count}件達成</em></li>`).join("")
+            : "<li class=\"analysis-history-empty\">活動記録はまだありません。</li>"}</ul>
         </div>
-        <p class="analysis-disclaimer">※ Big Five と職業候補はプロトタイプの参考表示です。診断・評価ではありません。</p>
+        <p class="analysis-disclaimer">※ Big Fiveと職業候補は、遊びや体験を振り返るための参考情報です。診断・評価を行うものではありません。</p>
       </div>`;
   },
   mount(ctx, params = {}, root) {
