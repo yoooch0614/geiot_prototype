@@ -132,6 +132,9 @@ body[data-animations="off"] *::after {
   flex: 0 0 auto;
   overflow: hidden;
   border-radius: 22%;
+  /* ロゴ絵柄が枠の端いっぱいなので、内側に余白を取る。色はロゴ画像の縁の色に合わせて継ぎ目を消す。 */
+  padding: clamp(10px, 2.4vw, 14px);
+  background: #fffbf0;
   box-shadow: 0 10px 18px rgba(58, 74, 63, .22);
   animation: splash-pop 600ms cubic-bezier(.34, 1.56, .64, 1) both;
 }
