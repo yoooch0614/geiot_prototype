@@ -105,6 +105,17 @@
 
 .title-ask { font-size: 16px; font-weight: 700; color: #5d6c63; margin: 8px 0 0; }
 
+/* タイトル画面はスクロールさせず、画面の高さにぴったり収める。
+   .screen の overflow:auto に負けないよう .screen を足して詳細度を上げている。
+   はみ出す分は表示しない代わりに、ロゴ・ボタンの大きさと間隔を画面の高さに合わせて縮める。 */
+.screen.title-screen {
+  overflow: hidden;
+  gap: clamp(6px, 1.8dvh, 16px);
+}
+.title-screen .title-icon { width: min(clamp(160px, 42vw, 260px), 30dvh); }
+.title-screen .title-ask { margin-top: 0; }
+.title-screen .mode-card { padding: clamp(14px, 4dvh, 34px) 12px; }
+
 /* こども/おうちのひと ボタンは押し込み感を足して統一（big-nextと同じ文法） */
 .title-screen .mode-card--child  { box-shadow: 0 6px 0 #4f9a45, var(--shadow); }
 .title-screen .mode-card--parent { box-shadow: 0 6px 0 #4f7ba3, var(--shadow); }
