@@ -1,4 +1,4 @@
-import { esc } from "../shared/utils.js";
+import { esc } from "../shared/utils.js?v=suki-no-tane-camera-fix-20260829-v2";
 
 // 今日のミッションの設定カード。保護者が「1日1冊読む」の対象を選べる。
 // 「すべての絵本」か、特定の1冊を指定するか。オフにすれば子ども画面から消える。

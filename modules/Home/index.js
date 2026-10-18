@@ -1,4 +1,4 @@
-import { esc } from "../shared/utils.js";
+import { esc } from "../shared/utils.js?v=suki-no-tane-camera-fix-20260829-v2";
 import { openGuide } from "../shared/guide.js";
 import { askResume } from "../Select/index.js";
 import { avatarSvg, avatarColorValue, openAvatarPicker } from "../shared/avatars.js?v=photo-fill-switch-20260821";

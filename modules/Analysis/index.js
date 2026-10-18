@@ -1,4 +1,4 @@
-import { esc } from "../shared/utils.js";
+import { esc } from "../shared/utils.js?v=suki-no-tane-camera-fix-20260829-v2";
 import { buildBigFiveAnalysis } from "./workStyles.js";
 
 const ANALYSIS_TRAITS = [

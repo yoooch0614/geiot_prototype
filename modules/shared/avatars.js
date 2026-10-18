@@ -7,7 +7,7 @@
  * えらんだ内容は Session（localStorage）に保存され、
  * おはなし画面・お祝い画面・絵本日記にも登場する（avatarBuddy）。
  */
-import { esc } from "./utils.js";
+import { esc } from "./utils.js?v=suki-no-tane-camera-fix-20260829-v2";
 import { localizeUi } from "./i18n.js";
 
 export const AVATAR_ANIMALS = [

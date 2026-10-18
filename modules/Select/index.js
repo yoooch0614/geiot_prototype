@@ -1,4 +1,4 @@
-import { esc } from "../shared/utils.js";
+import { esc } from "../shared/utils.js?v=suki-no-tane-camera-fix-20260829-v2";
 import { openGuide } from "../shared/guide.js";
 import { t } from "../shared/i18n.js";
 

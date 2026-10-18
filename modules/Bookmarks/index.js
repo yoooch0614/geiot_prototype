@@ -1,4 +1,4 @@
-import { esc } from "../shared/utils.js";
+import { esc } from "../shared/utils.js?v=suki-no-tane-camera-fix-20260829-v2";
 
 function pageBookmarkCard(ctx, bookmark) {
   const title = bookmark.bookTitle || ctx.repo.book(bookmark.bookId)?.title || bookmark.bookId;

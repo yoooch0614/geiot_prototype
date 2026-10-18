@@ -1,4 +1,4 @@
-import { playCelebrationSound, esc } from "../shared/utils.js";
+import { playCelebrationSound, esc } from "../shared/utils.js?v=suki-no-tane-camera-fix-20260829-v2";
 import { avatarBuddy, avatarRewardForMissionCount } from "../shared/avatars.js?v=photo-fill-switch-20260821";
 
 const TEACHER_RABBIT_ASSET = "content/assets/teacher-rabbit.png";

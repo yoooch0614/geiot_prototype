@@ -6,7 +6,7 @@ import {
   setSoundEnabled,
   isNarrationEnabled,
   setNarrationEnabled,
-} from "../shared/utils.js";
+} from "../shared/utils.js?v=suki-no-tane-camera-fix-20260829-v2";
 import { localizeText, localizeUi, t } from "../shared/i18n.js";
 
 function defaultBackTo(ctx) {
