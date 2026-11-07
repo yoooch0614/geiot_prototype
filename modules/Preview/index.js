@@ -1,3 +1,4 @@
+import { analyzeDrawingUrl } from "../Analysis/drawingFeatures.js";
 import { stage, composeMissionPhoto, extractPhotoColor } from "../shared/utils.js?v=suki-no-tane-camera-fix-20260829-v2";
 import { t } from "../shared/i18n.js";
 
@@ -86,6 +87,7 @@ export const PreviewScreen = {
       try {
         const rect = positioner.getBoundingClientRect();
         const vehicleColor = await extractPhotoColor(dataUrl);
+        const drawingFeatures = await analyzeDrawingUrl(dataUrl);
         const composedUrl = await composeMissionPhoto(
           ctx.repo.assetUrl(page.image), dataUrl, page.frame,
           {
@@ -102,6 +104,7 @@ export const PreviewScreen = {
           caption: page.diaryCaption || page.prompt, photoUrl: composedUrl,
           missionImage: page.image,
           vehicleColor,
+          drawingFeatures,
           vehicleSourceUrl: dataUrl,
           vehicleTextureScale: zoom,
         });

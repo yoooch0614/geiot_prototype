@@ -1,5 +1,6 @@
 import { esc } from "../shared/utils.js?v=suki-no-tane-camera-fix-20260829-v2";
 import { buildBigFiveAnalysis } from "./workStyles.js";
+import { isDemoMode, demoSession, demoPanelMarkup, mountDemoPanel } from "./demo.js";
 
 const ANALYSIS_TRAITS = [
   { icon: "palette", label: "好きな色", value: "写真の色を記録すると結果に反映されます" },
@@ -21,8 +22,9 @@ const COLOR_FAMILY_LABELS = {
 
 function colorSummary(evidence = {}) {
   return Object.entries(evidence.colorFamilies ?? {})
+    .filter(([, count]) => count >= 0.2)
     .sort(([, a], [, b]) => b - a)
-    .map(([family, count]) => `${COLOR_FAMILY_LABELS[family] || family}${count > 1 ? `×${count}` : ""}`)
+    .map(([family, count]) => `${COLOR_FAMILY_LABELS[family] || family}${Math.round(count) > 1 ? `×${Math.round(count)}` : ""}`)
     .join("・");
 }
 
@@ -282,7 +284,9 @@ export const AnalysisScreen = {
     const s = ctx.session;
     const filters = normalizeFilters(params);
     const report = reportStats(s, filters);
-    const analysis = buildBigFiveAnalysis(s, ctx.repo, ctx.bigFiveData);
+    // デモ（?demo=1）のときは、実際の記録ではなく、デモ専用の記録で分析する。
+    const demo = isDemoMode();
+    const analysis = buildBigFiveAnalysis(demo ? demoSession() : s, ctx.repo, ctx.bigFiveData);
     const months = monthChoices(s, filters.month);
     const days = recordDates(s);
     const { completedCount, missionCount, week: streak } = report;
@@ -391,6 +395,7 @@ export const AnalysisScreen = {
         <button class="back" data-back>‹ 戻る</button>
         <h2 class="parent-title">お子さまの成長レポート</h2>
         <p class="note">お子さまのこれまでの活動状況をまとめています。</p>
+        ${demo ? demoPanelMarkup() : ""}
         <div class="analysis-export-actions" aria-label="レポートを保存">
           <button type="button" class="analysis-export-button" data-export-png>PNGで保存</button>
           <button type="button" class="analysis-export-button" data-export-pdf>PDFで保存</button>
@@ -488,7 +493,8 @@ export const AnalysisScreen = {
   mount(ctx, params = {}, root) {
     root.querySelector("[data-back]").onclick = () => ctx.go("SELECT");
     const report = reportStats(ctx.session, params);
-    const analysis = buildBigFiveAnalysis(ctx.session, ctx.repo, ctx.bigFiveData);
+    const analysis = buildBigFiveAnalysis(isDemoMode() ? demoSession() : ctx.session, ctx.repo, ctx.bigFiveData);
+    if (isDemoMode()) mountDemoPanel(ctx, root, params);
     root.querySelector("[data-export-png]").onclick = () => exportPng(report, analysis);
     root.querySelector("[data-export-pdf]").onclick = () => {
       const cleanup = () => document.body.classList.remove("is-printing-analysis");

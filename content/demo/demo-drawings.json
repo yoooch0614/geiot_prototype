@@ -1,0 +1,144 @@
+{
+  "_説明": [
+    "発表のデモ用。URL に ?demo=1 を付けて、親モードの分析画面を開くと使える。",
+    "drawings は、絵を足す順番どおりに並べる。file は絵のファイル名（childImages の中のもの）。",
+    "developmentDomains に、その絵に紐づけたい発達領域タグを書く（使えるタグ: 形・観察・自然・感覚・色・もよう・表現・協力・生活習慣・自立）。",
+    "developmentDomains を空にして missionId だけ書くと、そのミッションのタグが使われる（missionId の一覧は docs-ai/デモ用ミッション一覧.md）。",
+    "どちらも空なら、絵の特徴（色・占有率・線の細かさ・色数）だけで分析する。",
+    "caption は、画面に出す絵の名前（任意）。この _説明 は読み込み時に無視される。"
+  ],
+  "drawings": [
+    {
+      "file": "1 - 1.jpeg",
+      "developmentDomains": ["色","もよう","表現"],
+      "missionId": "",
+      "caption": "アイスクリームを描いてみよう"
+    },
+    {
+      "file": "1 - 2.jpeg",
+      "developmentDomains": ["形","観察","自然","表現"],
+      "missionId": "",
+      "caption": "キツネを描いてみよう"
+    },
+    {
+      "file": "1 - 3.jpeg",
+      "developmentDomains": ["形","観察","自然","表現","色"],
+      "missionId": "",
+      "caption": "雪だるまを描いてみよう"
+    },
+    {
+      "file": "1 - 4.jpeg",
+      "developmentDomains": ["形","観察","自然","表現","色","もよう"],
+      "missionId": "",
+      "caption": "蝶々を描いてみよう"
+    },
+    {
+      "file": "1 - 5.jpeg",
+      "developmentDomains": ["形","色","もよう","表現"],
+      "missionId": "",
+      "caption": "おひなさんを描いてみよう"
+    },
+    {
+      "file": "1 - 6.jpeg",
+      "developmentDomains": ["形","観察","自然","表現","色","もよう"],
+      "missionId": "",
+      "caption": "海の世界を描いてみよう"
+    },
+    {
+      "file": "1 - 7.jpeg",
+      "developmentDomains": ["観察","表現","生活習慣"],
+      "missionId": "",
+      "caption": "日常を描いてみよう"
+    },
+    {
+      "file": "1 - 8.jpeg",
+      "developmentDomains": ["形","観察","色","表現"],
+      "missionId": "",
+      "caption": "お家を描いてみよう"
+    },
+    {
+      "file": "1 - 9.jpeg",
+      "developmentDomains": ["表現","観察","生活習慣","協力","自立"],
+      "missionId": "",
+      "caption": "夏祭りの風景を描いてみよう"
+    },
+    {
+      "file": "1 - 10.jpeg",
+      "developmentDomains": ["形","観察", "表現","色"],
+      "missionId": "",
+      "caption": "お家を描いてみよう"
+    },
+    {
+      "file": "1 - 11.jpeg",
+      "developmentDomains": ["自然","観察","表現","色","もよう"],
+      "missionId": "",
+      "caption": "青虫を描いてみよう"
+    },
+    {
+      "file": "1 - 12.jpeg",
+      "developmentDomains": ["自然","観察","表現","色","もよう"],
+      "missionId": "",
+      "caption": "うさぎを描いてみよう"
+    },
+    {
+      "file": "1 - 13.jpeg",
+      "developmentDomains": ["自然","観察","表現","色","もよう"],
+      "missionId": "",
+      "caption": "クマを描いてみよう"
+    },
+    {
+      "file": "1 - 14.jpeg",
+      "developmentDomains": ["自然","観察","表現","色","もよう"],
+      "missionId": "",
+      "caption": "青虫を描いてみよう"
+    },
+    {
+      "file": "1 - 15.jpeg",
+      "developmentDomains": ["表現","色","もよう","形"],
+      "missionId": "",
+      "caption": "大好きな瓶を描いてみよう"
+    },
+    {
+      "file": "1 - 16.jpeg",
+      "developmentDomains": ["表現","色","もよう","形"],
+      "missionId": "",
+      "caption": "キャラクターを作ってみよう"
+    },
+    {
+      "file": "1 - 17.jpeg",
+      "developmentDomains": ["観察","表現","色","もよう","形"],
+      "missionId": "",
+      "caption": "登場人物を描いてみよう"
+    },
+    {
+      "file": "1 - 18.jpeg",
+      "developmentDomains": ["観察","表現","色","もよう","形","協力"],
+      "missionId": "",
+      "caption": "好きな世界を描いてみよう"
+    },
+    {
+      "file": "1 - 19.jpeg",
+      "developmentDomains": ["観察","表現","色","もよう","形"],
+      "missionId": "",
+      "caption": "登場人物を描いてみよう"
+    },
+    {
+      "file": "1 - 20.jpeg",
+      "developmentDomains": ["観察","もよう","自然","色","表現"],
+      "missionId": "",
+      "caption": "牛を描いてみよう"
+    },
+    {
+      "file": "1 - 21.jpeg",
+      "developmentDomains": ["表現","色","もよう","形"],
+      "missionId": "",
+      "caption": "キャラクターを作ってみよう"
+    },
+    {
+      "file": "1 - 22.jpeg",
+      "developmentDomains": ["表現","色","もよう","形"],
+      "missionId": "",
+      "caption": "キャラクターを作ってみよう"
+    }
+  ]
+}

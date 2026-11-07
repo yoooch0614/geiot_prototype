@@ -39,6 +39,21 @@ const COLOR_TRAIT_WEIGHTS = {
   pink: { agreeableness: 0.5, openness: 0.7, extraversion: 0.35 },
 };
 
+// 絵の特徴（占有率・線の細かさ・色数）から 5 軸への換算。
+// 構想にあった対応で、根拠は未確認の仮説。情緒安定性は、根拠がないため絵の特徴から出さない。
+// 各特徴は、手元の絵で観測した幅をもとに 0〜1 に正規化して使う。
+const DRAWING_EVIDENCE_WEIGHT = 0.8;
+const DRAWING_SCALES = { occupancy: 0.5, detail: 0.6, colorCount: 5 };
+
+function drawingTraitWeights(features) {
+  const unit = (value, scale) => clamp((Number(value) || 0) / scale, 0, 1);
+  return {
+    extraversion: unit(features.occupancy, DRAWING_SCALES.occupancy),
+    conscientiousness: unit(features.detail, DRAWING_SCALES.detail),
+    openness: unit((Number(features.colorCount) || 1) - 1, DRAWING_SCALES.colorCount),
+  };
+}
+
 const NAMED_COLORS = {
   red: [255, 0, 0],
   orange: [255, 165, 0],
@@ -160,17 +175,30 @@ function addDomainEvidence(evidence, domain) {
   return addWeightedEvidence(evidence, DOMAIN_TRAIT_WEIGHTS[domain]);
 }
 
-function addColorEvidence(evidence, color) {
+// share は、1枚の絵の中でその色が占める割合。1枚全体の色の影響が COLOR_EVIDENCE_WEIGHT を超えないよう按分する。
+function addColorEvidence(evidence, color, share = 1) {
   const profile = colorProfile(color);
   if (!profile) return false;
-  evidence.colorSamples += 1;
-  evidence.colorFamilies[profile.family] = (evidence.colorFamilies[profile.family] || 0) + 1;
-  return addWeightedEvidence(evidence, profile.weights, COLOR_EVIDENCE_WEIGHT);
+  evidence.colorSamples += share;
+  evidence.colorFamilies[profile.family] = (evidence.colorFamilies[profile.family] || 0) + share;
+  return addWeightedEvidence(evidence, profile.weights, COLOR_EVIDENCE_WEIGHT * share);
 }
 
-function addMissionEvidence(evidence, domains, color) {
+function addDrawingEvidence(evidence, features) {
+  const palette = (features.palette ?? []).filter((item) => Array.isArray(item.rgb));
+  const total = palette.reduce((sum, item) => sum + (item.share || 0), 0);
+  palette.forEach((item) => {
+    addColorEvidence(evidence, `rgb(${item.rgb.join(",")})`, (item.share || 0) / (total || 1));
+  });
+  evidence.drawings += 1;
+  return addWeightedEvidence(evidence, drawingTraitWeights(features), DRAWING_EVIDENCE_WEIGHT);
+}
+
+function addMissionEvidence(evidence, domains, color, drawingFeatures = null) {
   domains.forEach((domain) => addDomainEvidence(evidence, domain));
-  addColorEvidence(evidence, color);
+  // 絵の特徴量があるときは、複数の代表色を使う。ない古い記録は、従来の 1 色で補う。
+  if (drawingFeatures) addDrawingEvidence(evidence, drawingFeatures);
+  else addColorEvidence(evidence, color);
 }
 
 function missionPages(book) {
@@ -184,6 +212,7 @@ function collectEvidence(session, repo) {
     domains: {},
     colorSamples: 0,
     colorFamilies: {},
+    drawings: 0,
   };
 
   // 完成済みの日記には、現在のバージョンなら missionId・タグ・色を保存する。
@@ -199,7 +228,7 @@ function collectEvidence(session, repo) {
       legacyIndex += 1;
       const domains = entry.developmentDomains ?? page?.developmentDomains ?? [];
       const color = entry.vehicleColor || memory.bookColorValues?.[entry.missionId || page?.id] || null;
-      addMissionEvidence(evidence, domains, color);
+      addMissionEvidence(evidence, domains, color, entry.drawingFeatures ?? null);
     });
   });
 
@@ -207,7 +236,8 @@ function collectEvidence(session, repo) {
   const currentPages = missionPages(repo?.book(session.bookId));
   (session.runMissions ?? []).forEach((mission) => {
     const page = currentPages.find((candidate) => candidate.id === mission.missionId);
-    addMissionEvidence(evidence, page?.developmentDomains ?? [], mission.vehicleColor);
+    // デモの記録は、絵本のページを持たないため、記録に直接持たせたタグを優先する。
+    addMissionEvidence(evidence, mission.developmentDomains ?? page?.developmentDomains ?? [], mission.vehicleColor, mission.drawingFeatures ?? null);
   });
 
   return evidence;

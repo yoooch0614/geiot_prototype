@@ -702,3 +702,15 @@ body.night-theme .analysis-work-style-copy small {
     line-height: 1.25 !important;
   }
 }
+
+/* デモ用パネル（?demo=1 のときだけ表示） */
+.demo-panel { color: #3a3320; margin: 12px 0; padding: 12px 14px; border: 2px dashed #c9a23a; border-radius: 14px; background: #fff9e6; }
+.demo-panel h3 { margin: 0 0 6px; font-size: 15px; color: #3a3320; }
+.demo-note, .demo-status { margin: 4px 0; font-size: 12px; color: #6c6552; }
+.demo-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+.demo-button { padding: 8px 14px; border: 0; border-radius: 999px; background: #4f9a45; color: #fff; font-weight: 700; font-size: 14px; cursor: pointer; }
+.demo-button:disabled { opacity: 0.4; cursor: default; }
+.demo-button--quiet { background: #a8a28f; }
+.demo-thumbs { display: flex; gap: 8px; overflow-x: auto; padding: 6px 0; }
+.demo-thumb { color: #3a3320; margin: 0; flex: 0 0 auto; width: 72px; text-align: center; font-size: 10px; }
+.demo-thumb img { width: 72px; height: 72px; object-fit: cover; border-radius: 8px; border: 2px solid #fff; }

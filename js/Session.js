@@ -290,7 +290,7 @@ export class Session {
   // photoUrl が null なら「タップ達成」（写真なし）
   // missionImage はそのミッションの挿絵（写真がないとき日記の代わり絵に使う）
   // missionCharacter は写真の上に重ねるキャラクター（おはなしページと同じ演出）
-  completeMission({ missionId, missionText, caption, photoUrl, missionImage, missionCharacter, vehicleColor, vehicleSourceUrl, vehicleTextureScale, originalPage = null, completedPage = null }) {
+  completeMission({ missionId, missionText, caption, photoUrl, missionImage, missionCharacter, vehicleColor, drawingFeatures = null, vehicleSourceUrl, vehicleTextureScale, originalPage = null, completedPage = null }) {
     // 元ページと完成ページは別オブジェクトで保存する。
     // 確認画面のスクラッチボードが、写真を貼った後の画像を参照しないための境界。
     const original = originalPage && typeof originalPage === "object"
@@ -306,7 +306,7 @@ export class Session {
         };
     const mission = {
       missionId, missionText, caption, photoUrl, missionImage, missionCharacter,
-      vehicleColor, vehicleSourceUrl, vehicleTextureScale,
+      vehicleColor, drawingFeatures, vehicleSourceUrl, vehicleTextureScale,
       originalPage: original,
       completedPage: completed,
     };
@@ -590,6 +590,7 @@ export class Session {
           missionImage: m.missionImage,
           missionCharacter: m.missionCharacter,
           vehicleColor: m.vehicleColor || null,
+          drawingFeatures: m.drawingFeatures || null,
           originalPage,
           completedPage,
         });
