@@ -77,6 +77,7 @@ export function demoPanelMarkup() {
           <input type="file" accept="image/*" multiple hidden data-demo-files>
         </label>
         <button type="button" class="demo-button" data-demo-next ${upcoming && !state.busy ? "" : "disabled"}>つぎの絵を足す</button>
+        <button type="button" class="demo-button" data-demo-all ${upcoming && !state.busy ? "" : "disabled"}>のこりを全部足す</button>
         <button type="button" class="demo-button demo-button--quiet" data-demo-reset ${state.added.length ? "" : "disabled"}>リセット</button>
       </div>
       <p class="demo-status">選択済み ${state.files.size}枚 ／ 設定と一致 ${queued}枚 ／ 追加済み ${state.added.length}枚${state.message ? ` ／ ${esc(state.message)}` : ""}</p>
@@ -100,18 +101,16 @@ export function mountDemoPanel(ctx, root, params) {
     rerender();
   };
 
-  root.querySelector("[data-demo-next]").onclick = async () => {
+  // 次の 1 枚を分析して足す。読み込めなければ false。再描画は呼び出し側で行う。
+  const addNext = async () => {
     const entry = nextEntry();
-    if (!entry || state.busy) return;
-    state.busy = true;
+    if (!entry) return false;
     const url = URL.createObjectURL(state.files.get(entry.file));
     const drawingFeatures = await analyzeDrawingUrl(url);
-    state.busy = false;
     if (!drawingFeatures) {
       URL.revokeObjectURL(url);
       state.message = `${entry.file} を読み込めませんでした`;
-      rerender();
-      return;
+      return false;
     }
     state.message = "";
     state.added.push({
@@ -125,6 +124,23 @@ export function mountDemoPanel(ctx, root, params) {
         drawingFeatures,
       },
     });
+    return true;
+  };
+
+  root.querySelector("[data-demo-next]").onclick = async () => {
+    if (state.busy) return;
+    state.busy = true;
+    await addNext();
+    state.busy = false;
+    rerender();
+  };
+
+  // 選んだ絵を、設定の順にすべて足す。
+  root.querySelector("[data-demo-all]").onclick = async () => {
+    if (state.busy) return;
+    state.busy = true;
+    while (await addNext());
+    state.busy = false;
     rerender();
   };
 

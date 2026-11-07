@@ -1,5 +1,6 @@
 import { esc } from "../shared/utils.js?v=suki-no-tane-camera-fix-20260829-v2";
 import { buildBigFiveAnalysis } from "./workStyles.js";
+import { personalityText, likesText, recommendActivities, activitySamples, loadActivitySamples } from "./traitText.js";
 import { isDemoMode, demoSession, demoPanelMarkup, mountDemoPanel } from "./demo.js";
 
 const ANALYSIS_TRAITS = [
@@ -20,19 +21,30 @@ const COLOR_FAMILY_LABELS = {
   pink: "ピンク系",
 };
 
+// 好きな色は、記録の中でよく使われた色系統の上位 2 つ。
 function colorSummary(evidence = {}) {
   return Object.entries(evidence.colorFamilies ?? {})
     .filter(([, count]) => count >= 0.2)
     .sort(([, a], [, b]) => b - a)
-    .map(([family, count]) => `${COLOR_FAMILY_LABELS[family] || family}${Math.round(count) > 1 ? `×${Math.round(count)}` : ""}`)
+    .slice(0, 2)
+    .map(([family]) => COLOR_FAMILY_LABELS[family] || family)
     .join("・");
 }
 
+// 記録があるときは、結果から文を作る。無いときや作れないときは、固定の見本文のまま。
 function analysisTraits(analysis) {
   const summary = colorSummary(analysis.evidence);
-  return ANALYSIS_TRAITS.map((trait) => trait.icon === "palette"
-    ? { ...trait, value: summary || trait.value }
-    : trait);
+  const recorded = analysis.source === "activity";
+  const personality = recorded ? personalityText(analysis.axes) : null;
+  const likes = recorded ? likesText(analysis.evidence.domains) : null;
+  const activities = recorded ? recommendActivities(analysis.axes, analysis.evidence.domains, activitySamples()) : [];
+  return ANALYSIS_TRAITS.map((trait) => {
+    if (trait.icon === "palette") return { ...trait, value: summary || trait.value };
+    if (trait.icon === "smile" && personality) return { ...trait, value: personality };
+    if (trait.icon === "star" && likes) return { ...trait, value: likes };
+    if (trait.icon === "book" && activities.length) return { ...trait, value: `${activities.join("・")}（サンプルデータ）` };
+    return trait;
+  });
 }
 
 function normalizeFilters(params = {}) {
@@ -495,6 +507,8 @@ export const AnalysisScreen = {
     const report = reportStats(ctx.session, params);
     const analysis = buildBigFiveAnalysis(isDemoMode() ? demoSession() : ctx.session, ctx.repo, ctx.bigFiveData);
     if (isDemoMode()) mountDemoPanel(ctx, root, params);
+    // 習い事のサンプルは非同期で読むため、初回だけ読み込み後に描き直す。
+    if (!activitySamples()) loadActivitySamples().then(() => ctx.go("ANALYSIS", params));
     root.querySelector("[data-export-png]").onclick = () => exportPng(report, analysis);
     root.querySelector("[data-export-pdf]").onclick = () => {
       const cleanup = () => document.body.classList.remove("is-printing-analysis");

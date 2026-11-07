@@ -1,0 +1,18 @@
+{
+  "_説明": [
+    "習い事の提案に使うサンプルデータ。実在の教室への聞き取りや公式サイトの調査で作ったものではなく、仕組みを見せるための仮の内容。",
+    "将来、聞き取り・公式サイトで作った本物のデータに、この形式のまま差し替える。",
+    "axes: 向いている性格の軸（openness / conscientiousness / extraversion / agreeableness / emotional_stability）",
+    "domains: 向いている活動の領域タグ（形・観察・自然・感覚・色・もよう・表現・協力・生活習慣・自立）"
+  ],
+  "activities": [
+    { "name": "図工・造形教室", "axes": ["openness", "extraversion"], "domains": ["色", "もよう", "表現", "形"] },
+    { "name": "リトミック・音楽教室", "axes": ["extraversion", "emotional_stability"], "domains": ["表現", "感覚"] },
+    { "name": "自然体験・野外活動", "axes": ["openness", "emotional_stability"], "domains": ["自然", "観察", "感覚"] },
+    { "name": "そろばん・学習教室", "axes": ["conscientiousness"], "domains": ["形", "観察", "生活習慣"] },
+    { "name": "スイミング", "axes": ["emotional_stability", "conscientiousness"], "domains": ["自立", "生活習慣"] },
+    { "name": "キッズダンス", "axes": ["extraversion", "agreeableness"], "domains": ["表現", "協力"] },
+    { "name": "チームスポーツ（サッカーなど）", "axes": ["agreeableness", "extraversion"], "domains": ["協力", "自立"] },
+    { "name": "ものづくり・プログラミング教室", "axes": ["openness", "conscientiousness"], "domains": ["形", "観察", "もよう"] }
+  ]
+}
