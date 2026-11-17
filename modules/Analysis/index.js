@@ -1,25 +1,10 @@
 import { esc } from "../shared/utils.js?v=suki-no-tane-camera-fix-20260829-v2";
-import { buildBigFiveAnalysis } from "./workStyles.js";
-import { personalityText, likesText, recommendActivities, activitySamples, loadActivitySamples } from "./traitText.js";
+import { buildBigFiveAnalysis, COLOR_FAMILY_LABELS } from "./workStyles.js";
+import { strengthLines, approachLines, activityLines, strengthShort, approachShort, activityShort, likesText, recommendActivities, activitySamples, loadActivitySamples } from "./traitText.js";
+import { LEVEL_LABEL } from "./personality.js";
 import { isDemoMode, demoSession, demoPanelMarkup, mountDemoPanel } from "./demo.js";
 
-const ANALYSIS_TRAITS = [
-  { icon: "palette", label: "好きな色", value: "写真の色を記録すると結果に反映されます" },
-  { icon: "smile", label: "性格", value: "好奇心旺盛で、思いやりがあります" },
-  { icon: "star", label: "好きなこと", value: "動物・乗り物・お絵かき" },
-  { icon: "book", label: "習い事の提案", value: "図工教室・リトミック" },
-];
-
-const COLOR_FAMILY_LABELS = {
-  red: "赤系",
-  orange: "オレンジ系",
-  yellow: "黄色系",
-  green: "緑系",
-  cyan: "水色系",
-  blue: "青系",
-  purple: "紫系",
-  pink: "ピンク系",
-};
+const FEW = "もう少しあそぶと見えてきます";
 
 // 好きな色は、記録の中でよく使われた色系統の上位 2 つ。
 function colorSummary(evidence = {}) {
@@ -31,20 +16,35 @@ function colorSummary(evidence = {}) {
     .join("・");
 }
 
-// 記録があるときは、結果から文を作る。無いときや作れないときは、固定の見本文のまま。
+// 記録があるときは、結果から文を作る。「まだ少ない」ときは、値や性格の文を出さない。
 function analysisTraits(analysis) {
   const summary = colorSummary(analysis.evidence);
   const recorded = analysis.source === "activity";
-  const personality = recorded ? personalityText(analysis.axes) : null;
+  const ready = recorded && analysis.axes.some((axis) => axis.level !== "few");
   const likes = recorded ? likesText(analysis.evidence.domains) : null;
-  const activities = recorded ? recommendActivities(analysis.axes, analysis.evidence.domains, activitySamples()) : [];
-  return ANALYSIS_TRAITS.map((trait) => {
-    if (trait.icon === "palette") return { ...trait, value: summary || trait.value };
-    if (trait.icon === "smile" && personality) return { ...trait, value: personality };
-    if (trait.icon === "star" && likes) return { ...trait, value: likes };
-    if (trait.icon === "book" && activities.length) return { ...trait, value: `${activities.join("・")}（サンプルデータ）` };
-    return trait;
-  });
+  const recommendation = recorded
+    ? recommendActivities(analysis.axes, analysis.evidence.domains, analysis.evidence.plays, activitySamples())
+    : null;
+  const strengths = ready ? strengthLines(analysis.axes) : [];
+  const approach = ready ? approachLines(analysis.axes) : [];
+  const activities = activityLines(recommendation);
+  // lines は画面用（項目ごとに行を分ける）、value は PNG 書き出し用の短い 1 行。
+  return [
+    { icon: "palette", label: "好きな色", value: summary || "写真や絵の色を記録すると見えてきます" },
+    { icon: "smile", label: "得意とこれから伸びるところ", lines: strengths, value: (ready && strengthShort(analysis.axes)) || FEW },
+    { icon: "heart", label: "子どもへの接し方", lines: approach, value: (ready && approachShort(analysis.axes)) || FEW },
+    { icon: "star", label: "好きなこと", value: likes || FEW },
+    { icon: "book", label: "習い事の提案", lines: activities, value: activityShort(recommendation) || FEW },
+  ];
+}
+
+// 軸ごとの確からしさ。値を出せない軸は「まだ少ない」と書く。
+function axisValueLabel(axis) {
+  return axis.level === "few" ? "まだ少ない" : String(axis.value);
+}
+
+function confidenceSummary(axes) {
+  return axes.map((axis) => `${axis.label}：${LEVEL_LABEL[axis.level]}`).join(" ／ ");
 }
 
 function normalizeFilters(params = {}) {
@@ -188,7 +188,7 @@ function buildExportSvg(report, analysis) {
     const x = center.x + Math.cos(angles[i]) * (radius + 58);
     const y = center.y + Math.sin(angles[i]) * (radius + 58);
     return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" class="export-axis-label" text-anchor="middle" fill="${axis.color}">${xmlEscape(axis.label)}</text>
-      <text x="${x.toFixed(1)}" y="${(y + 24).toFixed(1)}" class="export-axis-value" text-anchor="middle">${axis.value}</text>`;
+      <text x="${x.toFixed(1)}" y="${(y + 24).toFixed(1)}" class="export-axis-value" text-anchor="middle">${axisValueLabel(axis)}</text>`;
   }).join("");
   const traitRows = traits.map((trait, i) => {
     const y = 520 + i * 112;
@@ -247,7 +247,7 @@ function buildExportSvg(report, analysis) {
       <text x="1290" y="343" class="stat-label" text-anchor="middle">活動日数</text>
 
       <rect x="${chartCard.x}" y="${chartCard.y}" width="${chartCard.width}" height="${chartCard.height}" rx="24" fill="#ffffff" />
-      <text x="${chartCard.x + 32}" y="440" class="card-title">Big Five（${analysis.source === "activity" ? "活動データの集計" : "参考値"}）</text>
+      <text x="${chartCard.x + 32}" y="440" class="card-title">Big Five（${analysis.source === "activity" ? "遊び方の記録の集計" : "記録がまだ少ない"}）</text>
       ${rings}${axisLines}<polygon points="${polygon}" class="export-polygon" />${labels}
       <circle cx="${center.x}" cy="${center.y}" r="5" fill="#6c7b70" />
 
@@ -354,7 +354,7 @@ export const AnalysisScreen = {
       const ly = center + Math.sin(p.angle) * (radius + 30);
       return `
         <text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" class="analysis-label" style="fill:${p.color}">${esc(p.label)}</text>
-        <text x="${lx.toFixed(1)}" y="${(ly + 15).toFixed(1)}" class="analysis-label-value">${p.value}</text>
+        <text x="${lx.toFixed(1)}" y="${(ly + 15).toFixed(1)}" class="analysis-label-value">${axisValueLabel(p)}</text>
       `;
     }).join("");
 
@@ -372,6 +372,9 @@ export const AnalysisScreen = {
           <span class="eye e1"></span><span class="eye e2"></span><span class="mouth"></span>
         </span>`;
       }
+      if (icon === "heart") {
+        return `<span class="trait-icon trait-icon--star" aria-hidden="true"></span>`;
+      }
       if (icon === "star") {
         return `<span class="trait-icon trait-icon--star" aria-hidden="true"></span>`;
       }
@@ -383,7 +386,19 @@ export const AnalysisScreen = {
       return "";
     };
 
-    const traitsMarkup = traits.map((t) => `
+    // 長い文が出る項目は、見出しの下に 1 件ずつ縦に並べる。短い項目は 1 行のまま。
+    const traitLinesMarkup = (lines) => `<div class="trait-lines">${lines.map((line) => `
+        <div class="trait-line">
+          <div class="trait-line__head">${line.badge ? `<span class="trait-badge">${esc(line.badge)}</span>` : ""}<b>${esc(line.head)}</b></div>
+          ${line.fact ? `<p class="trait-fact">${esc(line.fact)}。</p>` : ""}
+          ${line.text ? `<p class="trait-text">${esc(line.text)}${line.badge === "合いそう" || line.badge === "ちょっと挑戦" ? "" : "。"}</p>` : ""}
+        </div>`).join("")}</div>`;
+    const traitsMarkup = traits.map((t) => t.lines?.length ? `
+      <div class="trait-row trait-row--stack">
+        ${traitIconMarkup(t.icon)}
+        <span class="trait-label">${esc(t.label)}</span>
+        ${traitLinesMarkup(t.lines)}
+      </div>` : `
       <div class="trait-row">
         ${traitIconMarkup(t.icon)}
         <span class="trait-label">${esc(t.label)}</span>
@@ -392,8 +407,8 @@ export const AnalysisScreen = {
 
     const uploadedColorSummary = colorSummary(analysis.evidence);
     const bigFiveSource = analysis.source === "activity"
-      ? `絵本の達成記録${uploadedColorSummary ? `とアップロード写真の色（${uploadedColorSummary}）` : ""}から、現在の活動傾向を集計しています。`
-      : "活動記録がないため、参考値を表示しています。写真をアップロードすると色の傾向も反映されます。";
+      ? `遊び方の記録と絵の特徴${uploadedColorSummary ? `（好きな色：${uploadedColorSummary}）` : ""}から、現在の傾向を集計しています。`
+      : "遊び方の記録がまだないため、値は出していません。";
     const occupationMatches = analysis.matches.length
       ? `<ol class="analysis-work-style-list">${analysis.matches.map((match) => `
           <li>
@@ -403,7 +418,7 @@ export const AnalysisScreen = {
       : `<p class="analysis-work-style-empty">参照データを読み込めないため、候補を表示できません。</p>`;
 
     return `
-      <div class="screen parent analysis-screen">
+      <div class="screen parent analysis-screen${demo ? " analysis-screen--demo" : ""}">
         <button class="back" data-back>‹ 戻る</button>
         <h2 class="parent-title">お子さまの成長レポート</h2>
         <p class="note">お子さまのこれまでの活動状況をまとめています。</p>
@@ -478,6 +493,8 @@ export const AnalysisScreen = {
               <circle cx="${center}" cy="${center}" r="3" class="analysis-center" />
             </svg>
           </div>
+          <p class="analysis-confidence">確からしさ　${esc(confidenceSummary(axes))}</p>
+          <p class="analysis-confidence">遊び方の記録から見えた傾向で、診断ではありません。「まだ少ない」の軸は、値を出していません。</p>
         </div>
         <div class="analysis-card analysis-traits-card">
           <h3 class="log-title">お子さまの特徴</h3>
@@ -506,7 +523,19 @@ export const AnalysisScreen = {
     root.querySelector("[data-back]").onclick = () => ctx.go("SELECT");
     const report = reportStats(ctx.session, params);
     const analysis = buildBigFiveAnalysis(isDemoMode() ? demoSession() : ctx.session, ctx.repo, ctx.bigFiveData);
-    if (isDemoMode()) mountDemoPanel(ctx, root, params);
+    if (isDemoMode()) {
+      // 絵を 1 枚ずつ足す間、ページ全体は描き直さず、結果の部分だけを差し替える。
+      const refresh = () => {
+        const next = document.createElement("div");
+        next.innerHTML = AnalysisScreen.render(ctx, params);
+        [".analysis-chart-card", ".analysis-traits-card", ".analysis-work-style-card"].forEach((selector) => {
+          const fresh = next.querySelector(selector);
+          const old = root.querySelector(selector);
+          if (fresh && old) old.replaceWith(fresh);
+        });
+      };
+      mountDemoPanel(ctx, root, params, refresh);
+    }
     // 習い事のサンプルは非同期で読むため、初回だけ読み込み後に描き直す。
     if (!activitySamples()) loadActivitySamples().then(() => ctx.go("ANALYSIS", params));
     root.querySelector("[data-export-png]").onclick = () => exportPng(report, analysis);

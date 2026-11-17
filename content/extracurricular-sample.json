@@ -1,18 +1,18 @@
 {
   "_説明": [
     "習い事の提案に使うサンプルデータ。実在の教室への聞き取りや公式サイトの調査で作ったものではなく、仕組みを見せるための仮の内容。",
-    "将来、聞き取り・公式サイトで作った本物のデータに、この形式のまま差し替える。",
-    "axes: 向いている性格の軸（openness / conscientiousness / extraversion / agreeableness / emotional_stability）",
-    "domains: 向いている活動の領域タグ（形・観察・自然・感覚・色・もよう・表現・協力・生活習慣・自立）"
+    "将来、教室アンケートで集めた「種類」ごとのプロファイルに、この形式のまま差し替える（設計案_個性推定アルゴリズム.md の「教室アンケートで作る習い事データ」）。",
+    "attrs: 形式の属性（0〜1）。social 0=ひとり・1=チーム、procedure 0=毎回ちがう・自由・1=手順を積み上げる、size 0=少人数・1=大人数、competition 0=競わない・1=勝ち負けがある",
+    "domains: 関係する好き（活動の領域タグ: 形・観察・自然・感覚・色・もよう・表現・協力・生活習慣・自立）"
   ],
   "activities": [
-    { "name": "図工・造形教室", "axes": ["openness", "extraversion"], "domains": ["色", "もよう", "表現", "形"] },
-    { "name": "リトミック・音楽教室", "axes": ["extraversion", "emotional_stability"], "domains": ["表現", "感覚"] },
-    { "name": "自然体験・野外活動", "axes": ["openness", "emotional_stability"], "domains": ["自然", "観察", "感覚"] },
-    { "name": "そろばん・学習教室", "axes": ["conscientiousness"], "domains": ["形", "観察", "生活習慣"] },
-    { "name": "スイミング", "axes": ["emotional_stability", "conscientiousness"], "domains": ["自立", "生活習慣"] },
-    { "name": "キッズダンス", "axes": ["extraversion", "agreeableness"], "domains": ["表現", "協力"] },
-    { "name": "チームスポーツ（サッカーなど）", "axes": ["agreeableness", "extraversion"], "domains": ["協力", "自立"] },
-    { "name": "ものづくり・プログラミング教室", "axes": ["openness", "conscientiousness"], "domains": ["形", "観察", "もよう"] }
+    { "name": "図工・造形教室", "attrs": { "social": 0.3, "procedure": 0.2, "size": 0.3, "competition": 0.0 }, "domains": ["色", "もよう", "表現", "形"] },
+    { "name": "リトミック・音楽教室", "attrs": { "social": 0.5, "procedure": 0.3, "size": 0.4, "competition": 0.0 }, "domains": ["表現", "感覚"] },
+    { "name": "自然体験・野外活動", "attrs": { "social": 0.6, "procedure": 0.2, "size": 0.5, "competition": 0.0 }, "domains": ["自然", "観察", "感覚"] },
+    { "name": "そろばん・学習教室", "attrs": { "social": 0.2, "procedure": 0.9, "size": 0.3, "competition": 0.2 }, "domains": ["形", "観察", "生活習慣"] },
+    { "name": "スイミング", "attrs": { "social": 0.3, "procedure": 0.8, "size": 0.4, "competition": 0.4 }, "domains": ["自立", "生活習慣"] },
+    { "name": "キッズダンス", "attrs": { "social": 0.7, "procedure": 0.6, "size": 0.6, "competition": 0.2 }, "domains": ["表現", "協力"] },
+    { "name": "チームスポーツ（サッカーなど）", "attrs": { "social": 1.0, "procedure": 0.6, "size": 0.8, "competition": 0.9 }, "domains": ["協力", "自立"] },
+    { "name": "ものづくり・プログラミング教室", "attrs": { "social": 0.4, "procedure": 0.7, "size": 0.3, "competition": 0.1 }, "domains": ["形", "観察", "もよう"] }
   ]
 }

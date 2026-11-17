@@ -23,6 +23,7 @@
       "prompt": "そとに でて、まるい はっぱ を さがしてみよう。",
       "doneLabel": "みつけた！",
       "diaryCaption": "まるい はっぱ、みつけたよ！",
+      "play": {"hard": {"normal": "まるい はっぱを 1まい", "star": "ちがう かたちの はっぱも みつける"}, "more": "もう1まい さがす？", "wait": true, "branch": {"question": "はっぱの うえで、むしが ころんで ないているよ。どうする？", "options": [{"label": "たすける", "helps": true}, {"label": "そっと みまもる", "helps": false}, {"label": "おともだちを よぶ", "helps": true}]}},
       "developmentDomains": [
         "観察",
         "自然"
@@ -42,6 +43,7 @@
       "prompt": "あかい いろの もの を さがしてみよう。",
       "doneLabel": "みつけた！",
       "diaryCaption": "あかい もの、みつけたよ！",
+      "play": {"choose": {"question": "どっちを さがす？", "usual": "よく ある あかい もの", "unusual": "めずらしい あかい もの"}, "more": "もう1つ さがす？", "who": true},
       "developmentDomains": [
         "色",
         "観察"

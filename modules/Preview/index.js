@@ -118,6 +118,7 @@ export const PreviewScreen = {
       }
     };
     root.querySelector("[data-retry]").onclick = () => {
+      ctx.session.bumpRetake(page.id); // 撮り直しの回数を記録する
       const input = ctx.els.camera;
       input.value = "";
       input.onchange = () => {

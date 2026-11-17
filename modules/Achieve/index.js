@@ -3,6 +3,55 @@ import { avatarBuddy, avatarRewardForMissionCount } from "../shared/avatars.js?v
 
 const TEACHER_RABBIT_ASSET = "content/assets/teacher-rabbit.png";
 
+// 描いたあとの仕掛け（もうひとつ・きもち）。タップだけを遊びの記録に残す。
+const MOODS = [
+  { value: "happy", label: "たのしい", mouth: "M20 38 Q32 50 44 38", fill: "#ffe08a" },
+  { value: "normal", label: "ふつう", mouth: "M22 42 L42 42", fill: "#d9e8f5" },
+  { value: "hard", label: "むずかしかった", mouth: "M22 46 Q32 36 42 46", fill: "#f3c9c0" },
+];
+
+const faceSvg = (mood) => `
+  <svg viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
+    <circle cx="32" cy="32" r="28" fill="${mood.fill}" stroke="#3a4a3f" stroke-width="3"/>
+    <circle cx="23" cy="26" r="3" fill="#3a4a3f"/><circle cx="41" cy="26" r="3" fill="#3a4a3f"/>
+    <path d="${mood.mouth}" fill="none" stroke="#3a4a3f" stroke-width="3" stroke-linecap="round"/>
+  </svg>`;
+
+function askAfter(ctx, page, root, done) {
+  const panel = document.createElement("div");
+  panel.className = "play-after";
+  root.querySelector(".achieve").append(panel);
+  const askMood = () => {
+    panel.innerHTML = `
+      <p class="play-after__q">かいてみて、どうだった？</p>
+      <div class="play-after__row">${MOODS.map((mood) => `
+        <button type="button" class="play-mood" data-mood="${mood.value}">${faceSvg(mood)}<span>${esc(mood.label)}</span></button>`).join("")}
+      </div>`;
+    panel.querySelectorAll("[data-mood]").forEach((button) => {
+      button.onclick = () => {
+        ctx.session.recordPlay(page.id, { mood: button.dataset.mood }, { closing: true });
+        done();
+      };
+    });
+  };
+  if (page?.play?.more) {
+    panel.innerHTML = `
+      <p class="play-after__q">${esc(page.play.more)}</p>
+      <div class="play-after__row">
+        <button type="button" class="play-card" data-more="yes">かく</button>
+        <button type="button" class="play-card" data-more="no">おしまい</button>
+      </div>`;
+    panel.querySelectorAll("[data-more]").forEach((button) => {
+      button.onclick = () => {
+        ctx.session.recordPlay(page.id, { addMore: button.dataset.more === "yes" }, { closing: true });
+        askMood();
+      };
+    });
+  } else {
+    askMood();
+  }
+}
+
 export const AchieveScreen = {
   render(ctx) {
     const avatar = ctx.session.getAvatar();
@@ -27,7 +76,7 @@ export const AchieveScreen = {
         ${avatarBuddy(avatar, "avatar-buddy--achieve")}
       </div>`;
   },
-  mount(ctx, _params, root) {
+  mount(ctx, params, root) {
     playCelebrationSound(ctx);
     const completion = ctx.session.takeLastMissionCompletion?.();
     const reward = completion?.isNewMission
@@ -55,6 +104,9 @@ export const AchieveScreen = {
       layer.appendChild(p);
     }
 
-    setTimeout(() => ctx.advance(), 1800);
+    // お祝いのあと、描いたあとの質問（もうひとつ・きもち）に答えてから次へ進む。
+    const page = params?.page;
+    const next = () => ctx.advance();
+    setTimeout(() => (page?.id ? askAfter(ctx, page, root, next) : next()), 1800);
   },
 };
