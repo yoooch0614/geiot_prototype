@@ -17,6 +17,7 @@
       "prompt": "どんなくるまで、おでかけしたい？ すきないろやもようを みつけて、しゃしんをとろう！",
       "doneLabel": "とってみよう！",
       "diaryCaption": "きみだけの くるま、できたよ！",
+      "play": {"choose": {"question": "どっちの くるまに する？", "usual": "ふつうの くるま", "unusual": "へんてこな くるま（やねが おさかな）"}, "hard": {"normal": "くるまを 1だい", "star": "くるまを 2だい（ともだちの ぶんも）"}, "more": "まわりに もようを かきたす？"},
       "developmentDomains": [
         "色",
         "もよう"
@@ -64,6 +65,7 @@
       "prompt": "このおうちには、どんなかべや やねが にあうかな？ おもしろいもようを みつけて、しゃしんをとろう！",
       "doneLabel": "とってみよう！",
       "diaryCaption": "まちのおうち、すてきになったよ！",
+      "play": {"hard": {"normal": "おうちを 1けん", "star": "おうちを 2けん ならべる"}, "more": "にわに おはなを かきたす？", "who": true},
       "developmentDomains": [
         "もよう",
         "形"
@@ -122,6 +124,7 @@
       "prompt": "おはなや ちょうちょに、どんないろを あげたい？ きれいだとおもういろやもようを、しゃしんにとろう！",
       "doneLabel": "とってみよう！",
       "diaryCaption": "きみだけの おはなと ちょうちょ！",
+      "play": {"choose": {"question": "どっちの おはなに する？", "usual": "ふつうの おはな", "unusual": "へんてこな おはな（はなびらが ほし）"}, "more": "ちょうちょを もっと ふやす？", "branch": {"question": "ちょうちょが こまっているよ。どうする？", "options": [{"label": "たすける", "helps": true}, {"label": "そっと みまもる", "helps": false}, {"label": "おともだちを よぶ", "helps": true}]}},
       "developmentDomains": [
         "色",
         "自然"

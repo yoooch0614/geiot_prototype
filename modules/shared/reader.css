@@ -234,3 +234,34 @@
 .sparkle { font-size: 48px; animation: pop 700ms ease; }
 .sticker { width: 140px; height: 140px; animation: pop 700ms ease; }
 @keyframes pop { 0%{transform: scale(.4); opacity: 0} 60%{transform: scale(1.12)} 100%{transform: scale(1); opacity: 1} }
+
+/* 描く前の仕掛け（えらぶ・むずかしい版）。2 枚のカードから 1 枚をタップする。 */
+.play-choice { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.play-choice__q { margin: 0; font-weight: 900; font-size: 18px; color: #3a4a3f; }
+.play-choice__cards { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.play-card {
+  font-family: inherit; font-weight: 700; font-size: 17px; color: #3a4a3f;
+  background: #fff; border: 3px solid #cbd8ce; border-radius: 18px; padding: 12px 18px;
+  min-width: 140px; cursor: pointer; transition: transform 120ms, border-color 120ms;
+}
+.play-card:active { transform: translateY(2px); }
+.play-card.is-picked { border-color: var(--green); background: #eef8e9; }
+.mission-shoot:disabled { opacity: .45; cursor: default; box-shadow: 0 6px 0 #e0563c; }
+
+/* 描いたあとの仕掛け（もうひとつ・きもち）。お祝い画面の上に重ねる。 */
+.play-after {
+  position: absolute; inset: auto 0 0 0; z-index: 5; display: flex; flex-direction: column; gap: 12px;
+  align-items: center; padding: 20px 16px 28px; background: rgba(255, 255, 255, .94);
+  border-radius: 24px 24px 0 0; box-shadow: 0 -6px 20px rgba(58, 74, 63, .18);
+}
+.play-after__q { margin: 0; font-weight: 900; font-size: 22px; color: #3a4a3f; }
+.play-after__row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.play-mood {
+  display: flex; flex-direction: column; align-items: center; gap: 4px; font-family: inherit;
+  font-weight: 700; font-size: 15px; color: #3a4a3f; background: #fff; border: 3px solid #cbd8ce;
+  border-radius: 18px; padding: 10px 14px; cursor: pointer;
+}
+.play-mood:active { transform: translateY(2px); }
+.play-wait.is-ready { border-color: var(--green); background: #eef8e9; }
+.play-wait:disabled { opacity: .6; cursor: default; }
+.play-wait__msg { margin: 0; min-height: 1.4em; font-weight: 700; color: #6c7b70; }

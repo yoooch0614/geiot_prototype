@@ -1,42 +1,18 @@
-// Big Five (O/C/Ex/A/ES) の参考スコアを、絵本の活動記録と
-// アップロード写真の色から作り、職業ごとの参照値と比較する。
-// 診断・評価・将来の職業適性判定ではなく、遊びや体験を振り返るための表示。
+// 遊びの記録と絵の特徴から 5 軸（O/C/Ex/A/ES）を出し、職業ごとの参照値と比較する。
+// 計算は personality.js（設計案「個性推定アルゴリズム」）。診断・評価・将来の職業適性判定ではなく、
+// 遊びや体験を振り返るための表示。外部には何も送らない。
+import { AXES, analyzeObservations } from "./personality.js";
 
-const DEFAULT_AXES = [
-  { id: "openness", shortLabel: "O", label: "開放性", value: 72, color: "#e5484d" },
-  { id: "conscientiousness", shortLabel: "C", label: "誠実性", value: 78, color: "#f5b301" },
-  { id: "extraversion", shortLabel: "Ex", label: "外向性", value: 66, color: "#ec4899" },
-  { id: "agreeableness", shortLabel: "A", label: "協調性", value: 84, color: "#3b82f6" },
-  { id: "emotional_stability", shortLabel: "ES", label: "情緒安定性", value: 70, color: "#4caf50" },
-];
 
-// 絵本ミッションの developmentDomains → Big Five の初期参考重み。
-// 研究用の確定対応表ではなく、後からレビューして調整できる仮説モデル。
-const DOMAIN_TRAIT_WEIGHTS = {
-  "形": { conscientiousness: 0.65, openness: 0.25 },
-  "観察": { openness: 0.55, conscientiousness: 0.4 },
-  "自然": { openness: 0.55, emotional_stability: 0.25 },
-  "感覚": { openness: 0.75, emotional_stability: 0.2 },
-  "色": { openness: 0.8, extraversion: 0.15 },
-  "もよう": { openness: 0.7, conscientiousness: 0.35 },
-  "表現": { openness: 0.65, extraversion: 0.55 },
-  "協力": { agreeableness: 1, extraversion: 0.25 },
-  "生活習慣": { conscientiousness: 0.85, emotional_stability: 0.25 },
-  "自立": { conscientiousness: 0.6, extraversion: 0.3, emotional_stability: 0.35 },
-};
-
-// 写真から得た色は、ミッションタグを補助する証拠として加える。
-// 1色の影響をタグ1個より少し弱くし、写真だけで結果が決まりすぎないようにする。
-const COLOR_EVIDENCE_WEIGHT = 0.8;
-const COLOR_TRAIT_WEIGHTS = {
-  red: { extraversion: 0.7, openness: 0.3, emotional_stability: 0.25 },
-  orange: { extraversion: 0.6, openness: 0.45, conscientiousness: 0.25 },
-  yellow: { openness: 0.65, extraversion: 0.45, conscientiousness: 0.2 },
-  green: { agreeableness: 0.7, emotional_stability: 0.35, openness: 0.3 },
-  cyan: { openness: 0.55, agreeableness: 0.5, emotional_stability: 0.25 },
-  blue: { agreeableness: 0.6, emotional_stability: 0.45, openness: 0.2 },
-  purple: { openness: 0.8, extraversion: 0.35, agreeableness: 0.2 },
-  pink: { agreeableness: 0.5, openness: 0.7, extraversion: 0.35 },
+export const COLOR_FAMILY_LABELS = {
+  red: "赤系",
+  orange: "オレンジ系",
+  yellow: "黄色系",
+  green: "緑系",
+  cyan: "水色系",
+  blue: "青系",
+  purple: "紫系",
+  pink: "ピンク系",
 };
 
 const NAMED_COLORS = {
@@ -133,104 +109,7 @@ function colorProfile(value) {
               : hue < 285
                 ? "purple"
                 : "pink";
-  return { family, weights: COLOR_TRAIT_WEIGHTS[family] };
-}
-
-function traitDefinitions(dataset) {
-  return Array.isArray(dataset?.traits) && dataset.traits.length === DEFAULT_AXES.length
-    ? dataset.traits
-    : DEFAULT_AXES;
-}
-
-function defaultValue(id) {
-  return DEFAULT_AXES.find((axis) => axis.id === id)?.value ?? 50;
-}
-
-function addWeightedEvidence(evidence, weights, amount = 1) {
-  if (!weights) return false;
-  evidence.total += amount;
-  Object.entries(weights).forEach(([trait, weight]) => {
-    evidence.traits[trait] = (evidence.traits[trait] || 0) + weight * amount;
-  });
-  return true;
-}
-
-function addDomainEvidence(evidence, domain) {
-  evidence.domains[domain] = (evidence.domains[domain] || 0) + 1;
-  return addWeightedEvidence(evidence, DOMAIN_TRAIT_WEIGHTS[domain]);
-}
-
-function addColorEvidence(evidence, color) {
-  const profile = colorProfile(color);
-  if (!profile) return false;
-  evidence.colorSamples += 1;
-  evidence.colorFamilies[profile.family] = (evidence.colorFamilies[profile.family] || 0) + 1;
-  return addWeightedEvidence(evidence, profile.weights, COLOR_EVIDENCE_WEIGHT);
-}
-
-function addMissionEvidence(evidence, domains, color) {
-  domains.forEach((domain) => addDomainEvidence(evidence, domain));
-  addColorEvidence(evidence, color);
-}
-
-function missionPages(book) {
-  return (book?.pages ?? []).filter((page) => page.type === "mission");
-}
-
-function collectEvidence(session, repo) {
-  const evidence = {
-    total: 0,
-    traits: {},
-    domains: {},
-    colorSamples: 0,
-    colorFamilies: {},
-  };
-
-  // 完成済みの日記には、現在のバージョンなら missionId・タグ・色を保存する。
-  // 古い日記にはそれらがない場合があるため、絵本のミッション順と旧色マップで補完する。
-  (session.memories ?? []).forEach((memory) => {
-    const pages = missionPages(repo?.book(memory.bookId));
-    let legacyIndex = 0;
-    (memory.entries ?? []).forEach((entry) => {
-      if (entry.kind !== "mission") return;
-      const page = entry.missionId
-        ? pages.find((candidate) => candidate.id === entry.missionId)
-        : pages[legacyIndex];
-      legacyIndex += 1;
-      const domains = entry.developmentDomains ?? page?.developmentDomains ?? [];
-      const color = entry.vehicleColor || memory.bookColorValues?.[entry.missionId || page?.id] || null;
-      addMissionEvidence(evidence, domains, color);
-    });
-  });
-
-  // 読みかけの本で分析画面を開いた場合も、達成済みミッションを反映する。
-  const currentPages = missionPages(repo?.book(session.bookId));
-  (session.runMissions ?? []).forEach((mission) => {
-    const page = currentPages.find((candidate) => candidate.id === mission.missionId);
-    addMissionEvidence(evidence, page?.developmentDomains ?? [], mission.vehicleColor);
-  });
-
-  return evidence;
-}
-
-function activityAxes(session, repo, dataset) {
-  const evidence = collectEvidence(session, repo);
-  const definitions = traitDefinitions(dataset);
-  if (!evidence.total) {
-    return {
-      axes: definitions.map((axis) => ({ ...axis, value: defaultValue(axis.id) })),
-      evidence,
-      source: "demo",
-    };
-  }
-
-  const axes = definitions.map((axis) => {
-    const weightedEvidence = evidence.traits[axis.id] || 0;
-    // 36 は未観測を表す中立値。記録が増えるほど、活動と色の傾向を36〜100へ反映する。
-    const value = 36 + (weightedEvidence / evidence.total) * 64;
-    return { ...axis, value: Math.round(clamp(value)) };
-  });
-  return { axes, evidence, source: "activity" };
+  return { family };
 }
 
 function normalize(value, range) {
@@ -243,7 +122,7 @@ function normalize(value, range) {
 
 function occupationMatches(axes, dataset, limit = 3) {
   if (!dataset?.occupations?.length) return [];
-  const definitions = traitDefinitions(dataset);
+  const definitions = AXES;
   const profile = Object.fromEntries(axes.map((axis) => [axis.id, axis.value]));
   const matches = dataset.occupations.map((occupation) => {
     let distance = 0;
@@ -270,14 +149,74 @@ function occupationMatches(axes, dataset, limit = 3) {
     .slice(0, limit);
 }
 
+
+function missionPages(book) {
+  return (book?.pages ?? []).filter((page) => page.type === "mission");
+}
+
+// 好きな色は、5 軸には使わない（色と性格の関係には前例がないため）。記録した事実として数えるだけ。
+function addColors(colorFamilies, features) {
+  const palette = (features?.palette ?? []).filter((item) => Array.isArray(item.rgb));
+  const total = palette.reduce((sum, item) => sum + (item.share || 0), 0) || 1;
+  palette.forEach((item) => {
+    const profile = colorProfile(`rgb(${item.rgb.join(",")})`);
+    if (profile) colorFamilies[profile.family] = (colorFamilies[profile.family] || 0) + (item.share || 0) / total;
+  });
+}
+
+// 記録を、遊びの記録（plays）と絵の特徴（drawings）、領域タグ、色にまとめる。
+export function collectObservations(session, repo) {
+  const drawings = [];
+  const domains = {};
+  const colorFamilies = {};
+  // 絵の特徴がない古い記録は、従来の 1 色で補う。
+  const addDrawing = (features, color) => {
+    if (features) {
+      drawings.push(features);
+      addColors(colorFamilies, features);
+      return;
+    }
+    const profile = colorProfile(color);
+    if (profile) colorFamilies[profile.family] = (colorFamilies[profile.family] || 0) + 1;
+  };
+  const addDomains = (list) => list.forEach((domain) => { domains[domain] = (domains[domain] || 0) + 1; });
+
+  // 完成済みの日記。古い記録には missionId やタグがないことがあるため、絵本のミッション順で補う。
+  (session.memories ?? []).forEach((memory) => {
+    const pages = missionPages(repo?.book(memory.bookId));
+    let legacyIndex = 0;
+    (memory.entries ?? []).forEach((entry) => {
+      if (entry.kind !== "mission") return;
+      const page = entry.missionId ? pages.find((item) => item.id === entry.missionId) : pages[legacyIndex];
+      legacyIndex += 1;
+      addDomains(entry.developmentDomains ?? page?.developmentDomains ?? []);
+      addDrawing(entry.drawingFeatures, entry.vehicleColor || memory.bookColorValues?.[entry.missionId || page?.id]);
+    });
+  });
+
+  // 読みかけの本で達成済みのミッション。デモの記録は絵本のページを持たないので、タグを直接持つ。
+  const currentPages = missionPages(repo?.book(session.bookId));
+  (session.runMissions ?? []).forEach((mission) => {
+    const page = currentPages.find((item) => item.id === mission.missionId);
+    addDomains(mission.developmentDomains ?? page?.developmentDomains ?? []);
+    addDrawing(mission.drawingFeatures, mission.vehicleColor);
+  });
+
+  return { plays: session.plays ?? [], drawings, domains, colorFamilies };
+}
+
 export function buildBigFiveAnalysis(session, repo, dataset) {
-  const activity = activityAxes(session, repo, dataset);
+  const evidence = collectObservations(session, repo);
+  const { axes, stats, observed } = analyzeObservations(evidence);
   return {
-    axes: activity.axes,
-    evidence: activity.evidence,
-    source: activity.source,
-    scores: activity.axes.map((axis) => axis.value),
-    matches: occupationMatches(activity.axes, dataset),
-    datasetAvailable: Boolean(dataset?.occupations?.length && dataset?.traits?.length === DEFAULT_AXES.length),
+    axes,
+    stats,
+    evidence: { ...evidence, total: observed },
+    // 記録がまったくないときは "demo"（固定の初期値は出さず、「まだ少ない」と表示する）。
+    source: observed ? "activity" : "demo",
+    scores: axes.map((axis) => axis.value),
+    // 値を出せる軸が 1 つもないときは、職業候補も出さない。
+    matches: axes.some((axis) => axis.level !== "few") ? occupationMatches(axes, dataset) : [],
+    datasetAvailable: Boolean(dataset?.occupations?.length && dataset?.traits?.length === AXES.length),
   };
 }

@@ -61,10 +61,18 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         pass  # ログを静かに
 
 
+class Server(socketserver.ThreadingTCPServer):
+    # 起動直後は数十個のファイルを同時に要求される。1件ずつ処理し待ち行列も小さいと、
+    # 接続が切れて「じゅんび中…」のまま止まるため、並行で処理し、待ち行列も広げる。
+    request_queue_size = 128
+    daemon_threads = True
+    allow_reuse_address = True
+
+
 def main():
     ip = lan_ip()
     # 0.0.0.0 にバインド ＝ 同じ Wi-Fi の他端末からも見える
-    with socketserver.TCPServer(("0.0.0.0", PORT), Handler) as httpd:
+    with Server(("0.0.0.0", PORT), Handler) as httpd:
         print("=" * 44)
         print("  えほん web サーバー起動中")
         print("-" * 44)

@@ -28,6 +28,7 @@ import {
 const STORAGE_KEY = "ehon.session.v2";
 const MEMORIES_KEY = "memories.v1"; // IndexedDB: 完成した絵本日記（写真つき）
 const RUN_KEY = "run.v1";           // IndexedDB: 読みかけの本（ページ位置＋達成ミッション）
+const MAX_PLAYS = 300;              // 遊び方の記録は軽いので多めに残す
 const MAX_MEMORIES = 30;            // 端末容量の保険。古い思い出から順に押し出す
 const DEFAULT_PIN = "0000";         // おうちのひとゲートの初期PIN
 const PIN_MAX_FAILURES = 3;
@@ -62,6 +63,9 @@ export class Session {
     // --- localStorage（メタのみ）---
     this.activityDays = new Set(); // 外で活動した日
     this.memoryLog = [];           // [{id, bookTitle, date, count}] 親レポート用（写真なし）
+    // 遊び方の記録（個性推定の元データ）。ミッション 1 回の遊びにつき 1 件。画像は含まない。
+    // {missionId, date, domains, started, completed, unusual, hardChosen, retakes, addMore, mood}
+    this.plays = [];
     // きょうのミッション（1日1さつ）。おうちのひとが設定する。
     // bookId が null なら「どの絵本でもOK」、指定があればその絵本だけがクリア対象。
     this.dailyMission = { enabled: true, bookId: null };
@@ -286,11 +290,35 @@ export class Session {
   next(count) { if (this.pageIndex < count - 1) { this.pageIndex++; this._saveRunSoon(); } }
   prev() { if (this.pageIndex > 0) { this.pageIndex--; this._saveRunSoon(); } }
 
+  // ── 遊び方の記録（仕掛けのタップ・撮り直し・抜けた回数）──────
+  // 同じミッションで、まだ終わっていない遊びがあればそれに足す。無ければ新しく作る。
+  // closing が true のときは、直前に終わった遊び（描いたあとの「もうひとつ」「きもち」）に足す。
+  recordPlay(missionId, patch = {}, { closing = false, domains = null } = {}) {
+    let play = null;
+    for (let i = this.plays.length - 1; i >= 0; i -= 1) {
+      if (this.plays[i].missionId === missionId) { play = this.plays[i]; break; }
+    }
+    if (!play || (play.completed && !closing)) {
+      play = { missionId, date: today(), domains: domains ?? [], started: false, completed: false, retakes: 0 };
+      this.plays.push(play);
+      if (this.plays.length > MAX_PLAYS) this.plays.splice(0, this.plays.length - MAX_PLAYS);
+    }
+    if (domains && !play.domains?.length) play.domains = domains;
+    Object.assign(play, patch);
+    this._save();
+    return play;
+  }
+  bumpRetake(missionId) {
+    const play = this.recordPlay(missionId, {});
+    play.retakes = (play.retakes || 0) + 1;
+    this._save();
+  }
+
   // ── ミッション達成 ─────────────────────
   // photoUrl が null なら「タップ達成」（写真なし）
   // missionImage はそのミッションの挿絵（写真がないとき日記の代わり絵に使う）
   // missionCharacter は写真の上に重ねるキャラクター（おはなしページと同じ演出）
-  completeMission({ missionId, missionText, caption, photoUrl, missionImage, missionCharacter, vehicleColor, vehicleSourceUrl, vehicleTextureScale, originalPage = null, completedPage = null }) {
+  completeMission({ missionId, missionText, caption, photoUrl, missionImage, missionCharacter, vehicleColor, drawingFeatures = null, vehicleSourceUrl, vehicleTextureScale, originalPage = null, completedPage = null }) {
     // 元ページと完成ページは別オブジェクトで保存する。
     // 確認画面のスクラッチボードが、写真を貼った後の画像を参照しないための境界。
     const original = originalPage && typeof originalPage === "object"
@@ -306,7 +334,7 @@ export class Session {
         };
     const mission = {
       missionId, missionText, caption, photoUrl, missionImage, missionCharacter,
-      vehicleColor, vehicleSourceUrl, vehicleTextureScale,
+      vehicleColor, drawingFeatures, vehicleSourceUrl, vehicleTextureScale,
       originalPage: original,
       completedPage: completed,
     };
@@ -324,6 +352,8 @@ export class Session {
       isNewMission,
       completedMissionCount: this.completedMissionCount,
     };
+    // 遊びの記録を「描き終えた」にする。撮影の画面を経ずに達成した場合も、1 件として残す。
+    this.recordPlay(missionId, { started: true, completed: true });
     this.activityDays.add(today()); // 外で活動した日として記録
     this._save();
     this._saveRun(); // 写真はすぐIndexedDBへ（リロードしても消えない）
@@ -504,6 +534,7 @@ export class Session {
       bookmarks: this.bookmarks,
       activityDays: [...this.activityDays],
       memoryLog: this.memoryLog,
+      plays: this.plays,
       dailyMission: { ...this.dailyMission },
       missionDoneDays: { ...this.missionDoneDays },
       completedMissionCount: this.completedMissionCount,
@@ -590,6 +621,7 @@ export class Session {
           missionImage: m.missionImage,
           missionCharacter: m.missionCharacter,
           vehicleColor: m.vehicleColor || null,
+          drawingFeatures: m.drawingFeatures || null,
           originalPage,
           completedPage,
         });
@@ -644,6 +676,7 @@ export class Session {
   reset() {
     this.activityDays = new Set();
     this.memoryLog = [];
+    this.plays = [];
     this.missionDoneDays = {}; // ミッションの設定（dailyMission）は親の意図なので残す
     this.completedMissionCount = 0;
     this.lastMissionCompletion = null;
@@ -693,6 +726,7 @@ export class Session {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
         activityDays: [...this.activityDays],
         memoryLog: this.memoryLog,
+        plays: this.plays,
         dailyMission: this.dailyMission,
         missionDoneDays: this.missionDoneDays,
         completedMissionCount: this.completedMissionCount,
@@ -720,6 +754,7 @@ export class Session {
       const s = JSON.parse(raw);
       this.activityDays = new Set(s.activityDays ?? []);
       this.memoryLog = s.memoryLog ?? [];
+      this.plays = Array.isArray(s.plays) ? s.plays.filter((play) => play && play.missionId) : [];
       if (s.dailyMission && typeof s.dailyMission === "object") {
         this.dailyMission = {
           enabled: s.dailyMission.enabled !== false,
