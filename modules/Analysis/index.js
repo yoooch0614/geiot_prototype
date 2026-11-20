@@ -358,7 +358,7 @@ export const AnalysisScreen = {
       `;
     }).join("");
 
-    // 特性まとめのアイコンは絵文字ではなくCSS図形で表現する
+    // 個性まとめのアイコンは絵文字ではなくCSS図形で表現する
     const traits = analysisTraits(analysis);
 
     const traitIconMarkup = (icon) => {

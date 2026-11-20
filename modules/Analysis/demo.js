@@ -90,11 +90,7 @@ export function demoPanelMarkup() {
       <p class="demo-status">選択済み ${state.files.size}枚 ／ 設定と一致 ${queued}枚 ／ 追加済み ${state.added.length}枚${state.message ? ` ／ ${esc(state.message)}` : ""}</p>
       ${thumbs ? `<div class="demo-thumbs">${thumbs}</div>` : ""}
     </section>
-    <section class="demo-flow" aria-label="分析のようす">
-      <h3>分析のようす</h3>
-      <div class="demo-flow-body" data-demo-flow>${state.flowHtml || '<p class="demo-flow-empty">「1枚ずつ分析」か「自動で分析」を押すと、絵から数値が作られる流れをここに出します。</p>'}</div>
-      <p class="demo-flow-note">※ 記録を指標にして、根拠の強さの重みで 5 軸にまとめています。「仮説」の指標は影響を小さくしています。診断ではありません。</p>
-    </section>`;
+    `;
 }
 
 // ---- 分析のようす（1 枚ごとの数値化を順に見せる） ----
